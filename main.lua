@@ -1,7 +1,7 @@
 -- main.lua
 local rawBase = "https://raw.githubusercontent.com/Chaints/Blxfrt/main/"
 
--- Load UI dengan bypass Anti-Cache + Script Extra
+-- Load UI (Dengan Anti-Cache tick())
 local UI = loadstring(game:HttpGet(rawBase .. "ui.lua?" .. tick()))()
 local ScriptLoad = loadstring(game:HttpGet(rawBase .. "scriptload.lua?" .. tick()))()
 
@@ -17,16 +17,16 @@ elseif placeId == 7449423635 then
     currentSea = "Sea 3"
 end
 
-print("ZxD Hub Execution Success | Loaded at: " .. currentSea)
+print("ZxD Hub Loaded di: " .. currentSea)
 
 ---------------------------------------------------------
--- SETUP TABS & FITUR (Sistem 2 Card Kiri & Kanan)
+-- SETUP FITUR DENGAN SISTEM GAP 2 CARD (KIRI & KANAN)
 ---------------------------------------------------------
 
--- 1. TAB AUTO FARM
+-- TAB 1: AUTO FARM
 local FarmTab = UI:CreateTab("Auto Farm")
 
--- CARD KIRI: Toggle Utama
+-- CARD KIRI (Fitur Utama)
 FarmTab:AddSection("Main Farming", "left")
 
 _G.AutoFarm = false
@@ -43,7 +43,7 @@ FarmTab:CreateToggle("Auto Stats (Melee/Def)", false, "left", function(state)
     print("Auto Stats Status:", state)
 end)
 
--- CARD KANAN: Pengaturan Modifiers
+-- CARD KANAN (Pengaturan & Modifiers)
 FarmTab:AddSection("Farm Config", "right")
 
 FarmTab:CreateSlider("Distance Y-Axis", 5, 25, 12, "right", function(value)
@@ -60,34 +60,34 @@ end)
 
 ---------------------------------------------------------
 
--- 2. TAB TELEPORT
+-- TAB 2: TELEPORT
 local TeleTab = UI:CreateTab("Teleport")
 
--- CARD KIRI: Sea Teleport
+-- CARD KIRI
 TeleTab:AddSection("Sea Teleport", "left")
-TeleTab:CreateButton("Teleport to Sea 1", "left", function() end)
-TeleTab:CreateButton("Teleport to Sea 2", "left", function() end)
-TeleTab:CreateButton("Teleport to Sea 3", "left", function() end)
+TeleTab:CreateButton("Teleport Sea 1", "left", function() end)
+TeleTab:CreateButton("Teleport Sea 2", "left", function() end)
+TeleTab:CreateButton("Teleport Sea 3", "left", function() end)
 
--- CARD KANAN: Islands
+-- CARD KANAN
 TeleTab:AddSection("Quick Islands", "right")
 TeleTab:CreateButton("TP to Mansion", "right", function() end)
 TeleTab:CreateButton("TP to Cafe", "right", function() end)
 
 ---------------------------------------------------------
 
--- 3. TAB SETTINGS
+-- TAB 3: SETTINGS
 local SettingsTab = UI:CreateTab("Settings")
 
--- CARD KIRI: Server Tools
+-- CARD KIRI
 SettingsTab:AddSection("Server Control", "left")
 SettingsTab:CreateButton("Rejoin Server", "left", function()
     game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId)
 end)
 SettingsTab:CreateButton("Server Hop", "left", function() end)
 
--- CARD KANAN: Player Boost
-SettingsTab:AddSection("Player Movement", "right")
+-- CARD KANAN
+SettingsTab:AddSection("Player Boost", "right")
 SettingsTab:CreateSlider("WalkSpeed Boost", 16, 200, 16, "right", function(speed)
     if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed

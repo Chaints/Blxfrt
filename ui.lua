@@ -10,17 +10,17 @@ ScreenGui.Name = "ZxDHub"
 ScreenGui.Parent = game:GetService("CoreGui")
 ScreenGui.ResetOnSpawn = false
 
--- Theme Palette: Pitch Dark Vector
+-- Theme Palette: Pitch Black Ultra Dark
 local Theme = {
-    Background  = Color3.fromRGB(10, 10, 12),    -- Main Dark
-    Header      = Color3.fromRGB(16, 16, 20),    -- Header Slate
-    CardBG      = Color3.fromRGB(20, 20, 26),    -- Standalone Card Box
-    ItemBG      = Color3.fromRGB(28, 28, 36),    -- Inner Button/Toggle BG
-    ActiveCyan  = Color3.fromRGB(0, 210, 255),   -- Electric Cyan Accent
-    InactivePill= Color3.fromRGB(35, 35, 45),    -- Muted Dark Pill
-    TextPrimary = Color3.fromRGB(250, 250, 255), -- White Text
-    TextMuted   = Color3.fromRGB(130, 135, 150), -- Subtle Grey
-    Border      = Color3.fromRGB(40, 42, 52)     -- Thin Border
+    Background  = Color3.fromRGB(8, 8, 10),      -- Deepest Pitch Black
+    Header      = Color3.fromRGB(12, 12, 15),    -- Very Dark Charcoal
+    CardBG      = Color3.fromRGB(15, 15, 19),    -- Standalone Card Box (GELAP)
+    ItemBG      = Color3.fromRGB(22, 22, 28),    -- Inner Button/Toggle BG
+    ActiveCyan  = Color3.fromRGB(0, 190, 245),   -- Cyan Accent
+    InactivePill= Color3.fromRGB(28, 28, 36),    -- Dark Muted Pill
+    TextPrimary = Color3.fromRGB(240, 240, 245), -- Crisp White
+    TextMuted   = Color3.fromRGB(100, 105, 120), -- Subtle Dark Grey
+    Border      = Color3.fromRGB(30, 32, 40)     -- Very Subtle Border Line
 }
 
 -- Mobile Toggle Button
@@ -88,7 +88,7 @@ Title.Name = "Title"
 Title.Size = UDim2.new(1, -40, 1, 0)
 Title.Position = UDim2.new(0, 14, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "<b>ZxD HUB</b> <font color=\"#00D2FF\">ULTRA</font>"
+Title.Text = "<b>ZxD HUB</b> <font color=\"#00BEF5\">DARK ULTRA</font>"
 Title.RichText = true
 Title.TextColor3 = Theme.TextPrimary
 Title.TextSize = 12
@@ -134,7 +134,7 @@ TabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     FloatingTabNav.CanvasSize = UDim2.new(0, TabLayout.AbsoluteContentSize.X, 0, 0)
 end)
 
--- Area Content Utama (Dibuat Transparan Biar GAP Antar Card Kelihatan!)
+-- Area Content Utama (Transparan total biar GAP antar Card Kelihatan)
 local ContentArea = Instance.new("Frame")
 ContentArea.Name = "ContentArea"
 ContentArea.Size = UDim2.new(1, -16, 1, -74)
@@ -143,7 +143,7 @@ ContentArea.BackgroundTransparency = 1
 ContentArea.Parent = MainFrame
 
 ---------------------------------------------------------
--- BUILDER LOGIC (2 CARD BOX TERPISAH GAP)
+-- BUILDER LOGIC (2 CARD BOX TERPISAH GAP GELAP)
 ---------------------------------------------------------
 local Tabs = {}
 local FirstTab = true
@@ -170,11 +170,11 @@ function UI:CreateTab(tabName)
     TabContainer.Parent = ContentArea
 
     ---------------------------------------------------------
-    -- CARD 1: KIRI (STANDALONE BOX)
+    -- CARD 1: KIRI
     ---------------------------------------------------------
     local LeftCard = Instance.new("Frame")
     LeftCard.Name = "LeftCard"
-    LeftCard.Size = UDim2.new(0.5, -8, 1, 0) -- Lebar separuh minus gap 8px
+    LeftCard.Size = UDim2.new(0.5, -8, 1, 0)
     LeftCard.Position = UDim2.new(0, 0, 0, 0)
     LeftCard.BackgroundColor3 = Theme.CardBG
     LeftCard.Parent = TabContainer
@@ -206,12 +206,12 @@ function UI:CreateTab(tabName)
     end)
 
     ---------------------------------------------------------
-    -- CARD 2: KANAN (STANDALONE BOX - TERPISAH GAP CLEAR)
+    -- CARD 2: KANAN (DENGAN GAP TERPISAH CLEAR)
     ---------------------------------------------------------
     local RightCard = Instance.new("Frame")
     RightCard.Name = "RightCard"
     RightCard.Size = UDim2.new(0.5, -8, 1, 0)
-    RightCard.Position = UDim2.new(0.5, 8, 0, 0) -- Jarak/Gap 16px total di tengah!
+    RightCard.Position = UDim2.new(0.5, 8, 0, 0) -- GAP 16px di tengah
     RightCard.BackgroundColor3 = Theme.CardBG
     RightCard.Parent = TabContainer
 
@@ -356,7 +356,7 @@ function UI:CreateTab(tabName)
         Title.Size = UDim2.new(1, -10, 0, 16)
         Title.Position = UDim2.new(0, 6, 0, 2)
         Title.BackgroundTransparency = 1
-        Title.Text = text .. ": <font color=\"#00D2FF\">" .. tostring(default) .. "</font>"
+        Title.Text = text .. ": <font color=\"#00BEF5\">" .. tostring(default) .. "</font>"
         Title.RichText = true
         Title.TextColor3 = Theme.TextPrimary
         Title.Font = Enum.Font.GothamMedium
@@ -393,7 +393,7 @@ function UI:CreateTab(tabName)
             local pos = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
             local val = math.floor(min + ((max - min) * pos))
             Fill.Size = UDim2.new(pos, 0, 1, 0)
-            Title.Text = text .. ": <font color=\"#00D2FF\">" .. tostring(val) .. "</font>"
+            Title.Text = text .. ": <font color=\"#00BEF5\">" .. tostring(val) .. "</font>"
             pcall(callback, val)
         end
 
