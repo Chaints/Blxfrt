@@ -10,28 +10,27 @@ ScreenGui.Name = "ZxDHub"
 ScreenGui.Parent = game:GetService("CoreGui")
 ScreenGui.ResetOnSpawn = false
 
--- Theme Palette: OLED Pitch Black & Slate Accent (Ultra Clean)
+-- Theme Palette: Pitch Dark Vector
 local Theme = {
-    Background  = Color3.fromRGB(13, 13, 16),    -- Deep OLED Black
-    Header      = Color3.fromRGB(18, 18, 22),    -- Sleek Gunmetal
-    CardBG      = Color3.fromRGB(22, 22, 28),    -- Card BG
+    Background  = Color3.fromRGB(10, 10, 12),    -- Main Dark
+    Header      = Color3.fromRGB(16, 16, 20),    -- Header Slate
+    CardBG      = Color3.fromRGB(20, 20, 26),    -- Standalone Card Box
     ItemBG      = Color3.fromRGB(28, 28, 36),    -- Inner Button/Toggle BG
-    ActivePill  = Color3.fromRGB(0, 180, 216),   -- Cyber Electric Cyan
-    InactivePill= Color3.fromRGB(40, 40, 50),    -- Muted Dark
-    TextPrimary = Color3.fromRGB(245, 245, 250), -- Crisp White
-    TextMuted   = Color3.fromRGB(120, 125, 140), -- Cool Grey
-    Border      = Color3.fromRGB(40, 42, 52),    -- Fine Border Line
-    BorderActive= Color3.fromRGB(0, 180, 216)    -- Accent Line
+    ActiveCyan  = Color3.fromRGB(0, 210, 255),   -- Electric Cyan Accent
+    InactivePill= Color3.fromRGB(35, 35, 45),    -- Muted Dark Pill
+    TextPrimary = Color3.fromRGB(250, 250, 255), -- White Text
+    TextMuted   = Color3.fromRGB(130, 135, 150), -- Subtle Grey
+    Border      = Color3.fromRGB(40, 42, 52)     -- Thin Border
 }
 
--- Mobile Open/Close Floating Button
+-- Mobile Toggle Button
 local MobileBtn = Instance.new("TextButton")
 MobileBtn.Name = "MobileToggle"
 MobileBtn.Size = UDim2.new(0, 42, 0, 42)
 MobileBtn.Position = UDim2.new(0.08, 0, 0.2, 0)
 MobileBtn.BackgroundColor3 = Theme.Background
 MobileBtn.Text = "ZxD"
-MobileBtn.TextColor3 = Theme.ActivePill
+MobileBtn.TextColor3 = Theme.ActiveCyan
 MobileBtn.Font = Enum.Font.GothamBold
 MobileBtn.TextSize = 13
 MobileBtn.Active = true
@@ -43,7 +42,7 @@ MobCorner.CornerRadius = UDim.new(1, 0)
 MobCorner.Parent = MobileBtn
 
 local MobStroke = Instance.new("UIStroke")
-MobStroke.Color = Theme.ActivePill
+MobStroke.Color = Theme.ActiveCyan
 MobStroke.Thickness = 1.5
 MobStroke.Parent = MobileBtn
 
@@ -52,8 +51,8 @@ MobStroke.Parent = MobileBtn
 ---------------------------------------------------------
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 450, 0, 270)
-MainFrame.Position = UDim2.new(0.5, -225, 0.5, -135)
+MainFrame.Size = UDim2.new(0, 460, 0, 275)
+MainFrame.Position = UDim2.new(0.5, -230, 0.5, -137)
 MainFrame.BackgroundColor3 = Theme.Background
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -87,9 +86,9 @@ HeaderCorner.Parent = Header
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Size = UDim2.new(1, -40, 1, 0)
-Title.Position = UDim2.new(0, 12, 0, 0)
+Title.Position = UDim2.new(0, 14, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "<b>ZxD HUB</b> <font color=\"#00B4D8\">V1.2</font>"
+Title.Text = "<b>ZxD HUB</b> <font color=\"#00D2FF\">ULTRA</font>"
 Title.RichText = true
 Title.TextColor3 = Theme.TextPrimary
 Title.TextSize = 12
@@ -116,7 +115,7 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- Floating Tab Bar (Capsule Pill Tabs)
+-- Top Floating Tab Bar
 local FloatingTabNav = Instance.new("ScrollingFrame")
 FloatingTabNav.Name = "FloatingTabNav"
 FloatingTabNav.Size = UDim2.new(1, -16, 0, 26)
@@ -135,7 +134,7 @@ TabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     FloatingTabNav.CanvasSize = UDim2.new(0, TabLayout.AbsoluteContentSize.X, 0, 0)
 end)
 
--- Area Konten Card
+-- Area Content Utama (Dibuat Transparan Biar GAP Antar Card Kelihatan!)
 local ContentArea = Instance.new("Frame")
 ContentArea.Name = "ContentArea"
 ContentArea.Size = UDim2.new(1, -16, 1, -74)
@@ -144,15 +143,15 @@ ContentArea.BackgroundTransparency = 1
 ContentArea.Parent = MainFrame
 
 ---------------------------------------------------------
--- BUILDER LOGIC (2 SEPARATE CARDS WITH PROPER GAP)
+-- BUILDER LOGIC (2 CARD BOX TERPISAH GAP)
 ---------------------------------------------------------
 local Tabs = {}
 local FirstTab = true
 
 function UI:CreateTab(tabName)
     local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(0, 92, 1, 0)
-    TabButton.BackgroundColor3 = FirstTab and Theme.ActivePill or Theme.InactivePill
+    TabButton.Size = UDim2.new(0, 94, 1, 0)
+    TabButton.BackgroundColor3 = FirstTab and Theme.ActiveCyan or Theme.InactivePill
     TabButton.Text = tabName
     TabButton.TextColor3 = FirstTab and Theme.Background or Theme.TextMuted
     TabButton.Font = Enum.Font.GothamBold
@@ -171,11 +170,11 @@ function UI:CreateTab(tabName)
     TabContainer.Parent = ContentArea
 
     ---------------------------------------------------------
-    -- CARD 1: KIRI (LEFT STANDALONE CARD)
+    -- CARD 1: KIRI (STANDALONE BOX)
     ---------------------------------------------------------
     local LeftCard = Instance.new("Frame")
     LeftCard.Name = "LeftCard"
-    LeftCard.Size = UDim2.new(0.5, -6, 1, 0) -- Jeda di tengah (-6px)
+    LeftCard.Size = UDim2.new(0.5, -8, 1, 0) -- Lebar separuh minus gap 8px
     LeftCard.Position = UDim2.new(0, 0, 0, 0)
     LeftCard.BackgroundColor3 = Theme.CardBG
     LeftCard.Parent = TabContainer
@@ -194,7 +193,7 @@ function UI:CreateTab(tabName)
     LeftScroll.Position = UDim2.new(0, 6, 0, 6)
     LeftScroll.BackgroundTransparency = 1
     LeftScroll.ScrollBarThickness = 2
-    LeftScroll.ScrollBarImageColor3 = Theme.ActivePill
+    LeftScroll.ScrollBarImageColor3 = Theme.ActiveCyan
     LeftScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
     LeftScroll.Parent = LeftCard
 
@@ -207,12 +206,12 @@ function UI:CreateTab(tabName)
     end)
 
     ---------------------------------------------------------
-    -- CARD 2: KANAN (RIGHT STANDALONE CARD WITH 12PX GAP)
+    -- CARD 2: KANAN (STANDALONE BOX - TERPISAH GAP CLEAR)
     ---------------------------------------------------------
     local RightCard = Instance.new("Frame")
     RightCard.Name = "RightCard"
-    RightCard.Size = UDim2.new(0.5, -6, 1, 0)
-    RightCard.Position = UDim2.new(0.5, 6, 0, 0) -- Terpisah jelas (+6px dari tengah)
+    RightCard.Size = UDim2.new(0.5, -8, 1, 0)
+    RightCard.Position = UDim2.new(0.5, 8, 0, 0) -- Jarak/Gap 16px total di tengah!
     RightCard.BackgroundColor3 = Theme.CardBG
     RightCard.Parent = TabContainer
 
@@ -230,7 +229,7 @@ function UI:CreateTab(tabName)
     RightScroll.Position = UDim2.new(0, 6, 0, 6)
     RightScroll.BackgroundTransparency = 1
     RightScroll.ScrollBarThickness = 2
-    RightScroll.ScrollBarImageColor3 = Theme.ActivePill
+    RightScroll.ScrollBarImageColor3 = Theme.ActiveCyan
     RightScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
     RightScroll.Parent = RightCard
 
@@ -251,7 +250,7 @@ function UI:CreateTab(tabName)
             t.Button.TextColor3 = Theme.TextMuted
         end
         TabContainer.Visible = true
-        TabButton.BackgroundColor3 = Theme.ActivePill
+        TabButton.BackgroundColor3 = Theme.ActiveCyan
         TabButton.TextColor3 = Theme.Background
     end)
 
@@ -259,7 +258,7 @@ function UI:CreateTab(tabName)
     FirstTab = false
 
     ---------------------------------------------------------
-    -- ELEMENT CREATORS INSIDE CARDS
+    -- ELEMENT BUILDERS
     ---------------------------------------------------------
     local Elements = {}
 
@@ -273,7 +272,7 @@ function UI:CreateTab(tabName)
         Sec.Size = UDim2.new(1, -4, 0, 16)
         Sec.BackgroundTransparency = 1
         Sec.Text = "• " .. string.upper(text)
-        Sec.TextColor3 = Theme.ActivePill
+        Sec.TextColor3 = Theme.ActiveCyan
         Sec.Font = Enum.Font.GothamBold
         Sec.TextSize = 10
         Sec.TextXAlignment = Enum.TextXAlignment.Left
@@ -292,6 +291,11 @@ function UI:CreateTab(tabName)
         ItemCorner.CornerRadius = UDim.new(0, 6)
         ItemCorner.Parent = Item
 
+        local ItemStroke = Instance.new("UIStroke")
+        ItemStroke.Color = Theme.Border
+        ItemStroke.Thickness = 1
+        ItemStroke.Parent = Item
+
         local TglBtn = Instance.new("TextButton")
         TglBtn.Size = UDim2.new(1, 0, 1, 0)
         TglBtn.BackgroundTransparency = 1
@@ -302,11 +306,10 @@ function UI:CreateTab(tabName)
         TglBtn.TextXAlignment = Enum.TextXAlignment.Left
         TglBtn.Parent = Item
 
-        -- Pill Toggle Indicator (Smooth Modern Look)
         local Indicator = Instance.new("Frame")
-        Indicator.Size = UDim2.new(0, 20, 0, 10)
-        Indicator.Position = UDim2.new(1, -24, 0.5, -5)
-        Indicator.BackgroundColor3 = defaultState and Theme.ActivePill or Theme.InactivePill
+        Indicator.Size = UDim2.new(0, 22, 0, 12)
+        Indicator.Position = UDim2.new(1, -26, 0.5, -6)
+        Indicator.BackgroundColor3 = defaultState and Theme.ActiveCyan or Theme.InactivePill
         Indicator.Parent = Item
 
         local IndCorner = Instance.new("UICorner")
@@ -314,8 +317,8 @@ function UI:CreateTab(tabName)
         IndCorner.Parent = Indicator
 
         local Dot = Instance.new("Frame")
-        Dot.Size = UDim2.new(0, 8, 0, 8)
-        Dot.Position = defaultState and UDim2.new(1, -9, 0.5, -4) or UDim2.new(0, 1, 0.5, -4)
+        Dot.Size = UDim2.new(0, 10, 0, 10)
+        Dot.Position = defaultState and UDim2.new(1, -11, 0.5, -5) or UDim2.new(0, 1, 0.5, -5)
         Dot.BackgroundColor3 = Theme.TextPrimary
         Dot.Parent = Indicator
 
@@ -326,8 +329,8 @@ function UI:CreateTab(tabName)
         local enabled = defaultState or false
         TglBtn.MouseButton1Click:Connect(function()
             enabled = not enabled
-            Indicator.BackgroundColor3 = enabled and Theme.ActivePill or Theme.InactivePill
-            Dot.Position = enabled and UDim2.new(1, -9, 0.5, -4) or UDim2.new(0, 1, 0.5, -4)
+            Indicator.BackgroundColor3 = enabled and Theme.ActiveCyan or Theme.InactivePill
+            Dot.Position = enabled and UDim2.new(1, -11, 0.5, -5) or UDim2.new(0, 1, 0.5, -5)
             pcall(callback, enabled)
         end)
     end
@@ -344,11 +347,16 @@ function UI:CreateTab(tabName)
         ItemCorner.CornerRadius = UDim.new(0, 6)
         ItemCorner.Parent = Item
 
+        local ItemStroke = Instance.new("UIStroke")
+        ItemStroke.Color = Theme.Border
+        ItemStroke.Thickness = 1
+        ItemStroke.Parent = Item
+
         local Title = Instance.new("TextLabel")
         Title.Size = UDim2.new(1, -10, 0, 16)
         Title.Position = UDim2.new(0, 6, 0, 2)
         Title.BackgroundTransparency = 1
-        Title.Text = text .. ": <font color=\"#00B4D8\">" .. tostring(default) .. "</font>"
+        Title.Text = text .. ": <font color=\"#00D2FF\">" .. tostring(default) .. "</font>"
         Title.RichText = true
         Title.TextColor3 = Theme.TextPrimary
         Title.Font = Enum.Font.GothamMedium
@@ -370,7 +378,7 @@ function UI:CreateTab(tabName)
 
         local Fill = Instance.new("Frame")
         Fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
-        Fill.BackgroundColor3 = Theme.ActivePill
+        Fill.BackgroundColor3 = Theme.ActiveCyan
         Fill.BorderSizePixel = 0
         Fill.Parent = SliderBar
 
@@ -385,7 +393,7 @@ function UI:CreateTab(tabName)
             local pos = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
             local val = math.floor(min + ((max - min) * pos))
             Fill.Size = UDim2.new(pos, 0, 1, 0)
-            Title.Text = text .. ": <font color=\"#00B4D8\">" .. tostring(val) .. "</font>"
+            Title.Text = text .. ": <font color=\"#00D2FF\">" .. tostring(val) .. "</font>"
             pcall(callback, val)
         end
 
@@ -425,6 +433,11 @@ function UI:CreateTab(tabName)
         local Corner = Instance.new("UICorner")
         Corner.CornerRadius = UDim.new(0, 6)
         Corner.Parent = Btn
+
+        local BtnStroke = Instance.new("UIStroke")
+        BtnStroke.Color = Theme.Border
+        BtnStroke.Thickness = 1
+        BtnStroke.Parent = Btn
 
         Btn.MouseButton1Click:Connect(function()
             pcall(callback)
