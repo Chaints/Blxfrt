@@ -10,10 +10,10 @@ _G.AutoFarm = _G.AutoFarm or false
 _G.AutoEquipMelee = true
 _G.AutoAttack = true
 
--- MENGAMBIL REMOTE EVENT BLOX FRUITS ASLI
-local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
-local RegisterAttack = Net:WaitForChild("RegisterAttack")
-local RegisterHit = Net:WaitForChild("RegisterHit")
+-- MENCARI REMOTE DENGAN AMAN (TIDAK AKAN CRASH JIKA PATH SALAH)
+local Net = ReplicatedStorage:FindFirstChild("Modules") and ReplicatedStorage.Modules:FindFirstChild("Net")
+local RegisterAttack = Net and Net:FindFirstChild("RegisterAttack")
+local RegisterHit = Net and Net:FindFirstChild("RegisterHit")
 
 -- 1. FUNGSI TWEEN MOVEMENT
 function ScriptLoad.TweenTo(targetCFrame, speed)
@@ -62,7 +62,7 @@ function ScriptLoad.EquipMelee()
     end
 end
 
--- 3. AUTO ATTACK (PERBAIKAN SYSTEM HIT)
+-- 3. AUTO ATTACK SAFE MODE
 function ScriptLoad.AttackTarget(targetEnemy)
     local character = LocalPlayer.Character
     if not character or not targetEnemy then return end
@@ -71,15 +71,17 @@ function ScriptLoad.AttackTarget(targetEnemy)
     local tool = character:FindFirstChildOfClass("Tool")
     
     if enemyHrp and tool then
-        -- 1. Simulasi Klik Virtual Client
-        VirtualUser:CaptureController()
-        VirtualUser:Button1Down(Vector2.new(0, 0))
-        tool:Activate()
+        -- Opsi 1: Pakai Remote jika ketemu
+        if RegisterAttack and RegisterHit then
+            local hitPart = tool:FindFirstChild("Handle") or tool:FindFirstChildOfClass("Part") or enemyHrp
+            RegisterAttack:FireServer(0)
+            RegisterHit:FireServer(hitPart, {enemyHrp})
+        end
         
-        -- 2. Fire Remote Blox Fruits
-        local hitPart = tool:FindFirstChild("Handle") or tool:FindFirstChildOfClass("Part") or enemyHrp
-        RegisterAttack:FireServer(0)
-        RegisterHit:FireServer(hitPart, {enemyHrp})
+        -- Opsi 2: Click Fallback jika Remote tidak ketemu
+        VirtualUser:CaptureController()
+        VirtualUser:Button1Down(Vector2.new(0,0))
+        tool:Activate()
     end
 end
 
@@ -101,7 +103,6 @@ task.spawn(function()
                         local hum = enemy:FindFirstChild("Humanoid")
                         
                         if hrp and hum and hum.Health > 0 then
-                            -- Teleport ke atas musuh 5 stud
                             local targetPos = hrp.CFrame * CFrame.new(0, 5, 0)
                             ScriptLoad.TweenTo(targetPos, 300)
 
