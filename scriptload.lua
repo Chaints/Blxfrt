@@ -1,8 +1,12 @@
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
-local VirtualUser = game:GetService("VirtualUser")
 local LocalPlayer = Players.LocalPlayer
+
+-- DEKLARASI REMOTE EVENT (Sesuaikan nama remote dengan yang ada di game)
+local NetFolder = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net") -- Contoh path remote Blox Fruits
+local RegisterAttack = NetFolder:WaitForChild("RegisterAttack") 
+local RegisterHit = NetFolder:WaitForChild("RegisterHit")
 
 local ScriptLoad = {}
 
@@ -57,7 +61,7 @@ function ScriptLoad.EquipMelee()
     end
 end
 
--- 3. AUTO ATTACK (VIRTUAL CLICK + REMOTE FIRE)
+-- 3. AUTO ATTACK (SUDAH DIPERBAIKI)
 function ScriptLoad.AttackTarget(targetEnemy)
     pcall(function()
         local character = LocalPlayer.Character
@@ -67,28 +71,24 @@ function ScriptLoad.AttackTarget(targetEnemy)
         local tool = character:FindFirstChildOfClass("Tool")
         
         if enemyHrp and tool then
-            -- Trigger ayunan senjata
+            -- Fire Remote Event
             RegisterAttack:FireServer(0)
-            
-            -- Trigger registrasi damage ke server (Paksa Hit ke Target)
             RegisterHit:FireServer(enemyHrp, {enemyHrp})
             
-            -- Activation buatan di Client
+            -- Tool Click Fallback
             tool:Activate()
         end
     end)
 end
 
-
--- 4. LOOP UTAMA (FARMING & ATTACK)
+-- 4. LOOP UTAMA (SUDAH DIPERBAIKI)
 task.spawn(function()
-    while task.wait(0.01) do
+    while task.wait(0.1) do -- Disarankan minimal 0.1s agar tidak lag/crash
         if _G.AutoFarm then
             pcall(function()
                 local character = LocalPlayer.Character
                 if not character or not character:FindFirstChild("HumanoidRootPart") then return end
 
-                -- Equip Melee jika belum pegang weapon
                 if _G.AutoEquipMelee then
                     ScriptLoad.EquipMelee()
                 end
@@ -99,14 +99,13 @@ task.spawn(function()
                         local hrp = enemy:FindFirstChild("HumanoidRootPart")
                         local hum = enemy:FindFirstChild("Humanoid")
                         
-                        -- Cek jika musuh masih hidup
                         if hrp and hum and hum.Health > 0 then
                             local targetPos = hrp.CFrame * CFrame.new(0, 4, 1)
                             ScriptLoad.TweenTo(targetPos, 300)
 
-                            -- Trigger Serangan
+                            -- DIPERBAIKI: Memanggil fungsi AttackTarget dengan memasukkan target musuh
                             if _G.AutoAttack then
-                                ScriptLoad.Click()
+                                ScriptLoad.AttackTarget(enemy)
                             end
                             break
                         end
