@@ -10,23 +10,24 @@ ScreenGui.Name = "ZxDHub"
 ScreenGui.Parent = game:GetService("CoreGui")
 ScreenGui.ResetOnSpawn = false
 
--- Theme Palette: Modern Dark (Pitch Black & Charcoal Slate)
+-- Theme Palette: OLED Pitch Black & Slate Accent (Ultra Clean)
 local Theme = {
-    Background  = Color3.fromRGB(15, 15, 18),    -- Pitch Black Main
-    Header      = Color3.fromRGB(22, 22, 26),    -- Header Dark
-    CardBG      = Color3.fromRGB(24, 24, 28),    -- Card Box BG
-    ItemBG      = Color3.fromRGB(32, 32, 38),    -- Inner Button/Toggle BG
-    ActivePill  = Color3.fromRGB(70, 130, 240),  -- Modern Slate Blue (Active)
-    InactivePill= Color3.fromRGB(35, 35, 42),    -- Dark Inactive
-    TextPrimary = Color3.fromRGB(240, 240, 245), -- Off-White
-    TextMuted   = Color3.fromRGB(130, 130, 145), -- Muted Dark Text
-    Border      = Color3.fromRGB(45, 45, 55)     -- Dark Stroke Border
+    Background  = Color3.fromRGB(13, 13, 16),    -- Deep OLED Black
+    Header      = Color3.fromRGB(18, 18, 22),    -- Sleek Gunmetal
+    CardBG      = Color3.fromRGB(22, 22, 28),    -- Card BG
+    ItemBG      = Color3.fromRGB(28, 28, 36),    -- Inner Button/Toggle BG
+    ActivePill  = Color3.fromRGB(0, 180, 216),   -- Cyber Electric Cyan
+    InactivePill= Color3.fromRGB(40, 40, 50),    -- Muted Dark
+    TextPrimary = Color3.fromRGB(245, 245, 250), -- Crisp White
+    TextMuted   = Color3.fromRGB(120, 125, 140), -- Cool Grey
+    Border      = Color3.fromRGB(40, 42, 52),    -- Fine Border Line
+    BorderActive= Color3.fromRGB(0, 180, 216)    -- Accent Line
 }
 
--- Mobile Open/Close Button (Draggable Dark Circle)
+-- Mobile Open/Close Floating Button
 local MobileBtn = Instance.new("TextButton")
 MobileBtn.Name = "MobileToggle"
-MobileBtn.Size = UDim2.new(0, 44, 0, 44)
+MobileBtn.Size = UDim2.new(0, 42, 0, 42)
 MobileBtn.Position = UDim2.new(0.08, 0, 0.2, 0)
 MobileBtn.BackgroundColor3 = Theme.Background
 MobileBtn.Text = "ZxD"
@@ -47,12 +48,12 @@ MobStroke.Thickness = 1.5
 MobStroke.Parent = MobileBtn
 
 ---------------------------------------------------------
--- MAIN FRAME WINDOW (1 WINDOW DENGAN HEADER & TAB)
+-- MAIN FRAME WINDOW
 ---------------------------------------------------------
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 440, 0, 260)
-MainFrame.Position = UDim2.new(0.5, -220, 0.5, -130)
+MainFrame.Size = UDim2.new(0, 450, 0, 270)
+MainFrame.Position = UDim2.new(0.5, -225, 0.5, -135)
 MainFrame.BackgroundColor3 = Theme.Background
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -75,7 +76,7 @@ end)
 -- Header Bar
 local Header = Instance.new("Frame")
 Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 30)
+Header.Size = UDim2.new(1, 0, 0, 32)
 Header.BackgroundColor3 = Theme.Header
 Header.Parent = MainFrame
 
@@ -88,7 +89,7 @@ Title.Name = "Title"
 Title.Size = UDim2.new(1, -40, 1, 0)
 Title.Position = UDim2.new(0, 12, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "<b>ZxD HUB</b> | <font color=\"#4682F0\">Dark Edition</font>"
+Title.Text = "<b>ZxD HUB</b> <font color=\"#00B4D8\">V1.2</font>"
 Title.RichText = true
 Title.TextColor3 = Theme.TextPrimary
 Title.TextSize = 12
@@ -98,12 +99,12 @@ Title.Parent = Header
 
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Name = "CloseBtn"
-CloseBtn.Size = UDim2.new(0, 18, 0, 18)
-CloseBtn.Position = UDim2.new(1, -26, 0.5, -9)
+CloseBtn.Size = UDim2.new(0, 20, 0, 20)
+CloseBtn.Position = UDim2.new(1, -26, 0.5, -10)
 CloseBtn.BackgroundColor3 = Theme.ItemBG
 CloseBtn.Text = "×"
 CloseBtn.TextColor3 = Theme.TextMuted
-CloseBtn.TextSize = 14
+CloseBtn.TextSize = 15
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.Parent = Header
 
@@ -115,11 +116,11 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- Floating Tab Bar (Pill Tabs)
+-- Floating Tab Bar (Capsule Pill Tabs)
 local FloatingTabNav = Instance.new("ScrollingFrame")
 FloatingTabNav.Name = "FloatingTabNav"
 FloatingTabNav.Size = UDim2.new(1, -16, 0, 26)
-FloatingTabNav.Position = UDim2.new(0, 8, 0, 36)
+FloatingTabNav.Position = UDim2.new(0, 8, 0, 38)
 FloatingTabNav.BackgroundTransparency = 1
 FloatingTabNav.ScrollBarThickness = 0
 FloatingTabNav.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -137,23 +138,23 @@ end)
 -- Area Konten Card
 local ContentArea = Instance.new("Frame")
 ContentArea.Name = "ContentArea"
-ContentArea.Size = UDim2.new(1, -16, 1, -72)
-ContentArea.Position = UDim2.new(0, 8, 0, 66)
+ContentArea.Size = UDim2.new(1, -16, 1, -74)
+ContentArea.Position = UDim2.new(0, 8, 0, 68)
 ContentArea.BackgroundTransparency = 1
 ContentArea.Parent = MainFrame
 
 ---------------------------------------------------------
--- BUILDER LOGIC (2 SEPARATE CARDS WITH GAP IN DARK MODE)
+-- BUILDER LOGIC (2 SEPARATE CARDS WITH PROPER GAP)
 ---------------------------------------------------------
 local Tabs = {}
 local FirstTab = true
 
 function UI:CreateTab(tabName)
     local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(0, 90, 1, 0)
+    TabButton.Size = UDim2.new(0, 92, 1, 0)
     TabButton.BackgroundColor3 = FirstTab and Theme.ActivePill or Theme.InactivePill
     TabButton.Text = tabName
-    TabButton.TextColor3 = FirstTab and Theme.TextPrimary or Theme.TextMuted
+    TabButton.TextColor3 = FirstTab and Theme.Background or Theme.TextMuted
     TabButton.Font = Enum.Font.GothamBold
     TabButton.TextSize = 11
     TabButton.Parent = FloatingTabNav
@@ -170,11 +171,11 @@ function UI:CreateTab(tabName)
     TabContainer.Parent = ContentArea
 
     ---------------------------------------------------------
-    -- CARD 1: KIRI
+    -- CARD 1: KIRI (LEFT STANDALONE CARD)
     ---------------------------------------------------------
     local LeftCard = Instance.new("Frame")
     LeftCard.Name = "LeftCard"
-    LeftCard.Size = UDim2.new(0.5, -6, 1, 0) -- Lebar separuh dikurangi gap
+    LeftCard.Size = UDim2.new(0.5, -6, 1, 0) -- Jeda di tengah (-6px)
     LeftCard.Position = UDim2.new(0, 0, 0, 0)
     LeftCard.BackgroundColor3 = Theme.CardBG
     LeftCard.Parent = TabContainer
@@ -206,12 +207,12 @@ function UI:CreateTab(tabName)
     end)
 
     ---------------------------------------------------------
-    -- CARD 2: KANAN (DENGAN GAP DENGAN CARD KIRI)
+    -- CARD 2: KANAN (RIGHT STANDALONE CARD WITH 12PX GAP)
     ---------------------------------------------------------
     local RightCard = Instance.new("Frame")
     RightCard.Name = "RightCard"
     RightCard.Size = UDim2.new(0.5, -6, 1, 0)
-    RightCard.Position = UDim2.new(0.5, 6, 0, 0) -- GAP 12px di tengah
+    RightCard.Position = UDim2.new(0.5, 6, 0, 0) -- Terpisah jelas (+6px dari tengah)
     RightCard.BackgroundColor3 = Theme.CardBG
     RightCard.Parent = TabContainer
 
@@ -251,7 +252,7 @@ function UI:CreateTab(tabName)
         end
         TabContainer.Visible = true
         TabButton.BackgroundColor3 = Theme.ActivePill
-        TabButton.TextColor3 = Theme.TextPrimary
+        TabButton.TextColor3 = Theme.Background
     end)
 
     table.insert(Tabs, TabObj)
@@ -271,7 +272,7 @@ function UI:CreateTab(tabName)
         local Sec = Instance.new("TextLabel")
         Sec.Size = UDim2.new(1, -4, 0, 16)
         Sec.BackgroundTransparency = 1
-        Sec.Text = string.upper(text)
+        Sec.Text = "• " .. string.upper(text)
         Sec.TextColor3 = Theme.ActivePill
         Sec.Font = Enum.Font.GothamBold
         Sec.TextSize = 10
@@ -301,9 +302,10 @@ function UI:CreateTab(tabName)
         TglBtn.TextXAlignment = Enum.TextXAlignment.Left
         TglBtn.Parent = Item
 
+        -- Pill Toggle Indicator (Smooth Modern Look)
         local Indicator = Instance.new("Frame")
-        Indicator.Size = UDim2.new(0, 12, 0, 12)
-        Indicator.Position = UDim2.new(1, -16, 0.5, -6)
+        Indicator.Size = UDim2.new(0, 20, 0, 10)
+        Indicator.Position = UDim2.new(1, -24, 0.5, -5)
         Indicator.BackgroundColor3 = defaultState and Theme.ActivePill or Theme.InactivePill
         Indicator.Parent = Item
 
@@ -311,10 +313,21 @@ function UI:CreateTab(tabName)
         IndCorner.CornerRadius = UDim.new(1, 0)
         IndCorner.Parent = Indicator
 
+        local Dot = Instance.new("Frame")
+        Dot.Size = UDim2.new(0, 8, 0, 8)
+        Dot.Position = defaultState and UDim2.new(1, -9, 0.5, -4) or UDim2.new(0, 1, 0.5, -4)
+        Dot.BackgroundColor3 = Theme.TextPrimary
+        Dot.Parent = Indicator
+
+        local DotCorner = Instance.new("UICorner")
+        DotCorner.CornerRadius = UDim.new(1, 0)
+        DotCorner.Parent = Dot
+
         local enabled = defaultState or false
         TglBtn.MouseButton1Click:Connect(function()
             enabled = not enabled
             Indicator.BackgroundColor3 = enabled and Theme.ActivePill or Theme.InactivePill
+            Dot.Position = enabled and UDim2.new(1, -9, 0.5, -4) or UDim2.new(0, 1, 0.5, -4)
             pcall(callback, enabled)
         end)
     end
@@ -335,7 +348,8 @@ function UI:CreateTab(tabName)
         Title.Size = UDim2.new(1, -10, 0, 16)
         Title.Position = UDim2.new(0, 6, 0, 2)
         Title.BackgroundTransparency = 1
-        Title.Text = text .. ": " .. tostring(default)
+        Title.Text = text .. ": <font color=\"#00B4D8\">" .. tostring(default) .. "</font>"
+        Title.RichText = true
         Title.TextColor3 = Theme.TextPrimary
         Title.Font = Enum.Font.GothamMedium
         Title.TextSize = 10
@@ -343,8 +357,8 @@ function UI:CreateTab(tabName)
         Title.Parent = Item
 
         local SliderBar = Instance.new("TextButton")
-        SliderBar.Size = UDim2.new(1, -12, 0, 5)
-        SliderBar.Position = UDim2.new(0, 6, 0, 24)
+        SliderBar.Size = UDim2.new(1, -12, 0, 4)
+        SliderBar.Position = UDim2.new(0, 6, 0, 25)
         SliderBar.BackgroundColor3 = Theme.InactivePill
         SliderBar.Text = ""
         SliderBar.AutoButtonColor = false
@@ -371,7 +385,7 @@ function UI:CreateTab(tabName)
             local pos = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
             local val = math.floor(min + ((max - min) * pos))
             Fill.Size = UDim2.new(pos, 0, 1, 0)
-            Title.Text = text .. ": " .. tostring(val)
+            Title.Text = text .. ": <font color=\"#00B4D8\">" .. tostring(val) .. "</font>"
             pcall(callback, val)
         end
 
