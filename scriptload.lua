@@ -1,7 +1,7 @@
--- scriptload.lua
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local VirtualUser = game:GetService("VirtualUser")
 local LocalPlayer = Players.LocalPlayer
 
 local ScriptLoad = {}
@@ -10,7 +10,7 @@ _G.AutoFarm = _G.AutoFarm or false
 _G.AutoEquipMelee = true
 _G.AutoAttack = true
 
--- 1. FUNGSI TWEEN
+-- 1. FUNGSI TWEEN MOVEMENT
 function ScriptLoad.TweenTo(targetCFrame, speed)
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -57,7 +57,7 @@ function ScriptLoad.EquipMelee()
     end
 end
 
--- 3. ATTACK REMOTE NATIVE BLOX FRUITS (FAST ATTACK)
+-- 3. AUTO ATTACK (VIRTUAL CLICK + REMOTE FIRE)
 function ScriptLoad.Click()
     pcall(function()
         local character = LocalPlayer.Character
@@ -66,34 +66,39 @@ function ScriptLoad.Click()
         local tool = character:FindFirstChildOfClass("Tool")
         if not tool then return end
 
-        -- 1. Tembak Remote Network Internal Blox Fruits (Net / RegisterAttack)
+        -- A. Klik Mouse secara Engine Level (Solusi utama agar Blox Fruits merespons)
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton1(Vector2.new(50, 50))
+
+        -- B. Activate Weapon Client
+        tool:Activate()
+
+        -- C. Tembak Remote Network Internal Blox Fruits (dengan Parameter Cooldown)
         local netFolder = ReplicatedStorage:FindFirstChild("Modules") and ReplicatedStorage.Modules:FindFirstChild("Net")
         if netFolder then
             local registerAttack = netFolder:FindFirstChild("RE/RegisterAttack") or netFolder:FindFirstChild("RegisterAttack")
             if registerAttack then
-                registerAttack:FireServer()
+                registerAttack:FireServer(0)
             end
         end
 
-        -- 2. Tembak RigController (Metode Alternatif Blox Fruits)
+        -- D. RigController Backup
         local rigEvent = ReplicatedStorage:FindFirstChild("RigControllerEvent")
         if rigEvent then
             rigEvent:FireServer("weaponChange", tool.Name)
         end
-
-        -- 3. Trigger Tool Activate di Client
-        tool:Activate()
     end)
 end
 
--- 4. LOOP UTAMA
+-- 4. LOOP UTAMA (FARMING & ATTACK)
 task.spawn(function()
-    while task.wait(0.05) do
+    while task.wait(0.01) do
         if _G.AutoFarm then
             pcall(function()
                 local character = LocalPlayer.Character
                 if not character or not character:FindFirstChild("HumanoidRootPart") then return end
 
+                -- Equip Melee jika belum pegang weapon
                 if _G.AutoEquipMelee then
                     ScriptLoad.EquipMelee()
                 end
@@ -104,10 +109,12 @@ task.spawn(function()
                         local hrp = enemy:FindFirstChild("HumanoidRootPart")
                         local hum = enemy:FindFirstChild("Humanoid")
                         
+                        -- Cek jika musuh masih hidup
                         if hrp and hum and hum.Health > 0 then
                             local targetPos = hrp.CFrame * CFrame.new(0, 4, 1)
                             ScriptLoad.TweenTo(targetPos, 300)
 
+                            -- Trigger Serangan
                             if _G.AutoAttack then
                                 ScriptLoad.Click()
                             end
