@@ -1,52 +1,95 @@
+-- main.lua
 local rawBase = "https://raw.githubusercontent.com/Chaints/Blxfrt/main/"
 
--- Load UI (Melayang & Detached Baru)
-local UI = loadstring(game:HttpGet(rawBase .. "ui.lua"))()
+-- Load UI dengan bypass Anti-Cache + Script Extra
+local UI = loadstring(game:HttpGet(rawBase .. "ui.lua?" .. tick()))()
+local ScriptLoad = loadstring(game:HttpGet(rawBase .. "scriptload.lua?" .. tick()))()
 
--- Cek Tempat / Sea
+-- Pengecekan Sea berdasarkan PlaceId
 local placeId = game.PlaceId
 local currentSea = "Sea 1"
-if placeId == 4442272183 then currentSea = "Sea 2"
-elseif placeId == 7449423635 then currentSea = "Sea 3" end
 
-print("ZxD Hub Loaded di: " .. currentSea)
+if placeId == 2753915549 then
+    currentSea = "Sea 1"
+elseif placeId == 4442272183 then
+    currentSea = "Sea 2"
+elseif placeId == 7449423635 then
+    currentSea = "Sea 3"
+end
+
+print("ZxD Hub Execution Success | Loaded at: " .. currentSea)
 
 ---------------------------------------------------------
--- ISI FITUR KE DALAM UI (2-KOLOM DETACHED)
+-- SETUP TABS & FITUR (Sistem 2 Card Kiri & Kanan)
 ---------------------------------------------------------
 
 -- 1. TAB AUTO FARM
-local MainTab = UI:CreateTab("Auto Farm")
+local FarmTab = UI:CreateTab("Auto Farm")
 
--- Fitur Kolom Kiri
-MainTab:AddSection("FARMING UTAMA", "left")
-MainTab:CreateToggle("Auto Farm Level (" .. currentSea .. ")", false, "left", function(state)
+-- CARD KIRI: Toggle Utama
+FarmTab:AddSection("Main Farming", "left")
+
+_G.AutoFarm = false
+FarmTab:CreateToggle("Auto Farm Level (" .. currentSea .. ")", _G.AutoFarm, "left", function(state)
     _G.AutoFarm = state
     print("Auto Farm Status:", _G.AutoFarm)
 end)
-MainTab:CreateToggle("Auto Bone / Katakuri", false, "left", function(state) end)
 
--- Fitur Kolom Kanan
-MainTab:AddSection("PENGATURAN FARM", "right")
-MainTab:CreateSlider("Jarak Farm (Y-Axis)", 5, 25, 12, "right", function(value)
-    print("Jarak:", value)
+FarmTab:CreateToggle("Auto Bone / Katakuri", false, "left", function(state)
+    print("Auto Bone Status:", state)
 end)
-MainTab:CreateButton("Fast Attack Mode", "right", function()
-    print("Fast attack activated")
+
+FarmTab:CreateToggle("Auto Stats (Melee/Def)", false, "left", function(state)
+    print("Auto Stats Status:", state)
 end)
+
+-- CARD KANAN: Pengaturan Modifiers
+FarmTab:AddSection("Farm Config", "right")
+
+FarmTab:CreateSlider("Distance Y-Axis", 5, 25, 12, "right", function(value)
+    _G.FarmDistance = value
+end)
+
+FarmTab:CreateButton("Fast Attack Mode", "right", function()
+    print("Fast Attack Triggered!")
+end)
+
+FarmTab:CreateButton("Bypass TP Weapon", "right", function()
+    print("Bypass TP Triggered!")
+end)
+
+---------------------------------------------------------
 
 -- 2. TAB TELEPORT
 local TeleTab = UI:CreateTab("Teleport")
-TeleTab:AddSection("SEA TELEPORT", "left")
-TeleTab:CreateButton("Teleport Sea 1", "left", function() end)
-TeleTab:CreateButton("Teleport Sea 2", "left", function() end)
 
-TeleTab:AddSection("ISLANDS", "right")
+-- CARD KIRI: Sea Teleport
+TeleTab:AddSection("Sea Teleport", "left")
+TeleTab:CreateButton("Teleport to Sea 1", "left", function() end)
+TeleTab:CreateButton("Teleport to Sea 2", "left", function() end)
+TeleTab:CreateButton("Teleport to Sea 3", "left", function() end)
+
+-- CARD KANAN: Islands
+TeleTab:AddSection("Quick Islands", "right")
 TeleTab:CreateButton("TP to Mansion", "right", function() end)
+TeleTab:CreateButton("TP to Cafe", "right", function() end)
 
--- 3. TAB MISC
-local MiscTab = UI:CreateTab("Settings")
-MiscTab:AddSection("SERVER", "left")
-MiscTab:CreateButton("Rejoin Server", "left", function()
+---------------------------------------------------------
+
+-- 3. TAB SETTINGS
+local SettingsTab = UI:CreateTab("Settings")
+
+-- CARD KIRI: Server Tools
+SettingsTab:AddSection("Server Control", "left")
+SettingsTab:CreateButton("Rejoin Server", "left", function()
     game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId)
+end)
+SettingsTab:CreateButton("Server Hop", "left", function() end)
+
+-- CARD KANAN: Player Boost
+SettingsTab:AddSection("Player Movement", "right")
+SettingsTab:CreateSlider("WalkSpeed Boost", 16, 200, 16, "right", function(speed)
+    if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
+    end
 end)
