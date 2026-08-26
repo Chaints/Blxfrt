@@ -37,7 +37,7 @@ end
 ---------------------------------------------------------
 local MobileBtn = Instance.new("TextButton")
 MobileBtn.Name = "MobileToggle"
-MobileBtn.Size = UDim2.new(0, 40, 0, 40)
+MobileBtn.Size = UDim2.new(0, 36, 0, 36)
 MobileBtn.Position = UDim2.new(0, 14, 0.35, 0)
 MobileBtn.BackgroundColor3 = Theme.Background
 MobileBtn.Text = "•"
@@ -65,23 +65,13 @@ MobStroke.Parent = MobileBtn
 local MainWindow = Instance.new("Frame")
 MainWindow.Name = "MainWindow"
 MainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
-MainWindow.Size = UDim2.new(0, 300, 0, 220)
+MainWindow.Size = UDim2.new(0, 250, 0, 180)
 MainWindow.Position = UDim2.new(0.5, 0, 0.45, 0)
-MainWindow.BackgroundColor3 = Theme.Background
+MainWindow.BackgroundTransparency = 1
 MainWindow.BorderSizePixel = 0
 MainWindow.Active = true
 MainWindow.Draggable = true
-MainWindow.ClipsDescendants = true
 MainWindow.Parent = ScreenGui
-
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 16)
-MainCorner.Parent = MainWindow
-
-local MainStroke = Instance.new("UIStroke")
-MainStroke.Color = Theme.Border
-MainStroke.Thickness = 1
-MainStroke.Parent = MainWindow
 
 -- Header
 local Header = Instance.new("Frame")
@@ -137,8 +127,6 @@ CloseBtn.MouseLeave:Connect(function()
     tween(CloseBtn, {BackgroundColor3 = Theme.InactivePill, TextColor3 = Theme.TextMuted}, 0.15)
 end)
 CloseBtn.MouseButton1Click:Connect(function()
-    tween(MainWindow, {Size = UDim2.new(MainWindow.Size.X.Scale, 0, 0, 0), BackgroundTransparency = 1}, 0.2)
-    task.wait(0.2)
     ScreenGui:Destroy()
 end)
 
