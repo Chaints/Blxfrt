@@ -58,37 +58,27 @@ function ScriptLoad.EquipMelee()
 end
 
 -- 3. AUTO ATTACK (VIRTUAL CLICK + REMOTE FIRE)
-function ScriptLoad.Click()
+function ScriptLoad.AttackTarget(targetEnemy)
     pcall(function()
         local character = LocalPlayer.Character
-        if not character then return end
+        if not character or not targetEnemy then return end
         
+        local enemyHrp = targetEnemy:FindFirstChild("HumanoidRootPart")
         local tool = character:FindFirstChildOfClass("Tool")
-        if not tool then return end
-
-        -- A. Klik Mouse secara Engine Level (Solusi utama agar Blox Fruits merespons)
-        VirtualUser:CaptureController()
-        VirtualUser:ClickButton1(Vector2.new(50, 50))
-
-        -- B. Activate Weapon Client
-        tool:Activate()
-
-        -- C. Tembak Remote Network Internal Blox Fruits (dengan Parameter Cooldown)
-        local netFolder = ReplicatedStorage:FindFirstChild("Modules") and ReplicatedStorage.Modules:FindFirstChild("Net")
-        if netFolder then
-            local registerAttack = netFolder:FindFirstChild("RE/RegisterAttack") or netFolder:FindFirstChild("RegisterAttack")
-            if registerAttack then
-                registerAttack:FireServer(0)
-            end
-        end
-
-        -- D. RigController Backup
-        local rigEvent = ReplicatedStorage:FindFirstChild("RigControllerEvent")
-        if rigEvent then
-            rigEvent:FireServer("weaponChange", tool.Name)
+        
+        if enemyHrp and tool then
+            -- Trigger ayunan senjata
+            RegisterAttack:FireServer(0)
+            
+            -- Trigger registrasi damage ke server (Paksa Hit ke Target)
+            RegisterHit:FireServer(enemyHrp, {enemyHrp})
+            
+            -- Activation buatan di Client
+            tool:Activate()
         end
     end)
 end
+
 
 -- 4. LOOP UTAMA (FARMING & ATTACK)
 task.spawn(function()
