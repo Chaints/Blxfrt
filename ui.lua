@@ -10,20 +10,20 @@ ScreenGui.Name = "ZxDHub"
 ScreenGui.Parent = game:GetService("CoreGui")
 ScreenGui.ResetOnSpawn = false
 
--- Theme Palette: Taupe / Warm Earthy Abu Coklat
+-- Theme Palette: Modern Dark (Pitch Black & Charcoal Slate)
 local Theme = {
-    Background  = Color3.fromRGB(28, 25, 23),    -- Warm Dark Taupe
-    Header      = Color3.fromRGB(36, 33, 30),    -- Mid Warm Taupe
-    CardBG      = Color3.fromRGB(38, 34, 31),    -- Big Card Frame BG
-    ItemBG      = Color3.fromRGB(48, 43, 39),    -- Inner Toggle/Button BG
-    ActivePill  = Color3.fromRGB(155, 122, 92),  -- Warm Earthy Brown Accent
-    InactivePill= Color3.fromRGB(54, 48, 44),    -- Muted Dark Taupe
-    TextPrimary = Color3.fromRGB(240, 236, 230), -- Soft Off-White
-    TextMuted   = Color3.fromRGB(160, 150, 142), -- Warm Taupe Muted Text
-    Border      = Color3.fromRGB(65, 58, 52)     -- Soft Taupe Border
+    Background  = Color3.fromRGB(15, 15, 18),    -- Pitch Black Main
+    Header      = Color3.fromRGB(22, 22, 26),    -- Header Dark
+    CardBG      = Color3.fromRGB(24, 24, 28),    -- Card Box BG
+    ItemBG      = Color3.fromRGB(32, 32, 38),    -- Inner Button/Toggle BG
+    ActivePill  = Color3.fromRGB(70, 130, 240),  -- Modern Slate Blue (Active)
+    InactivePill= Color3.fromRGB(35, 35, 42),    -- Dark Inactive
+    TextPrimary = Color3.fromRGB(240, 240, 245), -- Off-White
+    TextMuted   = Color3.fromRGB(130, 130, 145), -- Muted Dark Text
+    Border      = Color3.fromRGB(45, 45, 55)     -- Dark Stroke Border
 }
 
--- Mobile Open/Close Toggle Button
+-- Mobile Open/Close Button (Draggable Dark Circle)
 local MobileBtn = Instance.new("TextButton")
 MobileBtn.Name = "MobileToggle"
 MobileBtn.Size = UDim2.new(0, 44, 0, 44)
@@ -47,33 +47,37 @@ MobStroke.Thickness = 1.5
 MobStroke.Parent = MobileBtn
 
 ---------------------------------------------------------
--- 1. DETACHED TAB WINDOW (HEADER + TAB)
+-- MAIN FRAME WINDOW (1 WINDOW DENGAN HEADER & TAB)
 ---------------------------------------------------------
-local TabWindow = Instance.new("Frame")
-TabWindow.Name = "TabWindow"
-TabWindow.Size = UDim2.new(0, 440, 0, 68)
-TabWindow.Position = UDim2.new(0.5, -220, 0.5, -140)
-TabWindow.BackgroundColor3 = Theme.Background
-TabWindow.BorderSizePixel = 0
-TabWindow.Active = true
-TabWindow.Draggable = true
-TabWindow.Parent = ScreenGui
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 440, 0, 260)
+MainFrame.Position = UDim2.new(0.5, -220, 0.5, -130)
+MainFrame.BackgroundColor3 = Theme.Background
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
 
-local TabWinCorner = Instance.new("UICorner")
-TabWinCorner.CornerRadius = UDim.new(0, 12)
-TabWinCorner.Parent = TabWindow
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.Parent = MainFrame
 
-local TabWinStroke = Instance.new("UIStroke")
-TabWinStroke.Color = Theme.Border
-TabWinStroke.Thickness = 1
-TabWinStroke.Parent = TabWindow
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Theme.Border
+MainStroke.Thickness = 1
+MainStroke.Parent = MainFrame
+
+MobileBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
 
 -- Header Bar
 local Header = Instance.new("Frame")
 Header.Name = "Header"
 Header.Size = UDim2.new(1, 0, 0, 30)
 Header.BackgroundColor3 = Theme.Header
-Header.Parent = TabWindow
+Header.Parent = MainFrame
 
 local HeaderCorner = Instance.new("UICorner")
 HeaderCorner.CornerRadius = UDim.new(0, 12)
@@ -84,7 +88,7 @@ Title.Name = "Title"
 Title.Size = UDim2.new(1, -40, 1, 0)
 Title.Position = UDim2.new(0, 12, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "<b>ZxD HUB</b> | <font color=\"#9B7A5C\">Minimalist Taupe</font>"
+Title.Text = "<b>ZxD HUB</b> | <font color=\"#4682F0\">Dark Edition</font>"
 Title.RichText = true
 Title.TextColor3 = Theme.TextPrimary
 Title.TextSize = 12
@@ -111,7 +115,7 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- Tab Navigation List
+-- Floating Tab Bar (Pill Tabs)
 local FloatingTabNav = Instance.new("ScrollingFrame")
 FloatingTabNav.Name = "FloatingTabNav"
 FloatingTabNav.Size = UDim2.new(1, -16, 0, 26)
@@ -119,7 +123,7 @@ FloatingTabNav.Position = UDim2.new(0, 8, 0, 36)
 FloatingTabNav.BackgroundTransparency = 1
 FloatingTabNav.ScrollBarThickness = 0
 FloatingTabNav.CanvasSize = UDim2.new(0, 0, 0, 0)
-FloatingTabNav.Parent = TabWindow
+FloatingTabNav.Parent = MainFrame
 
 local TabLayout = Instance.new("UIListLayout")
 TabLayout.Parent = FloatingTabNav
@@ -130,24 +134,16 @@ TabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     FloatingTabNav.CanvasSize = UDim2.new(0, TabLayout.AbsoluteContentSize.X, 0, 0)
 end)
 
----------------------------------------------------------
--- 2. CONTENT AREA (FULL TRANSPARENT FOR GAP EFFICENCY)
----------------------------------------------------------
+-- Area Konten Card
 local ContentArea = Instance.new("Frame")
 ContentArea.Name = "ContentArea"
-ContentArea.Size = UDim2.new(0, 440, 0, 190)
-ContentArea.Position = UDim2.new(0.5, -220, 0.5, -60) -- Melayang di bawah TabWindow
-ContentArea.BackgroundTransparency = 1 -- Transparan total biar Card Kiri/Kanan terpisah!
-ContentArea.Parent = ScreenGui
-
-MobileBtn.MouseButton1Click:Connect(function()
-    local isVis = not ContentArea.Visible
-    ContentArea.Visible = isVis
-    TabWindow.Visible = isVis
-end)
+ContentArea.Size = UDim2.new(1, -16, 1, -72)
+ContentArea.Position = UDim2.new(0, 8, 0, 66)
+ContentArea.BackgroundTransparency = 1
+ContentArea.Parent = MainFrame
 
 ---------------------------------------------------------
--- BUILDER LOGIC (2 SEPARATE CARDS WITH GAP)
+-- BUILDER LOGIC (2 SEPARATE CARDS WITH GAP IN DARK MODE)
 ---------------------------------------------------------
 local Tabs = {}
 local FirstTab = true
@@ -166,7 +162,6 @@ function UI:CreateTab(tabName)
     TabCorner.CornerRadius = UDim.new(1, 0)
     TabCorner.Parent = TabButton
 
-    -- Container Utama Tab (Transparan)
     local TabContainer = Instance.new("Frame")
     TabContainer.Name = tabName .. "Container"
     TabContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -175,17 +170,17 @@ function UI:CreateTab(tabName)
     TabContainer.Parent = ContentArea
 
     ---------------------------------------------------------
-    -- CARD 1: KIRI (LEFT STANDALONE CARD)
+    -- CARD 1: KIRI
     ---------------------------------------------------------
     local LeftCard = Instance.new("Frame")
     LeftCard.Name = "LeftCard"
-    LeftCard.Size = UDim2.new(0.5, -7, 1, 0) -- Lebar separuh dikurangi gap 7px
+    LeftCard.Size = UDim2.new(0.5, -6, 1, 0) -- Lebar separuh dikurangi gap
     LeftCard.Position = UDim2.new(0, 0, 0, 0)
     LeftCard.BackgroundColor3 = Theme.CardBG
     LeftCard.Parent = TabContainer
 
     local LeftCardCorner = Instance.new("UICorner")
-    LeftCardCorner.CornerRadius = UDim.new(0, 12)
+    LeftCardCorner.CornerRadius = UDim.new(0, 10)
     LeftCardCorner.Parent = LeftCard
 
     local LeftCardStroke = Instance.new("UIStroke")
@@ -211,17 +206,17 @@ function UI:CreateTab(tabName)
     end)
 
     ---------------------------------------------------------
-    -- CARD 2: KANAN (RIGHT STANDALONE CARD - TERPISAH GAP)
+    -- CARD 2: KANAN (DENGAN GAP DENGAN CARD KIRI)
     ---------------------------------------------------------
     local RightCard = Instance.new("Frame")
     RightCard.Name = "RightCard"
-    RightCard.Size = UDim2.new(0.5, -7, 1, 0)
-    RightCard.Position = UDim2.new(0.5, 7, 0, 0) -- Posisi kanan digeser +7px (Membuat GAP 14px total di tengah!)
+    RightCard.Size = UDim2.new(0.5, -6, 1, 0)
+    RightCard.Position = UDim2.new(0.5, 6, 0, 0) -- GAP 12px di tengah
     RightCard.BackgroundColor3 = Theme.CardBG
     RightCard.Parent = TabContainer
 
     local RightCardCorner = Instance.new("UICorner")
-    RightCardCorner.CornerRadius = UDim.new(0, 12)
+    RightCardCorner.CornerRadius = UDim.new(0, 10)
     RightCardCorner.Parent = RightCard
 
     local RightCardStroke = Instance.new("UIStroke")
@@ -263,7 +258,7 @@ function UI:CreateTab(tabName)
     FirstTab = false
 
     ---------------------------------------------------------
-    -- ELEMENT CREATORS
+    -- ELEMENT CREATORS INSIDE CARDS
     ---------------------------------------------------------
     local Elements = {}
 
