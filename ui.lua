@@ -3,36 +3,51 @@ if game:GetService("CoreGui"):FindFirstChild("ZxDHub") then
 end
 
 local UI = {}
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 -- ScreenGui Setup
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "ZxDHub"
 ScreenGui.Parent = game:GetService("CoreGui")
 ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
 
--- Theme Palette: OLED Pitch Dark
+-- Theme Palette: Minimalist Monochrome Dark
 local Theme = {
-    Background  = Color3.fromRGB(8, 8, 10),      -- Deep Dark Window
-    CardBG      = Color3.fromRGB(14, 14, 18),    -- Card Box Standalone
-    ActiveCyan  = Color3.fromRGB(0, 190, 245),   -- Cyan Accent
-    InactivePill= Color3.fromRGB(24, 24, 32),    -- Dark Muted Pill
-    TextPrimary = Color3.fromRGB(240, 240, 245), -- Crisp White
-    TextMuted   = Color3.fromRGB(100, 105, 120), -- Subtle Dark Grey
-    Border      = Color3.fromRGB(30, 32, 40)     -- Very Subtle Border
+    Background   = Color3.fromRGB(10, 10, 11),
+    CardBG       = Color3.fromRGB(16, 16, 18),
+    ItemHover    = Color3.fromRGB(22, 22, 25),
+    Accent       = Color3.fromRGB(245, 245, 245),  -- Pure-ish white accent
+    AccentDim    = Color3.fromRGB(180, 180, 185),
+    InactivePill = Color3.fromRGB(20, 20, 22),
+    TextPrimary  = Color3.fromRGB(235, 235, 238),
+    TextMuted    = Color3.fromRGB(110, 110, 118),
+    Border       = Color3.fromRGB(28, 28, 31)
 }
 
--- Mobile Toggle Button (Floating Circle)
+local function tween(obj, props, time, style)
+    local t = TweenService:Create(obj, TweenInfo.new(time or 0.22, style or Enum.EasingStyle.Quint, Enum.EasingDirection.Out), props)
+    t:Play()
+    return t
+end
+
+---------------------------------------------------------
+-- MOBILE TOGGLE (Floating minimal dot/button)
+---------------------------------------------------------
 local MobileBtn = Instance.new("TextButton")
 MobileBtn.Name = "MobileToggle"
-MobileBtn.Size = UDim2.new(0, 42, 0, 42)
-MobileBtn.Position = UDim2.new(0.08, 0, 0.2, 0)
+MobileBtn.Size = UDim2.new(0, 46, 0, 46)
+MobileBtn.Position = UDim2.new(0, 14, 0.35, 0)
 MobileBtn.BackgroundColor3 = Theme.Background
-MobileBtn.Text = "ZxD"
-MobileBtn.TextColor3 = Theme.ActiveCyan
+MobileBtn.Text = "•"
+MobileBtn.TextColor3 = Theme.Accent
 MobileBtn.Font = Enum.Font.GothamBold
-MobileBtn.TextSize = 13
+MobileBtn.TextSize = 22
+MobileBtn.AutoButtonColor = false
 MobileBtn.Active = true
 MobileBtn.Draggable = true
+MobileBtn.ZIndex = 10
 MobileBtn.Parent = ScreenGui
 
 local MobCorner = Instance.new("UICorner")
@@ -40,142 +55,198 @@ MobCorner.CornerRadius = UDim.new(1, 0)
 MobCorner.Parent = MobileBtn
 
 local MobStroke = Instance.new("UIStroke")
-MobStroke.Color = Theme.ActiveCyan
-MobStroke.Thickness = 1.5
+MobStroke.Color = Theme.Border
+MobStroke.Thickness = 1
 MobStroke.Parent = MobileBtn
 
 ---------------------------------------------------------
--- 1. HEADER & TAB NAVIGATION WINDOW (TOP FLOATING BOX)
+-- MAIN WINDOW (single floating container, responsive)
 ---------------------------------------------------------
-local TopWindow = Instance.new("Frame")
-TopWindow.Name = "TopWindow"
-TopWindow.Size = UDim2.new(0, 460, 0, 64)
-TopWindow.Position = UDim2.new(0.5, -230, 0.5, -140)
-TopWindow.BackgroundColor3 = Theme.Background
-TopWindow.BorderSizePixel = 0
-TopWindow.Active = true
-TopWindow.Draggable = true
-TopWindow.Parent = ScreenGui
+local MainWindow = Instance.new("Frame")
+MainWindow.Name = "MainWindow"
+MainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
+MainWindow.Size = UDim2.new(0.92, 0, 0.5, 0)
+MainWindow.Position = UDim2.new(0.5, 0, 0.48, 0)
+MainWindow.BackgroundColor3 = Theme.Background
+MainWindow.BorderSizePixel = 0
+MainWindow.Active = true
+MainWindow.Draggable = true
+MainWindow.ClipsDescendants = true
+MainWindow.Parent = ScreenGui
 
-local TopCorner = Instance.new("UICorner")
-TopCorner.CornerRadius = UDim.new(0, 12)
-TopCorner.Parent = TopWindow
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 16)
+MainCorner.Parent = MainWindow
 
-local TopStroke = Instance.new("UIStroke")
-TopStroke.Color = Theme.Border
-TopStroke.Thickness = 1
-TopStroke.Parent = TopWindow
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Theme.Border
+MainStroke.Thickness = 1
+MainStroke.Parent = MainWindow
 
--- Header Bar
+-- Header
 local Header = Instance.new("Frame")
 Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 28)
+Header.Size = UDim2.new(1, 0, 0, 40)
 Header.BackgroundTransparency = 1
-Header.Parent = TopWindow
+Header.Parent = MainWindow
 
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Size = UDim2.new(1, -40, 1, 0)
-Title.Position = UDim2.new(0, 12, 0, 0)
+Title.Position = UDim2.new(0, 16, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "<b>ZxD HUB</b> <font color=\"#00BEF5\">DETACHED</font>"
-Title.RichText = true
+Title.Text = "ZxD"
 Title.TextColor3 = Theme.TextPrimary
-Title.TextSize = 12
-Title.Font = Enum.Font.Gotham
+Title.TextSize = 14
+Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
 
+local SubTitle = Instance.new("TextLabel")
+SubTitle.Name = "SubTitle"
+SubTitle.Size = UDim2.new(1, -40, 0, 12)
+SubTitle.Position = UDim2.new(0, 16 + 32, 0, 1)
+SubTitle.BackgroundTransparency = 1
+SubTitle.Text = "HUB"
+SubTitle.TextColor3 = Theme.TextMuted
+SubTitle.TextSize = 10
+SubTitle.Font = Enum.Font.Gotham
+SubTitle.TextXAlignment = Enum.TextXAlignment.Left
+SubTitle.Parent = Header
+
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Name = "CloseBtn"
-CloseBtn.Size = UDim2.new(0, 18, 0, 18)
-CloseBtn.Position = UDim2.new(1, -24, 0.5, -9)
+CloseBtn.Size = UDim2.new(0, 26, 0, 26)
+CloseBtn.Position = UDim2.new(1, -36, 0.5, -13)
 CloseBtn.BackgroundColor3 = Theme.InactivePill
 CloseBtn.Text = "×"
 CloseBtn.TextColor3 = Theme.TextMuted
-CloseBtn.TextSize = 14
+CloseBtn.TextSize = 15
 CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.AutoButtonColor = false
 CloseBtn.Parent = Header
 
 local CloseCorner = Instance.new("UICorner")
 CloseCorner.CornerRadius = UDim.new(1, 0)
 CloseCorner.Parent = CloseBtn
 
+CloseBtn.MouseEnter:Connect(function()
+    tween(CloseBtn, {BackgroundColor3 = Theme.ItemHover, TextColor3 = Theme.TextPrimary}, 0.15)
+end)
+CloseBtn.MouseLeave:Connect(function()
+    tween(CloseBtn, {BackgroundColor3 = Theme.InactivePill, TextColor3 = Theme.TextMuted}, 0.15)
+end)
 CloseBtn.MouseButton1Click:Connect(function()
+    tween(MainWindow, {Size = UDim2.new(MainWindow.Size.X.Scale, 0, 0, 0), BackgroundTransparency = 1}, 0.2)
+    task.wait(0.2)
     ScreenGui:Destroy()
 end)
 
--- Top Floating Tab Bar (DENGAN GAP ANTAR TAB 8PX)
-local FloatingTabNav = Instance.new("ScrollingFrame")
-FloatingTabNav.Name = "FloatingTabNav"
-FloatingTabNav.Size = UDim2.new(1, -16, 0, 24)
-FloatingTabNav.Position = UDim2.new(0, 8, 0, 32)
-FloatingTabNav.BackgroundTransparency = 1
-FloatingTabNav.ScrollBarThickness = 0
-FloatingTabNav.CanvasSize = UDim2.new(0, 0, 0, 0)
-FloatingTabNav.Parent = TopWindow
+-- Divider
+local Divider = Instance.new("Frame")
+Divider.Size = UDim2.new(1, -32, 0, 1)
+Divider.Position = UDim2.new(0, 16, 0, 40)
+Divider.BackgroundColor3 = Theme.Border
+Divider.BorderSizePixel = 0
+Divider.Parent = MainWindow
+
+---------------------------------------------------------
+-- TAB NAV (minimal underline pill tabs)
+---------------------------------------------------------
+local TabNav = Instance.new("ScrollingFrame")
+TabNav.Name = "TabNav"
+TabNav.Size = UDim2.new(1, -16, 0, 34)
+TabNav.Position = UDim2.new(0, 8, 0, 47)
+TabNav.BackgroundTransparency = 1
+TabNav.ScrollBarThickness = 0
+TabNav.CanvasSize = UDim2.new(0, 0, 0, 0)
+TabNav.ScrollingDirection = Enum.ScrollingDirection.X
+TabNav.Parent = MainWindow
 
 local TabLayout = Instance.new("UIListLayout")
-TabLayout.Parent = FloatingTabNav
+TabLayout.Parent = TabNav
 TabLayout.FillDirection = Enum.FillDirection.Horizontal
-TabLayout.Padding = UDim.new(0, 8) -- GAP JELAS ANTAR TAB KAPSUL
+TabLayout.Padding = UDim.new(0, 6)
+TabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 
 TabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    FloatingTabNav.CanvasSize = UDim2.new(0, TabLayout.AbsoluteContentSize.X, 0, 0)
+    TabNav.CanvasSize = UDim2.new(0, TabLayout.AbsoluteContentSize.X + 8, 0, 0)
 end)
 
 ---------------------------------------------------------
--- 2. CONTENT AREA (TRANSPARAN TOTAL TANPA MAIN FRAME)
+-- CONTENT VIEWPORT (clips, holds sliding track of tab pages)
 ---------------------------------------------------------
-local ContentArea = Instance.new("Frame")
-ContentArea.Name = "ContentArea"
-ContentArea.Size = UDim2.new(0, 460, 0, 190)
-ContentArea.Position = UDim2.new(0.5, -230, 0.5, -68) -- MELAYANG DI BAWAH TOP WINDOW
-ContentArea.BackgroundTransparency = 1
-ContentArea.Parent = ScreenGui
+local Viewport = Instance.new("Frame")
+Viewport.Name = "Viewport"
+Viewport.Size = UDim2.new(1, -16, 1, -95)
+Viewport.Position = UDim2.new(0, 8, 0, 89)
+Viewport.BackgroundTransparency = 1
+Viewport.ClipsDescendants = true
+Viewport.Parent = MainWindow
 
-MobileBtn.MouseButton1Click:Connect(function()
-    local isVis = not ContentArea.Visible
-    ContentArea.Visible = isVis
-    TopWindow.Visible = isVis
-end)
+-- Track holds all tab pages side by side; slides horizontally on tab switch
+local Track = Instance.new("Frame")
+Track.Name = "Track"
+Track.Size = UDim2.new(0, 0, 1, 0) -- width grows per tab added
+Track.Position = UDim2.new(0, 0, 0, 0)
+Track.BackgroundTransparency = 1
+Track.Parent = Viewport
 
 ---------------------------------------------------------
--- BUILDER LOGIC (2 DETACHED CARDS WITH NO ITEM BG)
+-- BUILDER LOGIC
 ---------------------------------------------------------
 local Tabs = {}
 local FirstTab = true
+local TabCount = 0
+local currentIndex = 0
 
 function UI:CreateTab(tabName)
+    TabCount = TabCount + 1
+    local myIndex = TabCount
+
+    -- Tab Button
     local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(0, 92, 1, 0)
-    TabButton.BackgroundColor3 = FirstTab and Theme.ActiveCyan or Theme.InactivePill
-    TabButton.Text = tabName
-    TabButton.TextColor3 = FirstTab and Theme.Background or Theme.TextMuted
-    TabButton.Font = Enum.Font.GothamBold
-    TabButton.TextSize = 11
-    TabButton.Parent = FloatingTabNav
+    TabButton.Size = UDim2.new(0, 0, 1, 0)
+    TabButton.AutomaticSize = Enum.AutomaticSize.X
+    TabButton.BackgroundColor3 = FirstTab and Theme.Accent or Theme.InactivePill
+    TabButton.Text = ""
+    TabButton.AutoButtonColor = false
+    TabButton.Parent = TabNav
+
+    local TabPad = Instance.new("UIPadding")
+    TabPad.PaddingLeft = UDim.new(0, 14)
+    TabPad.PaddingRight = UDim.new(0, 14)
+    TabPad.Parent = TabButton
 
     local TabCorner = Instance.new("UICorner")
     TabCorner.CornerRadius = UDim.new(1, 0)
     TabCorner.Parent = TabButton
 
-    local TabContainer = Instance.new("Frame")
-    TabContainer.Name = tabName .. "Container"
-    TabContainer.Size = UDim2.new(1, 0, 1, 0)
-    TabContainer.BackgroundTransparency = 1
-    TabContainer.Visible = FirstTab
-    TabContainer.Parent = ContentArea
+    local TabLabel = Instance.new("TextLabel")
+    TabLabel.Size = UDim2.new(1, 0, 1, 0)
+    TabLabel.BackgroundTransparency = 1
+    TabLabel.Text = tabName
+    TabLabel.TextColor3 = FirstTab and Theme.Background or Theme.TextMuted
+    TabLabel.Font = Enum.Font.GothamBold
+    TabLabel.TextSize = 11
+    TabLabel.Parent = TabButton
+
+    local pageIndex = myIndex - 1
+
+    local TabPage = Instance.new("Frame")
+    TabPage.Name = tabName .. "Page"
+    TabPage.BackgroundTransparency = 1
+    TabPage.Parent = Track
 
     ---------------------------------------------------------
-    -- CARD 1: KIRI (STANDALONE BOX MELAYANG)
+    -- CARD 1: LEFT
     ---------------------------------------------------------
     local LeftCard = Instance.new("Frame")
     LeftCard.Name = "LeftCard"
-    LeftCard.Size = UDim2.new(0.5, -8, 1, 0)
+    LeftCard.Size = UDim2.new(0.5, -4, 1, 0)
     LeftCard.Position = UDim2.new(0, 0, 0, 0)
     LeftCard.BackgroundColor3 = Theme.CardBG
-    LeftCard.Parent = TabContainer
+    LeftCard.Parent = TabPage
 
     local LeftCardCorner = Instance.new("UICorner")
     LeftCardCorner.CornerRadius = UDim.new(0, 12)
@@ -191,27 +262,27 @@ function UI:CreateTab(tabName)
     LeftScroll.Position = UDim2.new(0, 8, 0, 6)
     LeftScroll.BackgroundTransparency = 1
     LeftScroll.ScrollBarThickness = 2
-    LeftScroll.ScrollBarImageColor3 = Theme.ActiveCyan
+    LeftScroll.ScrollBarImageColor3 = Theme.AccentDim
     LeftScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
     LeftScroll.Parent = LeftCard
 
     local LeftList = Instance.new("UIListLayout")
     LeftList.Parent = LeftScroll
-    LeftList.Padding = UDim.new(0, 8)
+    LeftList.Padding = UDim.new(0, 10)
 
     LeftList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         LeftScroll.CanvasSize = UDim2.new(0, 0, 0, LeftList.AbsoluteContentSize.Y + 4)
     end)
 
     ---------------------------------------------------------
-    -- CARD 2: KANAN (STANDALONE BOX MELAYANG - GAP 16PX)
+    -- CARD 2: RIGHT
     ---------------------------------------------------------
     local RightCard = Instance.new("Frame")
     RightCard.Name = "RightCard"
-    RightCard.Size = UDim2.new(0.5, -8, 1, 0)
-    RightCard.Position = UDim2.new(0.5, 8, 0, 0) -- GAP MELAYANG CLEAR
+    RightCard.Size = UDim2.new(0.5, -4, 1, 0)
+    RightCard.Position = UDim2.new(0.5, 4, 0, 0)
     RightCard.BackgroundColor3 = Theme.CardBG
-    RightCard.Parent = TabContainer
+    RightCard.Parent = TabPage
 
     local RightCardCorner = Instance.new("UICorner")
     RightCardCorner.CornerRadius = UDim.new(0, 12)
@@ -227,36 +298,48 @@ function UI:CreateTab(tabName)
     RightScroll.Position = UDim2.new(0, 8, 0, 6)
     RightScroll.BackgroundTransparency = 1
     RightScroll.ScrollBarThickness = 2
-    RightScroll.ScrollBarImageColor3 = Theme.ActiveCyan
+    RightScroll.ScrollBarImageColor3 = Theme.AccentDim
     RightScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
     RightScroll.Parent = RightCard
 
     local RightList = Instance.new("UIListLayout")
     RightList.Parent = RightScroll
-    RightList.Padding = UDim.new(0, 8)
+    RightList.Padding = UDim.new(0, 10)
 
     RightList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         RightScroll.CanvasSize = UDim2.new(0, 0, 0, RightList.AbsoluteContentSize.Y + 4)
     end)
 
-    local TabObj = { Button = TabButton, Container = TabContainer }
+    local TabObj = { Button = TabButton, Label = TabLabel, Page = TabPage, Index = pageIndex }
 
-    TabButton.MouseButton1Click:Connect(function()
+    local function goToTab()
         for _, t in pairs(Tabs) do
-            t.Container.Visible = false
-            t.Button.BackgroundColor3 = Theme.InactivePill
-            t.Button.TextColor3 = Theme.TextMuted
+            tween(t.Button, {BackgroundColor3 = Theme.InactivePill}, 0.18)
+            tween(t.Label, {TextColor3 = Theme.TextMuted}, 0.18)
         end
-        TabContainer.Visible = true
-        TabButton.BackgroundColor3 = Theme.ActiveCyan
-        TabButton.TextColor3 = Theme.Background
-    end)
+        tween(TabButton, {BackgroundColor3 = Theme.Accent}, 0.18)
+        tween(TabLabel, {TextColor3 = Theme.Background}, 0.18)
+
+        currentIndex = pageIndex
+        local targetX = -(Viewport.AbsoluteSize.X * pageIndex)
+        tween(Track, {Position = UDim2.new(0, targetX, 0, 0)}, 0.32, Enum.EasingStyle.Quint)
+    end
+
+    TabButton.MouseButton1Click:Connect(goToTab)
 
     table.insert(Tabs, TabObj)
+
+    if FirstTab then
+        -- defer initial layout until viewport has real size
+        task.defer(function()
+            TabPage.Size = UDim2.new(0, Viewport.AbsoluteSize.X, 1, 0)
+            Track.Size = UDim2.new(0, Viewport.AbsoluteSize.X * TabCount, 1, 0)
+        end)
+    end
     FirstTab = false
 
     ---------------------------------------------------------
-    -- ELEMENT BUILDERS (MELAYANG MURNI TANPA ITEM BG)
+    -- ELEMENT BUILDERS
     ---------------------------------------------------------
     local Elements = {}
 
@@ -269,46 +352,70 @@ function UI:CreateTab(tabName)
         local Sec = Instance.new("TextLabel")
         Sec.Size = UDim2.new(1, 0, 0, 16)
         Sec.BackgroundTransparency = 1
-        Sec.Text = "• " .. string.upper(text)
-        Sec.TextColor3 = Theme.ActiveCyan
+        Sec.Text = string.upper(text)
+        Sec.TextColor3 = Theme.TextMuted
         Sec.Font = Enum.Font.GothamBold
-        Sec.TextSize = 10
+        Sec.TextSize = 9
         Sec.TextXAlignment = Enum.TextXAlignment.Left
         Sec.Parent = Target
+
+        local Underline = Instance.new("Frame")
+        Underline.Size = UDim2.new(0, 14, 0, 2)
+        Underline.Position = UDim2.new(0, 0, 1, 2)
+        Underline.BackgroundColor3 = Theme.Accent
+        Underline.BorderSizePixel = 0
+        Underline.Parent = Sec
+
+        local UnderCorner = Instance.new("UICorner")
+        UnderCorner.CornerRadius = UDim.new(1, 0)
+        UnderCorner.Parent = Underline
     end
 
     function Elements:CreateToggle(text, defaultState, side, callback)
         local Target = GetTargetScroll(side)
 
-        local Item = Instance.new("Frame")
-        Item.Size = UDim2.new(1, 0, 0, 22)
-        Item.BackgroundTransparency = 1 -- Transparan Total
+        local Item = Instance.new("TextButton")
+        Item.Size = UDim2.new(1, 0, 0, 30)
+        Item.BackgroundColor3 = Theme.InactivePill
+        Item.Text = ""
+        Item.AutoButtonColor = false
         Item.Parent = Target
 
-        local TglBtn = Instance.new("TextButton")
-        TglBtn.Size = UDim2.new(1, 0, 1, 0)
-        TglBtn.BackgroundTransparency = 1
-        TglBtn.Text = text
-        TglBtn.TextColor3 = Theme.TextPrimary
-        TglBtn.Font = Enum.Font.GothamMedium
-        TglBtn.TextSize = 10
-        TglBtn.TextXAlignment = Enum.TextXAlignment.Left
-        TglBtn.Parent = Item
+        local ItemCorner = Instance.new("UICorner")
+        ItemCorner.CornerRadius = UDim.new(0, 8)
+        ItemCorner.Parent = Item
+
+        local Label = Instance.new("TextLabel")
+        Label.Size = UDim2.new(1, -44, 1, 0)
+        Label.Position = UDim2.new(0, 10, 0, 0)
+        Label.BackgroundTransparency = 1
+        Label.Text = text
+        Label.TextColor3 = Theme.TextPrimary
+        Label.Font = Enum.Font.GothamMedium
+        Label.TextSize = 10
+        Label.TextXAlignment = Enum.TextXAlignment.Left
+        Label.TextTruncate = Enum.TextTruncate.AtEnd
+        Label.Parent = Item
 
         local Indicator = Instance.new("Frame")
-        Indicator.Size = UDim2.new(0, 22, 0, 12)
-        Indicator.Position = UDim2.new(1, -22, 0.5, -6)
-        Indicator.BackgroundColor3 = defaultState and Theme.ActiveCyan or Theme.InactivePill
+        Indicator.Size = UDim2.new(0, 26, 0, 14)
+        Indicator.Position = UDim2.new(1, -34, 0.5, -7)
+        Indicator.BackgroundColor3 = defaultState and Theme.Accent or Theme.CardBG
         Indicator.Parent = Item
 
         local IndCorner = Instance.new("UICorner")
         IndCorner.CornerRadius = UDim.new(1, 0)
         IndCorner.Parent = Indicator
 
+        local IndStroke = Instance.new("UIStroke")
+        IndStroke.Color = Theme.Border
+        IndStroke.Thickness = 1
+        IndStroke.Parent = Indicator
+
         local Dot = Instance.new("Frame")
         Dot.Size = UDim2.new(0, 10, 0, 10)
-        Dot.Position = defaultState and UDim2.new(1, -11, 0.5, -5) or UDim2.new(0, 1, 0.5, -5)
-        Dot.BackgroundColor3 = Theme.TextPrimary
+        Dot.Position = defaultState and UDim2.new(1, -12, 0.5, -5) or UDim2.new(0, 2, 0.5, -5)
+        Dot.BackgroundColor3 = defaultState and Theme.Background or Theme.TextMuted
         Dot.Parent = Indicator
 
         local DotCorner = Instance.new("UICorner")
@@ -316,10 +423,21 @@ function UI:CreateTab(tabName)
         DotCorner.Parent = Dot
 
         local enabled = defaultState or false
-        TglBtn.MouseButton1Click:Connect(function()
+
+        Item.MouseEnter:Connect(function()
+            tween(Item, {BackgroundColor3 = Theme.ItemHover}, 0.15)
+        end)
+        Item.MouseLeave:Connect(function()
+            tween(Item, {BackgroundColor3 = Theme.InactivePill}, 0.15)
+        end)
+
+        Item.MouseButton1Click:Connect(function()
             enabled = not enabled
-            Indicator.BackgroundColor3 = enabled and Theme.ActiveCyan or Theme.InactivePill
-            Dot.Position = enabled and UDim2.new(1, -11, 0.5, -5) or UDim2.new(0, 1, 0.5, -5)
+            tween(Indicator, {BackgroundColor3 = enabled and Theme.Accent or Theme.CardBG}, 0.18)
+            tween(Dot, {
+                Position = enabled and UDim2.new(1, -12, 0.5, -5) or UDim2.new(0, 2, 0.5, -5),
+                BackgroundColor3 = enabled and Theme.Background or Theme.TextMuted
+            }, 0.18)
             pcall(callback, enabled)
         end)
     end
@@ -328,26 +446,46 @@ function UI:CreateTab(tabName)
         local Target = GetTargetScroll(side)
 
         local Item = Instance.new("Frame")
-        Item.Size = UDim2.new(1, 0, 0, 30)
-        Item.BackgroundTransparency = 1 -- Transparan Total
+        Item.Size = UDim2.new(1, 0, 0, 40)
+        Item.BackgroundColor3 = Theme.InactivePill
         Item.Parent = Target
 
-        local Title = Instance.new("TextLabel")
-        Title.Size = UDim2.new(1, 0, 0, 14)
-        Title.Position = UDim2.new(0, 0, 0, 0)
-        Title.BackgroundTransparency = 1
-        Title.Text = text .. ": <font color=\"#00BEF5\">" .. tostring(default) .. "</font>"
-        Title.RichText = true
-        Title.TextColor3 = Theme.TextPrimary
-        Title.Font = Enum.Font.GothamMedium
-        Title.TextSize = 10
-        Title.TextXAlignment = Enum.TextXAlignment.Left
-        Title.Parent = Item
+        local ItemCorner = Instance.new("UICorner")
+        ItemCorner.CornerRadius = UDim.new(0, 8)
+        ItemCorner.Parent = Item
+
+        local Padding = Instance.new("UIPadding")
+        Padding.PaddingLeft = UDim.new(0, 10)
+        Padding.PaddingRight = UDim.new(0, 10)
+        Padding.PaddingTop = UDim.new(0, 6)
+        Padding.Parent = Item
+
+        local TitleLbl = Instance.new("TextLabel")
+        TitleLbl.Size = UDim2.new(1, 0, 0, 14)
+        TitleLbl.BackgroundTransparency = 1
+        TitleLbl.Text = text
+        TitleLbl.TextColor3 = Theme.TextPrimary
+        TitleLbl.Font = Enum.Font.GothamMedium
+        TitleLbl.TextSize = 10
+        TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
+        TitleLbl.TextTruncate = Enum.TextTruncate.AtEnd
+        TitleLbl.Parent = Item
+
+        local ValueLbl = Instance.new("TextLabel")
+        ValueLbl.Size = UDim2.new(0, 40, 0, 14)
+        ValueLbl.Position = UDim2.new(1, -40, 0, 0)
+        ValueLbl.BackgroundTransparency = 1
+        ValueLbl.Text = tostring(default)
+        ValueLbl.TextColor3 = Theme.Accent
+        ValueLbl.Font = Enum.Font.GothamBold
+        ValueLbl.TextSize = 10
+        ValueLbl.TextXAlignment = Enum.TextXAlignment.Right
+        ValueLbl.Parent = Item
 
         local SliderBar = Instance.new("TextButton")
         SliderBar.Size = UDim2.new(1, 0, 0, 4)
-        SliderBar.Position = UDim2.new(0, 0, 0, 18)
-        SliderBar.BackgroundColor3 = Theme.InactivePill
+        SliderBar.Position = UDim2.new(0, 0, 0, 22)
+        SliderBar.BackgroundColor3 = Theme.CardBG
         SliderBar.Text = ""
         SliderBar.AutoButtonColor = false
         SliderBar.Parent = Item
@@ -358,7 +496,7 @@ function UI:CreateTab(tabName)
 
         local Fill = Instance.new("Frame")
         Fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
-        Fill.BackgroundColor3 = Theme.ActiveCyan
+        Fill.BackgroundColor3 = Theme.Accent
         Fill.BorderSizePixel = 0
         Fill.Parent = SliderBar
 
@@ -366,14 +504,25 @@ function UI:CreateTab(tabName)
         FillCorner.CornerRadius = UDim.new(1, 0)
         FillCorner.Parent = Fill
 
-        local UserInputService = game:GetService("UserInputService")
+        local Knob = Instance.new("Frame")
+        Knob.Size = UDim2.new(0, 10, 0, 10)
+        Knob.AnchorPoint = Vector2.new(0.5, 0.5)
+        Knob.Position = UDim2.new((default - min) / (max - min), 0, 0.5, 0)
+        Knob.BackgroundColor3 = Theme.Accent
+        Knob.Parent = SliderBar
+
+        local KnobCorner = Instance.new("UICorner")
+        KnobCorner.CornerRadius = UDim.new(1, 0)
+        KnobCorner.Parent = Knob
+
         local dragging = false
 
         local function update(input)
             local pos = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
             local val = math.floor(min + ((max - min) * pos))
             Fill.Size = UDim2.new(pos, 0, 1, 0)
-            Title.Text = text .. ": <font color=\"#00BEF5\">" .. tostring(val) .. "</font>"
+            Knob.Position = UDim2.new(pos, 0, 0.5, 0)
+            ValueLbl.Text = tostring(val)
             pcall(callback, val)
         end
 
@@ -401,20 +550,35 @@ function UI:CreateTab(tabName)
         local Target = GetTargetScroll(side)
 
         local Btn = Instance.new("TextButton")
-        Btn.Size = UDim2.new(1, 0, 0, 24)
+        Btn.Size = UDim2.new(1, 0, 0, 28)
         Btn.BackgroundColor3 = Theme.InactivePill
         Btn.Text = text
         Btn.TextColor3 = Theme.TextPrimary
         Btn.Font = Enum.Font.GothamMedium
         Btn.TextSize = 10
-        Btn.AutoButtonColor = true
+        Btn.AutoButtonColor = false
         Btn.Parent = Target
 
         local Corner = Instance.new("UICorner")
-        Corner.CornerRadius = UDim.new(0, 5)
+        Corner.CornerRadius = UDim.new(0, 8)
         Corner.Parent = Btn
 
+        local Stroke = Instance.new("UIStroke")
+        Stroke.Color = Theme.Border
+        Stroke.Thickness = 1
+        Stroke.Parent = Btn
+
+        Btn.MouseEnter:Connect(function()
+            tween(Btn, {BackgroundColor3 = Theme.ItemHover}, 0.15)
+        end)
+        Btn.MouseLeave:Connect(function()
+            tween(Btn, {BackgroundColor3 = Theme.InactivePill}, 0.15)
+        end)
         Btn.MouseButton1Click:Connect(function()
+            tween(Btn, {BackgroundColor3 = Theme.Accent}, 0.08)
+            task.delay(0.08, function()
+                tween(Btn, {BackgroundColor3 = Theme.ItemHover}, 0.15)
+            end)
             pcall(callback)
         end)
     end
@@ -422,5 +586,25 @@ function UI:CreateTab(tabName)
     return Elements
 end
 
-UI.Container = ContentArea
+---------------------------------------------------------
+-- FINAL SIZING PASS (once all tabs are declared, main.lua finishes running
+-- this ensures Track + Pages have correct pixel widths, then snaps to tab 1)
+---------------------------------------------------------
+task.defer(function()
+    task.wait(0.05)
+    local w = Viewport.AbsoluteSize.X
+    Track.Size = UDim2.new(0, w * math.max(TabCount, 1), 1, 0)
+    for _, t in pairs(Tabs) do
+        t.Page.Size = UDim2.new(0, w, 1, 0)
+        t.Page.Position = UDim2.new(0, w * t.Index, 0, 0)
+    end
+    Track.Position = UDim2.new(0, 0, 0, 0)
+end)
+
+MobileBtn.MouseButton1Click:Connect(function()
+    local isVis = not MainWindow.Visible
+    MainWindow.Visible = isVis
+end)
+
+UI.Container = MainWindow
 return UI
