@@ -26,7 +26,7 @@ print("ZxD Hub Loaded di: " .. currentSea)
 -- TAB 1: AUTO FARM
 local FarmTab = UI:CreateTab("Auto Farm")
 
--- CARD KIRI (Fitur Utama)
+-- CARD KIRI
 FarmTab:AddSection("Main Farming", "left")
 
 _G.AutoFarm = false
@@ -43,7 +43,7 @@ FarmTab:CreateToggle("Auto Stats (Melee/Def)", false, "left", function(state)
     print("Auto Stats Status:", state)
 end)
 
--- CARD KANAN (Pengaturan & Modifiers)
+-- CARD KANAN
 FarmTab:AddSection("Farm Config", "right")
 
 FarmTab:CreateSlider("Distance Y-Axis", 5, 25, 12, "right", function(value)
