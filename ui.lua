@@ -37,7 +37,7 @@ end
 ---------------------------------------------------------
 local MobileBtn = Instance.new("TextButton")
 MobileBtn.Name = "MobileToggle"
-MobileBtn.Size = UDim2.new(0, 46, 0, 46)
+MobileBtn.Size = UDim2.new(0, 40, 0, 40)
 MobileBtn.Position = UDim2.new(0, 14, 0.35, 0)
 MobileBtn.BackgroundColor3 = Theme.Background
 MobileBtn.Text = "•"
@@ -65,8 +65,8 @@ MobStroke.Parent = MobileBtn
 local MainWindow = Instance.new("Frame")
 MainWindow.Name = "MainWindow"
 MainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
-MainWindow.Size = UDim2.new(0.92, 0, 0.5, 0)
-MainWindow.Position = UDim2.new(0.5, 0, 0.48, 0)
+MainWindow.Size = UDim2.new(0, 300, 0, 220)
+MainWindow.Position = UDim2.new(0.5, 0, 0.45, 0)
 MainWindow.BackgroundColor3 = Theme.Background
 MainWindow.BorderSizePixel = 0
 MainWindow.Active = true
@@ -86,42 +86,42 @@ MainStroke.Parent = MainWindow
 -- Header
 local Header = Instance.new("Frame")
 Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 40)
+Header.Size = UDim2.new(1, 0, 0, 32)
 Header.BackgroundTransparency = 1
 Header.Parent = MainWindow
 
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
-Title.Size = UDim2.new(1, -40, 1, 0)
-Title.Position = UDim2.new(0, 16, 0, 0)
+Title.Size = UDim2.new(1, -70, 1, 0)
+Title.Position = UDim2.new(0, 12, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "ZxD"
 Title.TextColor3 = Theme.TextPrimary
-Title.TextSize = 14
+Title.TextSize = 13
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
 
 local SubTitle = Instance.new("TextLabel")
 SubTitle.Name = "SubTitle"
-SubTitle.Size = UDim2.new(1, -40, 0, 12)
-SubTitle.Position = UDim2.new(0, 16 + 32, 0, 1)
+SubTitle.Size = UDim2.new(0, 40, 0, 11)
+SubTitle.Position = UDim2.new(0, 12 + 30, 0, 1)
 SubTitle.BackgroundTransparency = 1
 SubTitle.Text = "HUB"
 SubTitle.TextColor3 = Theme.TextMuted
-SubTitle.TextSize = 10
+SubTitle.TextSize = 9
 SubTitle.Font = Enum.Font.Gotham
 SubTitle.TextXAlignment = Enum.TextXAlignment.Left
 SubTitle.Parent = Header
 
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Name = "CloseBtn"
-CloseBtn.Size = UDim2.new(0, 26, 0, 26)
-CloseBtn.Position = UDim2.new(1, -36, 0.5, -13)
+CloseBtn.Size = UDim2.new(0, 22, 0, 22)
+CloseBtn.Position = UDim2.new(1, -30, 0.5, -11)
 CloseBtn.BackgroundColor3 = Theme.InactivePill
 CloseBtn.Text = "×"
 CloseBtn.TextColor3 = Theme.TextMuted
-CloseBtn.TextSize = 15
+CloseBtn.TextSize = 13
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.AutoButtonColor = false
 CloseBtn.Parent = Header
@@ -144,19 +144,19 @@ end)
 
 -- Divider
 local Divider = Instance.new("Frame")
-Divider.Size = UDim2.new(1, -32, 0, 1)
-Divider.Position = UDim2.new(0, 16, 0, 40)
+Divider.Size = UDim2.new(1, -24, 0, 1)
+Divider.Position = UDim2.new(0, 12, 0, 32)
 Divider.BackgroundColor3 = Theme.Border
 Divider.BorderSizePixel = 0
 Divider.Parent = MainWindow
 
 ---------------------------------------------------------
--- TAB NAV (minimal underline pill tabs)
+-- TAB NAV (separated pill tabs with clear gap)
 ---------------------------------------------------------
 local TabNav = Instance.new("ScrollingFrame")
 TabNav.Name = "TabNav"
-TabNav.Size = UDim2.new(1, -16, 0, 34)
-TabNav.Position = UDim2.new(0, 8, 0, 47)
+TabNav.Size = UDim2.new(1, -16, 0, 26)
+TabNav.Position = UDim2.new(0, 8, 0, 40)
 TabNav.BackgroundTransparency = 1
 TabNav.ScrollBarThickness = 0
 TabNav.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -166,7 +166,7 @@ TabNav.Parent = MainWindow
 local TabLayout = Instance.new("UIListLayout")
 TabLayout.Parent = TabNav
 TabLayout.FillDirection = Enum.FillDirection.Horizontal
-TabLayout.Padding = UDim.new(0, 6)
+TabLayout.Padding = UDim.new(0, 10)
 TabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 
 TabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
@@ -178,8 +178,8 @@ end)
 ---------------------------------------------------------
 local Viewport = Instance.new("Frame")
 Viewport.Name = "Viewport"
-Viewport.Size = UDim2.new(1, -16, 1, -95)
-Viewport.Position = UDim2.new(0, 8, 0, 89)
+Viewport.Size = UDim2.new(1, -16, 1, -76)
+Viewport.Position = UDim2.new(0, 8, 0, 72)
 Viewport.BackgroundTransparency = 1
 Viewport.ClipsDescendants = true
 Viewport.Parent = MainWindow
@@ -243,7 +243,7 @@ function UI:CreateTab(tabName)
     ---------------------------------------------------------
     local LeftCard = Instance.new("Frame")
     LeftCard.Name = "LeftCard"
-    LeftCard.Size = UDim2.new(0.5, -4, 1, 0)
+    LeftCard.Size = UDim2.new(0.5, -7, 1, 0)
     LeftCard.Position = UDim2.new(0, 0, 0, 0)
     LeftCard.BackgroundColor3 = Theme.CardBG
     LeftCard.Parent = TabPage
@@ -279,8 +279,8 @@ function UI:CreateTab(tabName)
     ---------------------------------------------------------
     local RightCard = Instance.new("Frame")
     RightCard.Name = "RightCard"
-    RightCard.Size = UDim2.new(0.5, -4, 1, 0)
-    RightCard.Position = UDim2.new(0.5, 4, 0, 0)
+    RightCard.Size = UDim2.new(0.5, -7, 1, 0)
+    RightCard.Position = UDim2.new(0.5, 7, 0, 0)
     RightCard.BackgroundColor3 = Theme.CardBG
     RightCard.Parent = TabPage
 
