@@ -1,24 +1,29 @@
 local rawBase = "https://raw.githubusercontent.com/Chaints/Blxfrt/main/"
 local UI = loadstring(game:HttpGet(rawBase .. "ui.lua"))()
 
--- Tab Atas 1
-local MainTab = UI:CreateTab("Auto Farm")
-MainTab:AddSection("FARMING MAIN")
-MainTab:CreateToggle("Auto Farm Level", false, function(s) end)
-MainTab:CreateToggle("Auto Bone", false, function(s) end)
+-- 1. TAB FARMING
+local FarmTab = UI:CreateTab("Auto Farm")
+FarmTab:AddSection("Main Farm")
+FarmTab:CreateToggle("Auto Farm Level", false, function(state) print("Auto Farm:", state) end)
+FarmTab:CreateToggle("Auto Bone", false, function(state) end)
 
--- Tab Atas 2
-local TeleTab = UI:CreateTab("Teleport")
-TeleTab:AddSection("LOCATION")
-TeleTab:CreateButton("Teleport Sea 1", function() end)
-TeleTab:CreateButton("Teleport Sea 2", function() end)
+FarmTab:AddSection("Farm Distance")
+FarmTab:CreateSlider("Distance Y-Axis", 5, 25, 12, function(val)
+    print("Farm Distance:", val)
+end)
 
--- Tab Atas 3
-local StatsTab = UI:CreateTab("Stats")
-StatsTab:AddSection("AUTO STATS")
-StatsTab:CreateToggle("Auto Melee", false, function(s) end)
+-- 2. TAB PLAYER
+local PlayerTab = UI:CreateTab("Player")
+PlayerTab:AddSection("Player Boost")
+PlayerTab:CreateSlider("WalkSpeed", 16, 200, 16, function(speed)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
+end)
 
--- Tab Atas 4
-local MiscTab = UI:CreateTab("Settings")
-MiscTab:AddSection("SERVER")
-MiscTab:CreateButton("Rejoin Server", function() end)
+PlayerTab:CreateButton("Bypass Anti-Cheat Speed", function()
+    print("Bypassed!")
+end)
+
+-- 3. TAB SETTINGS
+local SettingsTab = UI:CreateTab("Settings")
+SettingsTab:AddSection("Server Control")
+SettingsTab:CreateButton("Rejoin Server", function() end)
