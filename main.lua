@@ -17,33 +17,14 @@ elseif placeId == 7449423635 then
     currentSea = "Sea 3"
 end
 
-print("DakzzHub Loaded di: " .. currentSea)
+print("ZxD Hub Loaded di: " .. currentSea)
 
--- Bikin Tombol Auto Farm di UI yang di-load
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Name = "ToggleAutoFarm"
-ToggleButton.Size = UDim2.new(1, 0, 0, 35)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-ToggleButton.Text = "Auto Farm (" .. currentSea .. "): OFF"
-ToggleButton.TextColor3 = Color3.fromRGB(255, 75, 75)
-ToggleButton.Font = Enum.Font.SourceSansSemibold
-ToggleButton.TextSize = 13
-ToggleButton.Parent = UI.Container
+-- Tampilkan Info Status (Placeholder)
+UI:AddPlaceholder("STATUS: Connected (" .. currentSea .. ")")
 
-local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(0, 6)
-ToggleCorner.Parent = ToggleButton
-
+-- Bikin Toggle Auto Farm pakai fungsi bawaan UI (Lebih simpel & enteng)
 _G.AutoFarm = false
-ToggleButton.MouseButton1Click:Connect(function()
-    _G.AutoFarm = not _G.AutoFarm
-    if _G.AutoFarm then
-        ToggleButton.Text = "Auto Farm (" .. currentSea .. "): ON"
-        ToggleButton.TextColor3 = Color3.fromRGB(75, 255, 75)
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(35, 60, 35)
-    else
-        ToggleButton.Text = "Auto Farm (" .. currentSea .. "): OFF"
-        ToggleButton.TextColor3 = Color3.fromRGB(255, 75, 75)
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    end
+UI:CreateToggle("Auto Farm " .. currentSea, function(state)
+    _G.AutoFarm = state
+    print("Auto Farm Status:", _G.AutoFarm)
 end)
