@@ -65,7 +65,7 @@ MobStroke.Parent = MobileBtn
 local MainWindow = Instance.new("Frame")
 MainWindow.Name = "MainWindow"
 MainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
-MainWindow.Size = UDim2.new(0, 380, 0, 320)
+MainWindow.Size = UDim2.new(0, 430, 0, 320)
 MainWindow.Position = UDim2.new(0.5, 0, 0.45, 0)
 MainWindow.BackgroundTransparency = 1
 MainWindow.BorderSizePixel = 0
@@ -376,20 +376,20 @@ function UI:CreateTab(tabName)
         ItemCorner.Parent = Item
 
         local Label = Instance.new("TextLabel")
-        Label.Size = UDim2.new(1, -60, 1, 0)
+        Label.Size = UDim2.new(1, -54, 1, 0)
         Label.Position = UDim2.new(0, 14, 0, 0)
         Label.BackgroundTransparency = 1
         Label.Text = text
         Label.TextColor3 = Theme.TextPrimary
         Label.Font = Enum.Font.GothamMedium
-        Label.TextSize = 13
+        Label.TextSize = 12
         Label.TextXAlignment = Enum.TextXAlignment.Left
         Label.TextTruncate = Enum.TextTruncate.AtEnd
         Label.Parent = Item
 
         local Indicator = Instance.new("Frame")
-        Indicator.Size = UDim2.new(0, 38, 0, 20)
-        Indicator.Position = UDim2.new(1, -48, 0.5, -10)
+        Indicator.Size = UDim2.new(0, 34, 0, 18)
+        Indicator.Position = UDim2.new(1, -44, 0.5, -9)
         Indicator.BackgroundColor3 = defaultState and Theme.Accent or Theme.CardBG
         Indicator.Parent = Item
 
@@ -403,8 +403,8 @@ function UI:CreateTab(tabName)
         IndStroke.Parent = Indicator
 
         local Dot = Instance.new("Frame")
-        Dot.Size = UDim2.new(0, 16, 0, 16)
-        Dot.Position = defaultState and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
+        Dot.Size = UDim2.new(0, 14, 0, 14)
+        Dot.Position = defaultState and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
         Dot.BackgroundColor3 = defaultState and Theme.Background or Theme.TextMuted
         Dot.Parent = Indicator
 
@@ -425,7 +425,7 @@ function UI:CreateTab(tabName)
             enabled = not enabled
             tween(Indicator, {BackgroundColor3 = enabled and Theme.Accent or Theme.CardBG}, 0.18)
             tween(Dot, {
-                Position = enabled and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8),
+                Position = enabled and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7),
                 BackgroundColor3 = enabled and Theme.Background or Theme.TextMuted
             }, 0.18)
             pcall(callback, enabled)
@@ -456,7 +456,7 @@ function UI:CreateTab(tabName)
         TitleLbl.Text = text
         TitleLbl.TextColor3 = Theme.TextPrimary
         TitleLbl.Font = Enum.Font.GothamMedium
-        TitleLbl.TextSize = 13
+        TitleLbl.TextSize = 12
         TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
         TitleLbl.TextTruncate = Enum.TextTruncate.AtEnd
         TitleLbl.Parent = Item
