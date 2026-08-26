@@ -10,19 +10,18 @@ ScreenGui.Name = "ZxDHub"
 ScreenGui.Parent = game:GetService("CoreGui")
 ScreenGui.ResetOnSpawn = false
 
--- Theme Palette: Ultra Dark Minimalist
+-- Theme Palette: OLED Pitch Dark
 local Theme = {
-    Background  = Color3.fromRGB(8, 8, 10),      -- Deepest Pitch Black
-    Header      = Color3.fromRGB(12, 12, 15),    -- Very Dark Charcoal
-    CardBG      = Color3.fromRGB(15, 15, 19),    -- Standalone Card Box
+    Background  = Color3.fromRGB(8, 8, 10),      -- Deep Dark Window
+    CardBG      = Color3.fromRGB(14, 14, 18),    -- Card Box Standalone
     ActiveCyan  = Color3.fromRGB(0, 190, 245),   -- Cyan Accent
     InactivePill= Color3.fromRGB(24, 24, 32),    -- Dark Muted Pill
     TextPrimary = Color3.fromRGB(240, 240, 245), -- Crisp White
     TextMuted   = Color3.fromRGB(100, 105, 120), -- Subtle Dark Grey
-    Border      = Color3.fromRGB(30, 32, 40)     -- Very Subtle Border Line
+    Border      = Color3.fromRGB(30, 32, 40)     -- Very Subtle Border
 }
 
--- Mobile Toggle Button
+-- Mobile Toggle Button (Floating Circle)
 local MobileBtn = Instance.new("TextButton")
 MobileBtn.Name = "MobileToggle"
 MobileBtn.Size = UDim2.new(0, 42, 0, 42)
@@ -46,48 +45,40 @@ MobStroke.Thickness = 1.5
 MobStroke.Parent = MobileBtn
 
 ---------------------------------------------------------
--- MAIN FRAME WINDOW
+-- 1. HEADER & TAB NAVIGATION WINDOW (TOP FLOATING BOX)
 ---------------------------------------------------------
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 460, 0, 275)
-MainFrame.Position = UDim2.new(0.5, -230, 0.5, -137)
-MainFrame.BackgroundColor3 = Theme.Background
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
+local TopWindow = Instance.new("Frame")
+TopWindow.Name = "TopWindow"
+TopWindow.Size = UDim2.new(0, 460, 0, 64)
+TopWindow.Position = UDim2.new(0.5, -230, 0.5, -140)
+TopWindow.BackgroundColor3 = Theme.Background
+TopWindow.BorderSizePixel = 0
+TopWindow.Active = true
+TopWindow.Draggable = true
+TopWindow.Parent = ScreenGui
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 12)
-MainCorner.Parent = MainFrame
+local TopCorner = Instance.new("UICorner")
+TopCorner.CornerRadius = UDim.new(0, 12)
+TopCorner.Parent = TopWindow
 
-local MainStroke = Instance.new("UIStroke")
-MainStroke.Color = Theme.Border
-MainStroke.Thickness = 1
-MainStroke.Parent = MainFrame
-
-MobileBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-end)
+local TopStroke = Instance.new("UIStroke")
+TopStroke.Color = Theme.Border
+TopStroke.Thickness = 1
+TopStroke.Parent = TopWindow
 
 -- Header Bar
 local Header = Instance.new("Frame")
 Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 32)
-Header.BackgroundColor3 = Theme.Header
-Header.Parent = MainFrame
-
-local HeaderCorner = Instance.new("UICorner")
-HeaderCorner.CornerRadius = UDim.new(0, 12)
-HeaderCorner.Parent = Header
+Header.Size = UDim2.new(1, 0, 0, 28)
+Header.BackgroundTransparency = 1
+Header.Parent = TopWindow
 
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Size = UDim2.new(1, -40, 1, 0)
-Title.Position = UDim2.new(0, 14, 0, 0)
+Title.Position = UDim2.new(0, 12, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "<b>ZxD HUB</b> <font color=\"#00BEF5\">CLEAN ULTRA</font>"
+Title.Text = "<b>ZxD HUB</b> <font color=\"#00BEF5\">DETACHED</font>"
 Title.RichText = true
 Title.TextColor3 = Theme.TextPrimary
 Title.TextSize = 12
@@ -97,12 +88,12 @@ Title.Parent = Header
 
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Name = "CloseBtn"
-CloseBtn.Size = UDim2.new(0, 20, 0, 20)
-CloseBtn.Position = UDim2.new(1, -26, 0.5, -10)
+CloseBtn.Size = UDim2.new(0, 18, 0, 18)
+CloseBtn.Position = UDim2.new(1, -24, 0.5, -9)
 CloseBtn.BackgroundColor3 = Theme.InactivePill
 CloseBtn.Text = "×"
 CloseBtn.TextColor3 = Theme.TextMuted
-CloseBtn.TextSize = 15
+CloseBtn.TextSize = 14
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.Parent = Header
 
@@ -114,15 +105,15 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- Top Floating Tab Bar (DENGAN GAP DENGAN JARAK EXTRA 8PX)
+-- Top Floating Tab Bar (DENGAN GAP ANTAR TAB 8PX)
 local FloatingTabNav = Instance.new("ScrollingFrame")
 FloatingTabNav.Name = "FloatingTabNav"
-FloatingTabNav.Size = UDim2.new(1, -16, 0, 26)
-FloatingTabNav.Position = UDim2.new(0, 8, 0, 38)
+FloatingTabNav.Size = UDim2.new(1, -16, 0, 24)
+FloatingTabNav.Position = UDim2.new(0, 8, 0, 32)
 FloatingTabNav.BackgroundTransparency = 1
 FloatingTabNav.ScrollBarThickness = 0
 FloatingTabNav.CanvasSize = UDim2.new(0, 0, 0, 0)
-FloatingTabNav.Parent = MainFrame
+FloatingTabNav.Parent = TopWindow
 
 local TabLayout = Instance.new("UIListLayout")
 TabLayout.Parent = FloatingTabNav
@@ -133,16 +124,24 @@ TabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     FloatingTabNav.CanvasSize = UDim2.new(0, TabLayout.AbsoluteContentSize.X, 0, 0)
 end)
 
--- Content Area
+---------------------------------------------------------
+-- 2. CONTENT AREA (TRANSPARAN TOTAL TANPA MAIN FRAME)
+---------------------------------------------------------
 local ContentArea = Instance.new("Frame")
 ContentArea.Name = "ContentArea"
-ContentArea.Size = UDim2.new(1, -16, 1, -74)
-ContentArea.Position = UDim2.new(0, 8, 0, 68)
+ContentArea.Size = UDim2.new(0, 460, 0, 190)
+ContentArea.Position = UDim2.new(0.5, -230, 0.5, -68) -- MELAYANG DI BAWAH TOP WINDOW
 ContentArea.BackgroundTransparency = 1
-ContentArea.Parent = MainFrame
+ContentArea.Parent = ScreenGui
+
+MobileBtn.MouseButton1Click:Connect(function()
+    local isVis = not ContentArea.Visible
+    ContentArea.Visible = isVis
+    TopWindow.Visible = isVis
+end)
 
 ---------------------------------------------------------
--- BUILDER LOGIC (2 CARD BOX TERPISAH GAP)
+-- BUILDER LOGIC (2 DETACHED CARDS WITH NO ITEM BG)
 ---------------------------------------------------------
 local Tabs = {}
 local FirstTab = true
@@ -169,7 +168,7 @@ function UI:CreateTab(tabName)
     TabContainer.Parent = ContentArea
 
     ---------------------------------------------------------
-    -- CARD 1: KIRI
+    -- CARD 1: KIRI (STANDALONE BOX MELAYANG)
     ---------------------------------------------------------
     local LeftCard = Instance.new("Frame")
     LeftCard.Name = "LeftCard"
@@ -179,7 +178,7 @@ function UI:CreateTab(tabName)
     LeftCard.Parent = TabContainer
 
     local LeftCardCorner = Instance.new("UICorner")
-    LeftCardCorner.CornerRadius = UDim.new(0, 10)
+    LeftCardCorner.CornerRadius = UDim.new(0, 12)
     LeftCardCorner.Parent = LeftCard
 
     local LeftCardStroke = Instance.new("UIStroke")
@@ -205,17 +204,17 @@ function UI:CreateTab(tabName)
     end)
 
     ---------------------------------------------------------
-    -- CARD 2: KANAN (GAP 16PX DI TENGAH)
+    -- CARD 2: KANAN (STANDALONE BOX MELAYANG - GAP 16PX)
     ---------------------------------------------------------
     local RightCard = Instance.new("Frame")
     RightCard.Name = "RightCard"
     RightCard.Size = UDim2.new(0.5, -8, 1, 0)
-    RightCard.Position = UDim2.new(0.5, 8, 0, 0)
+    RightCard.Position = UDim2.new(0.5, 8, 0, 0) -- GAP MELAYANG CLEAR
     RightCard.BackgroundColor3 = Theme.CardBG
     RightCard.Parent = TabContainer
 
     local RightCardCorner = Instance.new("UICorner")
-    RightCardCorner.CornerRadius = UDim.new(0, 10)
+    RightCardCorner.CornerRadius = UDim.new(0, 12)
     RightCardCorner.Parent = RightCard
 
     local RightCardStroke = Instance.new("UIStroke")
@@ -257,7 +256,7 @@ function UI:CreateTab(tabName)
     FirstTab = false
 
     ---------------------------------------------------------
-    -- ELEMENT BUILDERS (CLEAN / NON-BOX ITEM)
+    -- ELEMENT BUILDERS (MELAYANG MURNI TANPA ITEM BG)
     ---------------------------------------------------------
     local Elements = {}
 
@@ -281,10 +280,9 @@ function UI:CreateTab(tabName)
     function Elements:CreateToggle(text, defaultState, side, callback)
         local Target = GetTargetScroll(side)
 
-        -- Clean Item (Tanpa Box BG Tambahan)
         local Item = Instance.new("Frame")
-        Item.Size = UDim2.new(1, 0, 0, 24)
-        Item.BackgroundTransparency = 1
+        Item.Size = UDim2.new(1, 0, 0, 22)
+        Item.BackgroundTransparency = 1 -- Transparan Total
         Item.Parent = Target
 
         local TglBtn = Instance.new("TextButton")
@@ -330,8 +328,8 @@ function UI:CreateTab(tabName)
         local Target = GetTargetScroll(side)
 
         local Item = Instance.new("Frame")
-        Item.Size = UDim2.new(1, 0, 0, 32)
-        Item.BackgroundTransparency = 1
+        Item.Size = UDim2.new(1, 0, 0, 30)
+        Item.BackgroundTransparency = 1 -- Transparan Total
         Item.Parent = Target
 
         local Title = Instance.new("TextLabel")
@@ -348,7 +346,7 @@ function UI:CreateTab(tabName)
 
         local SliderBar = Instance.new("TextButton")
         SliderBar.Size = UDim2.new(1, 0, 0, 4)
-        SliderBar.Position = UDim2.new(0, 0, 0, 20)
+        SliderBar.Position = UDim2.new(0, 0, 0, 18)
         SliderBar.BackgroundColor3 = Theme.InactivePill
         SliderBar.Text = ""
         SliderBar.AutoButtonColor = false
