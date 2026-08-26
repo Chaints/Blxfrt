@@ -10,9 +10,9 @@ _G.AutoFarm = _G.AutoFarm or false
 _G.AutoEquipMelee = true
 _G.AutoAttack = true
 
--- MENCARI REMOTE DENGAN AMAN (TIDAK AKAN CRASH JIKA PATH SALAH)
+-- MENCARI REMOTE SPECIFIC (RE/RegisterAttack)
 local Net = ReplicatedStorage:FindFirstChild("Modules") and ReplicatedStorage.Modules:FindFirstChild("Net")
-local RegisterAttack = Net and Net:FindFirstChild("RegisterAttack")
+local RegisterAttack = Net and Net:FindFirstChild("RE/RegisterAttack")
 local RegisterHit = Net and Net:FindFirstChild("RegisterHit")
 
 -- 1. FUNGSI TWEEN MOVEMENT
@@ -62,7 +62,7 @@ function ScriptLoad.EquipMelee()
     end
 end
 
--- 3. AUTO ATTACK SAFE MODE
+-- 3. AUTO ATTACK (SUDAH DISESUAIKAN DENGAN REMOTE RE/RegisterAttack)
 function ScriptLoad.AttackTarget(targetEnemy)
     local character = LocalPlayer.Character
     if not character or not targetEnemy then return end
@@ -71,14 +71,18 @@ function ScriptLoad.AttackTarget(targetEnemy)
     local tool = character:FindFirstChildOfClass("Tool")
     
     if enemyHrp and tool then
-        -- Opsi 1: Pakai Remote jika ketemu
-        if RegisterAttack and RegisterHit then
-            local hitPart = tool:FindFirstChild("Handle") or tool:FindFirstChildOfClass("Part") or enemyHrp
+        -- Kirim remote serangan utama (RE/RegisterAttack)
+        if RegisterAttack then
             RegisterAttack:FireServer(0)
+        end
+        
+        -- Kirim RegisterHit jika ada
+        if RegisterHit then
+            local hitPart = tool:FindFirstChild("Handle") or tool:FindFirstChildOfClass("Part") or enemyHrp
             RegisterHit:FireServer(hitPart, {enemyHrp})
         end
         
-        -- Opsi 2: Click Fallback jika Remote tidak ketemu
+        -- Fallback click manual jika remote tidak berfungsi
         VirtualUser:CaptureController()
         VirtualUser:Button1Down(Vector2.new(0,0))
         tool:Activate()
