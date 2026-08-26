@@ -65,7 +65,7 @@ MobStroke.Parent = MobileBtn
 local MainWindow = Instance.new("Frame")
 MainWindow.Name = "MainWindow"
 MainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
-MainWindow.Size = UDim2.new(0, 320, 0, 230)
+MainWindow.Size = UDim2.new(0, 380, 0, 320)
 MainWindow.Position = UDim2.new(0.5, 0, 0.45, 0)
 MainWindow.BackgroundTransparency = 1
 MainWindow.BorderSizePixel = 0
@@ -76,7 +76,7 @@ MainWindow.Parent = ScreenGui
 -- Header (solid floating bar so the "ZxD" name is clearly visible)
 local Header = Instance.new("Frame")
 Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 36)
+Header.Size = UDim2.new(1, 0, 0, 46)
 Header.BackgroundColor3 = Theme.CardBG
 Header.BorderSizePixel = 0
 Header.Parent = MainWindow
@@ -97,31 +97,31 @@ Title.Position = UDim2.new(0, 14, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "ZxD"
 Title.TextColor3 = Theme.TextPrimary
-Title.TextSize = 15
+Title.TextSize = 19
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
 
 local SubTitle = Instance.new("TextLabel")
 SubTitle.Name = "SubTitle"
-SubTitle.Size = UDim2.new(0, 40, 0, 12)
-SubTitle.Position = UDim2.new(0, 14 + 34, 0, 2)
+SubTitle.Size = UDim2.new(0, 44, 0, 14)
+SubTitle.Position = UDim2.new(0, 14 + 40, 0, 4)
 SubTitle.BackgroundTransparency = 1
 SubTitle.Text = "HUB"
 SubTitle.TextColor3 = Theme.TextMuted
-SubTitle.TextSize = 10
+SubTitle.TextSize = 11
 SubTitle.Font = Enum.Font.Gotham
 SubTitle.TextXAlignment = Enum.TextXAlignment.Left
 SubTitle.Parent = Header
 
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Name = "CloseBtn"
-CloseBtn.Size = UDim2.new(0, 24, 0, 24)
-CloseBtn.Position = UDim2.new(1, -32, 0.5, -12)
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -38, 0.5, -15)
 CloseBtn.BackgroundColor3 = Theme.InactivePill
 CloseBtn.Text = "×"
 CloseBtn.TextColor3 = Theme.TextMuted
-CloseBtn.TextSize = 14
+CloseBtn.TextSize = 18
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.AutoButtonColor = false
 CloseBtn.Parent = Header
@@ -145,8 +145,8 @@ end)
 ---------------------------------------------------------
 local TabNav = Instance.new("ScrollingFrame")
 TabNav.Name = "TabNav"
-TabNav.Size = UDim2.new(1, -16, 0, 28)
-TabNav.Position = UDim2.new(0, 8, 0, 46)
+TabNav.Size = UDim2.new(1, -16, 0, 36)
+TabNav.Position = UDim2.new(0, 8, 0, 56)
 TabNav.BackgroundTransparency = 1
 TabNav.ScrollBarThickness = 0
 TabNav.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -156,7 +156,7 @@ TabNav.Parent = MainWindow
 local TabLayout = Instance.new("UIListLayout")
 TabLayout.Parent = TabNav
 TabLayout.FillDirection = Enum.FillDirection.Horizontal
-TabLayout.Padding = UDim.new(0, 10)
+TabLayout.Padding = UDim.new(0, 12)
 TabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 
 TabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
@@ -168,8 +168,8 @@ end)
 ---------------------------------------------------------
 local Viewport = Instance.new("Frame")
 Viewport.Name = "Viewport"
-Viewport.Size = UDim2.new(1, -16, 1, -82)
-Viewport.Position = UDim2.new(0, 8, 0, 80)
+Viewport.Size = UDim2.new(1, -16, 1, -104)
+Viewport.Position = UDim2.new(0, 8, 0, 100)
 Viewport.BackgroundTransparency = 1
 Viewport.ClipsDescendants = true
 Viewport.Parent = MainWindow
@@ -204,8 +204,8 @@ function UI:CreateTab(tabName)
     TabButton.Parent = TabNav
 
     local TabPad = Instance.new("UIPadding")
-    TabPad.PaddingLeft = UDim.new(0, 14)
-    TabPad.PaddingRight = UDim.new(0, 14)
+    TabPad.PaddingLeft = UDim.new(0, 18)
+    TabPad.PaddingRight = UDim.new(0, 18)
     TabPad.Parent = TabButton
 
     local TabCorner = Instance.new("UICorner")
@@ -218,7 +218,7 @@ function UI:CreateTab(tabName)
     TabLabel.Text = tabName
     TabLabel.TextColor3 = FirstTab and Theme.Background or Theme.TextMuted
     TabLabel.Font = Enum.Font.GothamBold
-    TabLabel.TextSize = 11
+    TabLabel.TextSize = 13
     TabLabel.Parent = TabButton
 
     local pageIndex = myIndex - 1
@@ -248,8 +248,8 @@ function UI:CreateTab(tabName)
     LeftCardStroke.Parent = LeftCard
 
     local LeftScroll = Instance.new("ScrollingFrame")
-    LeftScroll.Size = UDim2.new(1, -16, 1, -12)
-    LeftScroll.Position = UDim2.new(0, 8, 0, 6)
+    LeftScroll.Size = UDim2.new(1, -24, 1, -20)
+    LeftScroll.Position = UDim2.new(0, 12, 0, 10)
     LeftScroll.BackgroundTransparency = 1
     LeftScroll.ScrollBarThickness = 2
     LeftScroll.ScrollBarImageColor3 = Theme.AccentDim
@@ -258,7 +258,7 @@ function UI:CreateTab(tabName)
 
     local LeftList = Instance.new("UIListLayout")
     LeftList.Parent = LeftScroll
-    LeftList.Padding = UDim.new(0, 10)
+    LeftList.Padding = UDim.new(0, 14)
 
     LeftList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         LeftScroll.CanvasSize = UDim2.new(0, 0, 0, LeftList.AbsoluteContentSize.Y + 4)
@@ -284,8 +284,8 @@ function UI:CreateTab(tabName)
     RightCardStroke.Parent = RightCard
 
     local RightScroll = Instance.new("ScrollingFrame")
-    RightScroll.Size = UDim2.new(1, -16, 1, -12)
-    RightScroll.Position = UDim2.new(0, 8, 0, 6)
+    RightScroll.Size = UDim2.new(1, -24, 1, -20)
+    RightScroll.Position = UDim2.new(0, 12, 0, 10)
     RightScroll.BackgroundTransparency = 1
     RightScroll.ScrollBarThickness = 2
     RightScroll.ScrollBarImageColor3 = Theme.AccentDim
@@ -294,7 +294,7 @@ function UI:CreateTab(tabName)
 
     local RightList = Instance.new("UIListLayout")
     RightList.Parent = RightScroll
-    RightList.Padding = UDim.new(0, 10)
+    RightList.Padding = UDim.new(0, 14)
 
     RightList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         RightScroll.CanvasSize = UDim2.new(0, 0, 0, RightList.AbsoluteContentSize.Y + 4)
@@ -340,12 +340,12 @@ function UI:CreateTab(tabName)
     function Elements:AddSection(text, side)
         local Target = GetTargetScroll(side)
         local Sec = Instance.new("TextLabel")
-        Sec.Size = UDim2.new(1, 0, 0, 16)
+        Sec.Size = UDim2.new(1, 0, 0, 20)
         Sec.BackgroundTransparency = 1
         Sec.Text = string.upper(text)
         Sec.TextColor3 = Theme.TextMuted
         Sec.Font = Enum.Font.GothamBold
-        Sec.TextSize = 9
+        Sec.TextSize = 12
         Sec.TextXAlignment = Enum.TextXAlignment.Left
         Sec.Parent = Target
 
@@ -365,7 +365,7 @@ function UI:CreateTab(tabName)
         local Target = GetTargetScroll(side)
 
         local Item = Instance.new("TextButton")
-        Item.Size = UDim2.new(1, 0, 0, 30)
+        Item.Size = UDim2.new(1, 0, 0, 42)
         Item.BackgroundColor3 = Theme.InactivePill
         Item.Text = ""
         Item.AutoButtonColor = false
@@ -376,20 +376,20 @@ function UI:CreateTab(tabName)
         ItemCorner.Parent = Item
 
         local Label = Instance.new("TextLabel")
-        Label.Size = UDim2.new(1, -44, 1, 0)
-        Label.Position = UDim2.new(0, 10, 0, 0)
+        Label.Size = UDim2.new(1, -60, 1, 0)
+        Label.Position = UDim2.new(0, 14, 0, 0)
         Label.BackgroundTransparency = 1
         Label.Text = text
         Label.TextColor3 = Theme.TextPrimary
         Label.Font = Enum.Font.GothamMedium
-        Label.TextSize = 10
+        Label.TextSize = 13
         Label.TextXAlignment = Enum.TextXAlignment.Left
         Label.TextTruncate = Enum.TextTruncate.AtEnd
         Label.Parent = Item
 
         local Indicator = Instance.new("Frame")
-        Indicator.Size = UDim2.new(0, 26, 0, 14)
-        Indicator.Position = UDim2.new(1, -34, 0.5, -7)
+        Indicator.Size = UDim2.new(0, 38, 0, 20)
+        Indicator.Position = UDim2.new(1, -48, 0.5, -10)
         Indicator.BackgroundColor3 = defaultState and Theme.Accent or Theme.CardBG
         Indicator.Parent = Item
 
@@ -403,8 +403,8 @@ function UI:CreateTab(tabName)
         IndStroke.Parent = Indicator
 
         local Dot = Instance.new("Frame")
-        Dot.Size = UDim2.new(0, 10, 0, 10)
-        Dot.Position = defaultState and UDim2.new(1, -12, 0.5, -5) or UDim2.new(0, 2, 0.5, -5)
+        Dot.Size = UDim2.new(0, 16, 0, 16)
+        Dot.Position = defaultState and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
         Dot.BackgroundColor3 = defaultState and Theme.Background or Theme.TextMuted
         Dot.Parent = Indicator
 
@@ -425,7 +425,7 @@ function UI:CreateTab(tabName)
             enabled = not enabled
             tween(Indicator, {BackgroundColor3 = enabled and Theme.Accent or Theme.CardBG}, 0.18)
             tween(Dot, {
-                Position = enabled and UDim2.new(1, -12, 0.5, -5) or UDim2.new(0, 2, 0.5, -5),
+                Position = enabled and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8),
                 BackgroundColor3 = enabled and Theme.Background or Theme.TextMuted
             }, 0.18)
             pcall(callback, enabled)
@@ -436,45 +436,45 @@ function UI:CreateTab(tabName)
         local Target = GetTargetScroll(side)
 
         local Item = Instance.new("Frame")
-        Item.Size = UDim2.new(1, 0, 0, 40)
+        Item.Size = UDim2.new(1, 0, 0, 54)
         Item.BackgroundColor3 = Theme.InactivePill
         Item.Parent = Target
 
         local ItemCorner = Instance.new("UICorner")
-        ItemCorner.CornerRadius = UDim.new(0, 8)
+        ItemCorner.CornerRadius = UDim.new(0, 10)
         ItemCorner.Parent = Item
 
         local Padding = Instance.new("UIPadding")
-        Padding.PaddingLeft = UDim.new(0, 10)
-        Padding.PaddingRight = UDim.new(0, 10)
-        Padding.PaddingTop = UDim.new(0, 6)
+        Padding.PaddingLeft = UDim.new(0, 14)
+        Padding.PaddingRight = UDim.new(0, 14)
+        Padding.PaddingTop = UDim.new(0, 10)
         Padding.Parent = Item
 
         local TitleLbl = Instance.new("TextLabel")
-        TitleLbl.Size = UDim2.new(1, 0, 0, 14)
+        TitleLbl.Size = UDim2.new(1, 0, 0, 18)
         TitleLbl.BackgroundTransparency = 1
         TitleLbl.Text = text
         TitleLbl.TextColor3 = Theme.TextPrimary
         TitleLbl.Font = Enum.Font.GothamMedium
-        TitleLbl.TextSize = 10
+        TitleLbl.TextSize = 13
         TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
         TitleLbl.TextTruncate = Enum.TextTruncate.AtEnd
         TitleLbl.Parent = Item
 
         local ValueLbl = Instance.new("TextLabel")
-        ValueLbl.Size = UDim2.new(0, 40, 0, 14)
-        ValueLbl.Position = UDim2.new(1, -40, 0, 0)
+        ValueLbl.Size = UDim2.new(0, 50, 0, 18)
+        ValueLbl.Position = UDim2.new(1, -50, 0, 0)
         ValueLbl.BackgroundTransparency = 1
         ValueLbl.Text = tostring(default)
         ValueLbl.TextColor3 = Theme.Accent
         ValueLbl.Font = Enum.Font.GothamBold
-        ValueLbl.TextSize = 10
+        ValueLbl.TextSize = 13
         ValueLbl.TextXAlignment = Enum.TextXAlignment.Right
         ValueLbl.Parent = Item
 
         local SliderBar = Instance.new("TextButton")
-        SliderBar.Size = UDim2.new(1, 0, 0, 4)
-        SliderBar.Position = UDim2.new(0, 0, 0, 22)
+        SliderBar.Size = UDim2.new(1, 0, 0, 6)
+        SliderBar.Position = UDim2.new(0, 0, 0, 32)
         SliderBar.BackgroundColor3 = Theme.CardBG
         SliderBar.Text = ""
         SliderBar.AutoButtonColor = false
@@ -495,7 +495,7 @@ function UI:CreateTab(tabName)
         FillCorner.Parent = Fill
 
         local Knob = Instance.new("Frame")
-        Knob.Size = UDim2.new(0, 10, 0, 10)
+        Knob.Size = UDim2.new(0, 16, 0, 16)
         Knob.AnchorPoint = Vector2.new(0.5, 0.5)
         Knob.Position = UDim2.new((default - min) / (max - min), 0, 0.5, 0)
         Knob.BackgroundColor3 = Theme.Accent
@@ -540,12 +540,12 @@ function UI:CreateTab(tabName)
         local Target = GetTargetScroll(side)
 
         local Btn = Instance.new("TextButton")
-        Btn.Size = UDim2.new(1, 0, 0, 28)
+        Btn.Size = UDim2.new(1, 0, 0, 40)
         Btn.BackgroundColor3 = Theme.InactivePill
         Btn.Text = text
         Btn.TextColor3 = Theme.TextPrimary
         Btn.Font = Enum.Font.GothamMedium
-        Btn.TextSize = 10
+        Btn.TextSize = 13
         Btn.AutoButtonColor = false
         Btn.Parent = Target
 
