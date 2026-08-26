@@ -9,13 +9,24 @@ local ScriptLoad = {}
 _G.AutoFarm = _G.AutoFarm or false
 _G.AutoEquipMelee = true
 _G.AutoAttack = true
+_G.HitboxSize = Vector3.new(15, 15, 15) -- Ukuran hitbox NPC
 
--- MENCARI REMOTE SPECIFIC (RE/RegisterAttack)
-local Net = ReplicatedStorage:FindFirstChild("Modules") and ReplicatedStorage.Modules:FindFirstChild("Net")
-local RegisterAttack = Net and Net:FindFirstChild("RE/RegisterAttack")
-local RegisterHit = Net and Net:FindFirstChild("RegisterHit")
+-- INI DEKLARASI REMOTE LENGKAP
+local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
+local RegisterAttack = Net:FindFirstChild("RE/RegisterAttack")
+local RegisterHit = Net:FindFirstChild("RE/RegisterHit") or Net:FindFirstChild("RegisterHit")
 
--- 1. FUNGSI TWEEN MOVEMENT
+-- 1. EXPAND HITBOX NPC
+function ScriptLoad.ExpandHitbox(enemy)
+    local hrp = enemy:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        hrp.Size = _G.HitboxSize
+        hrp.Transparency = 0.7
+        hrp.CanCollide = false
+    end
+end
+
+-- 2. TWEEN MOVEMENT
 function ScriptLoad.TweenTo(targetCFrame, speed)
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -30,7 +41,7 @@ function ScriptLoad.TweenTo(targetCFrame, speed)
     return tween
 end
 
--- 2. AUTO EQUIP MELEE
+-- 3. AUTO EQUIP MELEE
 function ScriptLoad.EquipMelee()
     local character = LocalPlayer.Character
     local backpack = LocalPlayer:FindFirstChild("Backpack")
@@ -62,36 +73,38 @@ function ScriptLoad.EquipMelee()
     end
 end
 
--- 3. AUTO ATTACK (SUDAH DISESUAIKAN DENGAN REMOTE RE/RegisterAttack)
+-- 4. AUTO ATTACK DENGAN PAYLOAD SESUAI LOG REMOTESPY
 function ScriptLoad.AttackTarget(targetEnemy)
     local character = LocalPlayer.Character
     if not character or not targetEnemy then return end
     
-    local enemyHrp = targetEnemy:FindFirstChild("HumanoidRootPart")
-    local tool = character:FindFirstChildOfClass("Tool")
+    local enemyTorso = targetEnemy:FindFirstChild("UpperTorso") or targetEnemy:FindFirstChild("HumanoidRootPart")
     
-    if enemyHrp and tool then
-        -- Kirim remote serangan utama (RE/RegisterAttack)
-        if RegisterAttack then
-            RegisterAttack:FireServer(0)
-        end
-        
-        -- Kirim RegisterHit jika ada
-        if RegisterHit then
-            local hitPart = tool:FindFirstChild("Handle") or tool:FindFirstChildOfClass("Part") or enemyHrp
-            RegisterHit:FireServer(hitPart, {enemyHrp})
-        end
-        
-        -- Fallback click manual jika remote tidak berfungsi
-        VirtualUser:CaptureController()
-        VirtualUser:Button1Down(Vector2.new(0,0))
-        tool:Activate()
+    -- Fire RegisterAttack (0.5, 3)
+    if RegisterAttack then
+        RegisterAttack:FireServer(0.5, 3)
     end
+    
+    -- Fire RE/RegisterHit
+    if enemyTorso and RegisterHit then
+        local hitArgs = {
+            [1] = enemyTorso,
+            [2] = {},
+            [4] = "1270b44e" -- Pastikan hash ini valid atau server validation-nya dimatikan
+        }
+        RegisterHit:FireServer(unpack(hitArgs))
+    end
+
+    -- Fallback Click Manual
+    VirtualUser:CaptureController()
+    VirtualUser:Button1Down(Vector2.new(0,0))
+    local tool = character:FindFirstChildOfClass("Tool")
+    if tool then tool:Activate() end
 end
 
--- 4. LOOP UTAMA
+-- 5. LOOP UTAMA
 task.spawn(function()
-    while task.wait(0.1) do
+    while task.wait(0.2) do -- Jeda diatur 0.2 detik agar seimbang
         if _G.AutoFarm then
             local character = LocalPlayer.Character
             if character and character:FindFirstChild("HumanoidRootPart") then
@@ -107,9 +120,14 @@ task.spawn(function()
                         local hum = enemy:FindFirstChild("Humanoid")
                         
                         if hrp and hum and hum.Health > 0 then
+                            -- Perbesar Hitbox NPC
+                            ScriptLoad.ExpandHitbox(enemy)
+
+                            -- Gerak mendekati NPC
                             local targetPos = hrp.CFrame * CFrame.new(0, 5, 0)
                             ScriptLoad.TweenTo(targetPos, 300)
 
+                            -- Eksekusi Serangan
                             if _G.AutoAttack then
                                 ScriptLoad.AttackTarget(enemy)
                             end
