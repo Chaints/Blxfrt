@@ -1,6 +1,6 @@
 -- scriptload.lua
 local TweenService = game:GetService("TweenService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
@@ -10,7 +10,7 @@ _G.AutoFarm = _G.AutoFarm or false
 _G.AutoEquipMelee = true
 _G.AutoAttack = true
 
--- 1. FUNGSI TWEEN (GERAK MULUS)
+-- 1. FUNGSI TWEEN
 function ScriptLoad.TweenTo(targetCFrame, speed)
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -25,13 +25,12 @@ function ScriptLoad.TweenTo(targetCFrame, speed)
     return tween
 end
 
--- 2. FUNGSI AUTO EQUIP MELEE
+-- 2. AUTO EQUIP MELEE
 function ScriptLoad.EquipMelee()
     local character = LocalPlayer.Character
     local backpack = LocalPlayer:FindFirstChild("Backpack")
     if not character or not backpack then return end
 
-    -- Cek apakah sudah pegang senjata di tangan
     if character:FindFirstChildOfClass("Tool") then return end
 
     local meleeKeywords = {"Combat", "Dark Step", "Electro", "Water Kung Fu", "Dragon Claw", "Superhuman", "Death Step", "Sharkman Karate", "Electric Claw", "Dragon Talon", "Godhuman", "Sanguine Art"}
@@ -58,44 +57,47 @@ function ScriptLoad.EquipMelee()
     end
 end
 
--- 3. FIX AUTO ATTACK (Menggunakan VirtualInputManager & mouse1click)
+-- 3. ATTACK REMOTE NATIVE BLOX FRUITS (FAST ATTACK)
 function ScriptLoad.Click()
     pcall(function()
-        -- 1. Metode Delta / Executor Click
-        if mouse1click then
-            mouse1click()
-        end
+        local character = LocalPlayer.Character
+        if not character then return end
         
-        -- 2. Simulasi Klik Layar via VirtualInputManager (Sangat Ampuh di Android)
-        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
-        task.wait(0.01)
-        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
-        
-        -- 3. Trigger Tool
-        local char = LocalPlayer.Character
-        if char then
-            local tool = char:FindFirstChildOfClass("Tool")
-            if tool then
-                tool:Activate()
+        local tool = character:FindFirstChildOfClass("Tool")
+        if not tool then return end
+
+        -- 1. Tembak Remote Network Internal Blox Fruits (Net / RegisterAttack)
+        local netFolder = ReplicatedStorage:FindFirstChild("Modules") and ReplicatedStorage.Modules:FindFirstChild("Net")
+        if netFolder then
+            local registerAttack = netFolder:FindFirstChild("RE/RegisterAttack") or netFolder:FindFirstChild("RegisterAttack")
+            if registerAttack then
+                registerAttack:FireServer()
             end
         end
+
+        -- 2. Tembak RigController (Metode Alternatif Blox Fruits)
+        local rigEvent = ReplicatedStorage:FindFirstChild("RigControllerEvent")
+        if rigEvent then
+            rigEvent:FireServer("weaponChange", tool.Name)
+        end
+
+        -- 3. Trigger Tool Activate di Client
+        tool:Activate()
     end)
 end
 
 -- 4. LOOP UTAMA
 task.spawn(function()
-    while task.wait() do
+    while task.wait(0.05) do
         if _G.AutoFarm then
             pcall(function()
                 local character = LocalPlayer.Character
                 if not character or not character:FindFirstChild("HumanoidRootPart") then return end
 
-                -- Equip Melee
                 if _G.AutoEquipMelee then
                     ScriptLoad.EquipMelee()
                 end
 
-                -- Cari Musuh
                 local enemiesFolder = workspace:FindFirstChild("Enemies")
                 if enemiesFolder then
                     for _, enemy in ipairs(enemiesFolder:GetChildren()) do
@@ -103,11 +105,9 @@ task.spawn(function()
                         local hum = enemy:FindFirstChild("Humanoid")
                         
                         if hrp and hum and hum.Health > 0 then
-                            -- Posisikan kencang di atas musuh
                             local targetPos = hrp.CFrame * CFrame.new(0, 4, 1)
                             ScriptLoad.TweenTo(targetPos, 300)
 
-                            -- Serang jika AutoAttack ON
                             if _G.AutoAttack then
                                 ScriptLoad.Click()
                             end
@@ -116,8 +116,6 @@ task.spawn(function()
                     end
                 end
             end)
-        else
-            task.wait(0.5)
         end
     end
 end)
