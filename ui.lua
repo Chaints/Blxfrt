@@ -10,16 +10,16 @@ ScreenGui.Name = "ZxDHub"
 ScreenGui.Parent = game:GetService("CoreGui")
 ScreenGui.ResetOnSpawn = false
 
--- Theme Palette: Soft Abu Coklat (Taupe / Warm Brownish Grey)
+-- Theme Palette: Full Taupe / Soft Warm Abu Coklat
 local Theme = {
-    Background  = Color3.fromRGB(26, 24, 23),    -- Warm Dark Charcoal/Brown
-    Header      = Color3.fromRGB(34, 31, 29),    -- Mid Warm Taupe
-    CardBG      = Color3.fromRGB(38, 35, 33),    -- Soft Taupe Card
-    ActivePill  = Color3.fromRGB(150, 120, 95),  -- Warm Taupe Accent (Active)
-    InactivePill= Color3.fromRGB(48, 44, 41),    -- Muted Dark Taupe
-    TextPrimary = Color3.fromRGB(238, 235, 230), -- Soft Off-White
-    TextMuted   = Color3.fromRGB(155, 148, 142), -- Muted Taupe Text
-    Border      = Color3.fromRGB(60, 55, 52)     -- Soft Earthy Border
+    Background  = Color3.fromRGB(28, 25, 23),    -- Warm Dark Taupe
+    Header      = Color3.fromRGB(36, 33, 30),    -- Mid Warm Taupe
+    CardBG      = Color3.fromRGB(42, 38, 35),    -- Soft Warm Taupe Card
+    ActivePill  = Color3.fromRGB(155, 122, 92),  -- Warm Earthy Brown Accent
+    InactivePill= Color3.fromRGB(50, 45, 41),    -- Muted Dark Taupe
+    TextPrimary = Color3.fromRGB(240, 236, 230), -- Soft Off-White
+    TextMuted   = Color3.fromRGB(160, 150, 142), -- Warm Taupe Muted Text
+    Border      = Color3.fromRGB(65, 58, 52)     -- Soft Taupe Border
 }
 
 -- Mobile Open/Close Button (Circle Pill Floating)
@@ -37,7 +37,7 @@ MobileBtn.Draggable = true
 MobileBtn.Parent = ScreenGui
 
 local MobCorner = Instance.new("UICorner")
-MobCorner.CornerRadius = UDim.new(1, 0) -- Lingkaran Sempurna
+MobCorner.CornerRadius = UDim.new(1, 0)
 MobCorner.Parent = MobileBtn
 
 local MobStroke = Instance.new("UIStroke")
@@ -45,39 +45,36 @@ MobStroke.Color = Theme.ActivePill
 MobStroke.Thickness = 1.5
 MobStroke.Parent = MobileBtn
 
--- Main Frame Window (Soft Curved Sides)
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 420, 0, 270)
-MainFrame.Position = UDim2.new(0.5, -210, 0.5, -125)
-MainFrame.BackgroundColor3 = Theme.Background
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
+---------------------------------------------------------
+-- 1. DETACHED TAB WINDOW (Window Tab Terpisah)
+---------------------------------------------------------
+local TabWindow = Instance.new("Frame")
+TabWindow.Name = "TabWindow"
+TabWindow.Size = UDim2.new(0, 420, 0, 38)
+TabWindow.Position = UDim2.new(0.5, -210, 0.5, -150) -- Dipisah di atas
+TabWindow.BackgroundColor3 = Theme.Background
+TabWindow.BorderSizePixel = 0
+TabWindow.Active = true
+TabWindow.Draggable = true -- Bisa ditarik dan diseret terpisah
+TabWindow.Parent = ScreenGui
 
-MobileBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-end)
+local TabWinCorner = Instance.new("UICorner")
+TabWinCorner.CornerRadius = UDim.new(1, 0) -- Full Capsule Window
+TabWinCorner.Parent = TabWindow
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 14) -- Kurva Lebih Halus (Non-Kotak Kaku)
-MainCorner.Parent = MainFrame
+local TabWinStroke = Instance.new("UIStroke")
+TabWinStroke.Color = Theme.Border
+TabWinStroke.Thickness = 1
+TabWinStroke.Parent = TabWindow
 
-local MainStroke = Instance.new("UIStroke")
-MainStroke.Color = Theme.Border
-MainStroke.Thickness = 1
-MainStroke.Parent = MainFrame
-
--- FLOATING PILL TABS (Bentuk Kapsul Melayang)
 local FloatingTabNav = Instance.new("ScrollingFrame")
 FloatingTabNav.Name = "FloatingTabNav"
-FloatingTabNav.Size = UDim2.new(1, 0, 0, 28)
-FloatingTabNav.Position = UDim2.new(0, 0, 0, -36)
+FloatingTabNav.Size = UDim2.new(1, -16, 1, -8)
+FloatingTabNav.Position = UDim2.new(0, 8, 0, 4)
 FloatingTabNav.BackgroundTransparency = 1
 FloatingTabNav.ScrollBarThickness = 0
 FloatingTabNav.CanvasSize = UDim2.new(0, 0, 0, 0)
-FloatingTabNav.Parent = MainFrame
+FloatingTabNav.Parent = TabWindow
 
 local TabLayout = Instance.new("UIListLayout")
 TabLayout.Parent = FloatingTabNav
@@ -88,7 +85,35 @@ TabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     FloatingTabNav.CanvasSize = UDim2.new(0, TabLayout.AbsoluteContentSize.X, 0, 0)
 end)
 
--- Header Bar (Rounded Top)
+---------------------------------------------------------
+-- 2. DETACHED MAIN CONTENT WINDOW (Window Isi Card)
+---------------------------------------------------------
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 420, 0, 240)
+MainFrame.Position = UDim2.new(0.5, -210, 0.5, -100) -- Ada jeda melayang dengan TabWindow
+MainFrame.BackgroundColor3 = Theme.Background
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 14)
+MainCorner.Parent = MainFrame
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Theme.Border
+MainStroke.Thickness = 1
+MainStroke.Parent = MainFrame
+
+MobileBtn.MouseButton1Click:Connect(function()
+    local isVis = not MainFrame.Visible
+    MainFrame.Visible = isVis
+    TabWindow.Visible = isVis
+end)
+
+-- Header Bar
 local Header = Instance.new("Frame")
 Header.Name = "Header"
 Header.Size = UDim2.new(1, 0, 0, 32)
@@ -104,7 +129,7 @@ Title.Name = "Title"
 Title.Size = UDim2.new(1, -40, 1, 0)
 Title.Position = UDim2.new(0, 14, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "<b>ZxD HUB</b> | <font color=\"#96785F\">v1.2</font>"
+Title.Text = "<b>ZxD HUB</b> | <font color=\"#9B7A5C\">Minimalist Taupe</font>"
 Title.RichText = true
 Title.TextColor3 = Theme.TextPrimary
 Title.TextSize = 12
@@ -124,30 +149,28 @@ CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.Parent = Header
 
 local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(1, 0) -- Bulat Sempurna
+CloseCorner.CornerRadius = UDim.new(1, 0)
 CloseCorner.Parent = CloseBtn
 
 CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- Area Content
+-- Area Content Area
 local ContentArea = Instance.new("Frame")
 ContentArea.Name = "ContentArea"
-ContentArea.Size = UDim2.new(1, -16, 1, -44)
-ContentArea.Position = UDim2.new(0, 8, 0, 38)
+ContentArea.Size = UDim2.new(1, -16, 1, -42)
+ContentArea.Position = UDim2.new(0, 8, 0, 36)
 ContentArea.BackgroundTransparency = 1
 ContentArea.Parent = MainFrame
 
 ---------------------------------------------------------
--- TAB SYSTEM & 2-COLUMN BUILDER
+-- BUILDER LOGIC
 ---------------------------------------------------------
-
 local Tabs = {}
 local FirstTab = true
 
 function UI:CreateTab(tabName)
-    -- Tab Button Kapsul Melayang (Pill Shape)
     local TabButton = Instance.new("TextButton")
     TabButton.Size = UDim2.new(0, 95, 1, 0)
     TabButton.BackgroundColor3 = FirstTab and Theme.ActivePill or Theme.InactivePill
@@ -158,13 +181,8 @@ function UI:CreateTab(tabName)
     TabButton.Parent = FloatingTabNav
 
     local TabCorner = Instance.new("UICorner")
-    TabCorner.CornerRadius = UDim.new(1, 0) -- Kapsul / Pill Form
+    TabCorner.CornerRadius = UDim.new(1, 0)
     TabCorner.Parent = TabButton
-
-    local TabStroke = Instance.new("UIStroke")
-    TabStroke.Color = FirstTab and Theme.ActivePill or Theme.Border
-    TabStroke.Thickness = 1
-    TabStroke.Parent = TabButton
 
     local TabContainer = Instance.new("Frame")
     TabContainer.Name = tabName .. "Container"
@@ -173,7 +191,7 @@ function UI:CreateTab(tabName)
     TabContainer.Visible = FirstTab
     TabContainer.Parent = ContentArea
 
-    -- Kolom Kiri
+    -- Left Column
     local LeftColumn = Instance.new("ScrollingFrame")
     LeftColumn.Name = "LeftColumn"
     LeftColumn.Size = UDim2.new(0.5, -4, 1, 0)
@@ -192,7 +210,7 @@ function UI:CreateTab(tabName)
         LeftColumn.CanvasSize = UDim2.new(0, 0, 0, LeftList.AbsoluteContentSize.Y + 4)
     end)
 
-    -- Kolom Kanan
+    -- Right Column
     local RightColumn = Instance.new("ScrollingFrame")
     RightColumn.Name = "RightColumn"
     RightColumn.Size = UDim2.new(0.5, -4, 1, 0)
@@ -211,27 +229,22 @@ function UI:CreateTab(tabName)
         RightColumn.CanvasSize = UDim2.new(0, 0, 0, RightList.AbsoluteContentSize.Y + 4)
     end)
 
-    local TabObj = { Button = TabButton, Container = TabContainer, Stroke = TabStroke }
+    local TabObj = { Button = TabButton, Container = TabContainer }
 
     TabButton.MouseButton1Click:Connect(function()
         for _, t in pairs(Tabs) do
             t.Container.Visible = false
             t.Button.BackgroundColor3 = Theme.InactivePill
             t.Button.TextColor3 = Theme.TextMuted
-            t.Stroke.Color = Theme.Border
         end
         TabContainer.Visible = true
         TabButton.BackgroundColor3 = Theme.ActivePill
         TabButton.TextColor3 = Theme.TextPrimary
-        TabStroke.Color = Theme.ActivePill
     end)
 
     table.insert(Tabs, TabObj)
     FirstTab = false
 
-    ---------------------------------------------------------
-    -- ELEMENT CREATORS
-    ---------------------------------------------------------
     local Elements = {}
 
     local function GetTargetContainer(side)
@@ -260,7 +273,7 @@ function UI:CreateTab(tabName)
         Card.Parent = Target
 
         local CardCorner = Instance.new("UICorner")
-        CardCorner.CornerRadius = UDim.new(0, 8) -- Soft Curved Edge
+        CardCorner.CornerRadius = UDim.new(0, 8)
         CardCorner.Parent = Card
 
         local TglBtn = Instance.new("TextButton")
@@ -280,7 +293,7 @@ function UI:CreateTab(tabName)
         Indicator.Parent = Card
 
         local IndCorner = Instance.new("UICorner")
-        IndCorner.CornerRadius = UDim.new(1, 0) -- Pill Indicator Bulat
+        IndCorner.CornerRadius = UDim.new(1, 0)
         IndCorner.Parent = Indicator
 
         local enabled = defaultState or false
