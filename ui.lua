@@ -10,19 +10,20 @@ ScreenGui.Name = "ZxDHub"
 ScreenGui.Parent = game:GetService("CoreGui")
 ScreenGui.ResetOnSpawn = false
 
--- Theme Palette: Full Taupe / Soft Warm Abu Coklat
+-- Theme Palette: Full Taupe / Warm Earthy Abu Coklat
 local Theme = {
     Background  = Color3.fromRGB(28, 25, 23),    -- Warm Dark Taupe
     Header      = Color3.fromRGB(36, 33, 30),    -- Mid Warm Taupe
-    CardBG      = Color3.fromRGB(42, 38, 35),    -- Soft Warm Taupe Card
+    CardBG      = Color3.fromRGB(38, 34, 31),    -- Big Card Frame BG
+    ItemBG      = Color3.fromRGB(48, 43, 39),    -- Inner Toggle/Button BG
     ActivePill  = Color3.fromRGB(155, 122, 92),  -- Warm Earthy Brown Accent
-    InactivePill= Color3.fromRGB(50, 45, 41),    -- Muted Dark Taupe
+    InactivePill= Color3.fromRGB(54, 48, 44),    -- Muted Dark Taupe
     TextPrimary = Color3.fromRGB(240, 236, 230), -- Soft Off-White
     TextMuted   = Color3.fromRGB(160, 150, 142), -- Warm Taupe Muted Text
     Border      = Color3.fromRGB(65, 58, 52)     -- Soft Taupe Border
 }
 
--- Mobile Open/Close Button (Circle Pill Floating)
+-- Mobile Open/Close Toggle Button
 local MobileBtn = Instance.new("TextButton")
 MobileBtn.Name = "MobileToggle"
 MobileBtn.Size = UDim2.new(0, 44, 0, 44)
@@ -46,20 +47,20 @@ MobStroke.Thickness = 1.5
 MobStroke.Parent = MobileBtn
 
 ---------------------------------------------------------
--- 1. DETACHED TAB WINDOW (Window Tab Terpisah)
+-- 1. DETACHED TAB WINDOW
 ---------------------------------------------------------
 local TabWindow = Instance.new("Frame")
 TabWindow.Name = "TabWindow"
-TabWindow.Size = UDim2.new(0, 420, 0, 38)
-TabWindow.Position = UDim2.new(0.5, -210, 0.5, -150) -- Dipisah di atas
+TabWindow.Size = UDim2.new(0, 440, 0, 38)
+TabWindow.Position = UDim2.new(0.5, -220, 0.5, -155)
 TabWindow.BackgroundColor3 = Theme.Background
 TabWindow.BorderSizePixel = 0
 TabWindow.Active = true
-TabWindow.Draggable = true -- Bisa ditarik dan diseret terpisah
+TabWindow.Draggable = true
 TabWindow.Parent = ScreenGui
 
 local TabWinCorner = Instance.new("UICorner")
-TabWinCorner.CornerRadius = UDim.new(1, 0) -- Full Capsule Window
+TabWinCorner.CornerRadius = UDim.new(1, 0)
 TabWinCorner.Parent = TabWindow
 
 local TabWinStroke = Instance.new("UIStroke")
@@ -86,12 +87,12 @@ TabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 end)
 
 ---------------------------------------------------------
--- 2. DETACHED MAIN CONTENT WINDOW (Window Isi Card)
+-- 2. DETACHED MAIN CONTENT WINDOW
 ---------------------------------------------------------
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 420, 0, 240)
-MainFrame.Position = UDim2.new(0.5, -210, 0.5, -100) -- Ada jeda melayang dengan TabWindow
+MainFrame.Size = UDim2.new(0, 440, 0, 250)
+MainFrame.Position = UDim2.new(0.5, -220, 0.5, -105)
 MainFrame.BackgroundColor3 = Theme.Background
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -141,7 +142,7 @@ local CloseBtn = Instance.new("TextButton")
 CloseBtn.Name = "CloseBtn"
 CloseBtn.Size = UDim2.new(0, 20, 0, 20)
 CloseBtn.Position = UDim2.new(1, -28, 0.5, -10)
-CloseBtn.BackgroundColor3 = Theme.CardBG
+CloseBtn.BackgroundColor3 = Theme.ItemBG
 CloseBtn.Text = "×"
 CloseBtn.TextColor3 = Theme.TextMuted
 CloseBtn.TextSize = 15
@@ -156,16 +157,16 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- Area Content Area
+-- Content Area
 local ContentArea = Instance.new("Frame")
 ContentArea.Name = "ContentArea"
-ContentArea.Size = UDim2.new(1, -16, 1, -42)
-ContentArea.Position = UDim2.new(0, 8, 0, 36)
+ContentArea.Size = UDim2.new(1, -16, 1, -44)
+ContentArea.Position = UDim2.new(0, 8, 0, 38)
 ContentArea.BackgroundTransparency = 1
 ContentArea.Parent = MainFrame
 
 ---------------------------------------------------------
--- BUILDER LOGIC
+-- BUILDER LOGIC (1 TAB = 2 BIG CARDS SEPARATED)
 ---------------------------------------------------------
 local Tabs = {}
 local FirstTab = true
@@ -184,6 +185,7 @@ function UI:CreateTab(tabName)
     TabCorner.CornerRadius = UDim.new(1, 0)
     TabCorner.Parent = TabButton
 
+    -- Container Utama Tab
     local TabContainer = Instance.new("Frame")
     TabContainer.Name = tabName .. "Container"
     TabContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -191,42 +193,76 @@ function UI:CreateTab(tabName)
     TabContainer.Visible = FirstTab
     TabContainer.Parent = ContentArea
 
-    -- Left Column
-    local LeftColumn = Instance.new("ScrollingFrame")
-    LeftColumn.Name = "LeftColumn"
-    LeftColumn.Size = UDim2.new(0.5, -4, 1, 0)
-    LeftColumn.Position = UDim2.new(0, 0, 0, 0)
-    LeftColumn.BackgroundTransparency = 1
-    LeftColumn.ScrollBarThickness = 2
-    LeftColumn.ScrollBarImageColor3 = Theme.ActivePill
-    LeftColumn.CanvasSize = UDim2.new(0, 0, 0, 0)
-    LeftColumn.Parent = TabContainer
+    ---------------------------------------------------------
+    -- CARD 1: KIRI (LEFT BIG CARD)
+    ---------------------------------------------------------
+    local LeftCard = Instance.new("Frame")
+    LeftCard.Name = "LeftCard"
+    LeftCard.Size = UDim2.new(0.5, -6, 1, 0) -- Jeda di tengah (-6px)
+    LeftCard.Position = UDim2.new(0, 0, 0, 0)
+    LeftCard.BackgroundColor3 = Theme.CardBG
+    LeftCard.Parent = TabContainer
+
+    local LeftCardCorner = Instance.new("UICorner")
+    LeftCardCorner.CornerRadius = UDim.new(0, 10)
+    LeftCardCorner.Parent = LeftCard
+
+    local LeftCardStroke = Instance.new("UIStroke")
+    LeftCardStroke.Color = Theme.Border
+    LeftCardStroke.Thickness = 1
+    LeftCardStroke.Parent = LeftCard
+
+    local LeftScroll = Instance.new("ScrollingFrame")
+    LeftScroll.Size = UDim2.new(1, -12, 1, -12)
+    LeftScroll.Position = UDim2.new(0, 6, 0, 6)
+    LeftScroll.BackgroundTransparency = 1
+    LeftScroll.ScrollBarThickness = 2
+    LeftScroll.ScrollBarImageColor3 = Theme.ActivePill
+    LeftScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    LeftScroll.Parent = LeftCard
 
     local LeftList = Instance.new("UIListLayout")
-    LeftList.Parent = LeftColumn
+    LeftList.Parent = LeftScroll
     LeftList.Padding = UDim.new(0, 6)
 
     LeftList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        LeftColumn.CanvasSize = UDim2.new(0, 0, 0, LeftList.AbsoluteContentSize.Y + 4)
+        LeftScroll.CanvasSize = UDim2.new(0, 0, 0, LeftList.AbsoluteContentSize.Y + 4)
     end)
 
-    -- Right Column
-    local RightColumn = Instance.new("ScrollingFrame")
-    RightColumn.Name = "RightColumn"
-    RightColumn.Size = UDim2.new(0.5, -4, 1, 0)
-    RightColumn.Position = UDim2.new(0.5, 4, 0, 0)
-    RightColumn.BackgroundTransparency = 1
-    RightColumn.ScrollBarThickness = 2
-    RightColumn.ScrollBarImageColor3 = Theme.ActivePill
-    RightColumn.CanvasSize = UDim2.new(0, 0, 0, 0)
-    RightColumn.Parent = TabContainer
+    ---------------------------------------------------------
+    -- CARD 2: KANAN (RIGHT BIG CARD)
+    ---------------------------------------------------------
+    local RightCard = Instance.new("Frame")
+    RightCard.Name = "RightCard"
+    RightCard.Size = UDim2.new(0.5, -6, 1, 0)
+    RightCard.Position = UDim2.new(0.5, 6, 0, 0) -- Jeda di tengah (+6px)
+    RightCard.BackgroundColor3 = Theme.CardBG
+    RightCard.Parent = TabContainer
+
+    local RightCardCorner = Instance.new("UICorner")
+    RightCardCorner.CornerRadius = UDim.new(0, 10)
+    RightCardCorner.Parent = RightCard
+
+    local RightCardStroke = Instance.new("UIStroke")
+    RightCardStroke.Color = Theme.Border
+    RightCardStroke.Thickness = 1
+    RightCardStroke.Parent = RightCard
+
+    local RightScroll = Instance.new("ScrollingFrame")
+    RightScroll.Size = UDim2.new(1, -12, 1, -12)
+    RightScroll.Position = UDim2.new(0, 6, 0, 6)
+    RightScroll.BackgroundTransparency = 1
+    RightScroll.ScrollBarThickness = 2
+    RightScroll.ScrollBarImageColor3 = Theme.ActivePill
+    RightScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    RightScroll.Parent = RightCard
 
     local RightList = Instance.new("UIListLayout")
-    RightList.Parent = RightColumn
+    RightList.Parent = RightScroll
     RightList.Padding = UDim.new(0, 6)
 
     RightList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        RightColumn.CanvasSize = UDim2.new(0, 0, 0, RightList.AbsoluteContentSize.Y + 4)
+        RightScroll.CanvasSize = UDim2.new(0, 0, 0, RightList.AbsoluteContentSize.Y + 4)
     end)
 
     local TabObj = { Button = TabButton, Container = TabContainer }
@@ -245,14 +281,17 @@ function UI:CreateTab(tabName)
     table.insert(Tabs, TabObj)
     FirstTab = false
 
+    ---------------------------------------------------------
+    -- ELEMENT CREATORS INSIDE CARDS
+    ---------------------------------------------------------
     local Elements = {}
 
-    local function GetTargetContainer(side)
-        return (side and string.lower(side) == "right") and RightColumn or LeftColumn
+    local function GetTargetScroll(side)
+        return (side and string.lower(side) == "right") and RightScroll or LeftScroll
     end
 
     function Elements:AddSection(text, side)
-        local Target = GetTargetContainer(side)
+        local Target = GetTargetScroll(side)
         local Sec = Instance.new("TextLabel")
         Sec.Size = UDim2.new(1, -4, 0, 16)
         Sec.BackgroundTransparency = 1
@@ -265,16 +304,16 @@ function UI:CreateTab(tabName)
     end
 
     function Elements:CreateToggle(text, defaultState, side, callback)
-        local Target = GetTargetContainer(side)
+        local Target = GetTargetScroll(side)
 
-        local Card = Instance.new("Frame")
-        Card.Size = UDim2.new(1, -4, 0, 30)
-        Card.BackgroundColor3 = Theme.CardBG
-        Card.Parent = Target
+        local Item = Instance.new("Frame")
+        Item.Size = UDim2.new(1, -4, 0, 28)
+        Item.BackgroundColor3 = Theme.ItemBG
+        Item.Parent = Target
 
-        local CardCorner = Instance.new("UICorner")
-        CardCorner.CornerRadius = UDim.new(0, 8)
-        CardCorner.Parent = Card
+        local ItemCorner = Instance.new("UICorner")
+        ItemCorner.CornerRadius = UDim.new(0, 6)
+        ItemCorner.Parent = Item
 
         local TglBtn = Instance.new("TextButton")
         TglBtn.Size = UDim2.new(1, 0, 1, 0)
@@ -282,15 +321,15 @@ function UI:CreateTab(tabName)
         TglBtn.Text = "  " .. text
         TglBtn.TextColor3 = Theme.TextPrimary
         TglBtn.Font = Enum.Font.GothamMedium
-        TglBtn.TextSize = 11
+        TglBtn.TextSize = 10
         TglBtn.TextXAlignment = Enum.TextXAlignment.Left
-        TglBtn.Parent = Card
+        TglBtn.Parent = Item
 
         local Indicator = Instance.new("Frame")
         Indicator.Size = UDim2.new(0, 12, 0, 12)
-        Indicator.Position = UDim2.new(1, -18, 0.5, -6)
+        Indicator.Position = UDim2.new(1, -16, 0.5, -6)
         Indicator.BackgroundColor3 = defaultState and Theme.ActivePill or Theme.InactivePill
-        Indicator.Parent = Card
+        Indicator.Parent = Item
 
         local IndCorner = Instance.new("UICorner")
         IndCorner.CornerRadius = UDim.new(1, 0)
@@ -305,35 +344,35 @@ function UI:CreateTab(tabName)
     end
 
     function Elements:CreateSlider(text, min, max, default, side, callback)
-        local Target = GetTargetContainer(side)
+        local Target = GetTargetScroll(side)
 
-        local Card = Instance.new("Frame")
-        Card.Size = UDim2.new(1, -4, 0, 40)
-        Card.BackgroundColor3 = Theme.CardBG
-        Card.Parent = Target
+        local Item = Instance.new("Frame")
+        Item.Size = UDim2.new(1, -4, 0, 38)
+        Item.BackgroundColor3 = Theme.ItemBG
+        Item.Parent = Target
 
-        local CardCorner = Instance.new("UICorner")
-        CardCorner.CornerRadius = UDim.new(0, 8)
-        CardCorner.Parent = Card
+        local ItemCorner = Instance.new("UICorner")
+        ItemCorner.CornerRadius = UDim.new(0, 6)
+        ItemCorner.Parent = Item
 
         local Title = Instance.new("TextLabel")
         Title.Size = UDim2.new(1, -10, 0, 16)
-        Title.Position = UDim2.new(0, 8, 0, 2)
+        Title.Position = UDim2.new(0, 6, 0, 2)
         Title.BackgroundTransparency = 1
         Title.Text = text .. ": " .. tostring(default)
         Title.TextColor3 = Theme.TextPrimary
         Title.Font = Enum.Font.GothamMedium
         Title.TextSize = 10
         Title.TextXAlignment = Enum.TextXAlignment.Left
-        Title.Parent = Card
+        Title.Parent = Item
 
         local SliderBar = Instance.new("TextButton")
-        SliderBar.Size = UDim2.new(1, -16, 0, 5)
-        SliderBar.Position = UDim2.new(0, 8, 0, 25)
+        SliderBar.Size = UDim2.new(1, -12, 0, 5)
+        SliderBar.Position = UDim2.new(0, 6, 0, 24)
         SliderBar.BackgroundColor3 = Theme.InactivePill
         SliderBar.Text = ""
         SliderBar.AutoButtonColor = false
-        SliderBar.Parent = Card
+        SliderBar.Parent = Item
 
         local BarCorner = Instance.new("UICorner")
         BarCorner.CornerRadius = UDim.new(1, 0)
@@ -381,20 +420,20 @@ function UI:CreateTab(tabName)
     end
 
     function Elements:CreateButton(text, side, callback)
-        local Target = GetTargetContainer(side)
+        local Target = GetTargetScroll(side)
 
         local Btn = Instance.new("TextButton")
-        Btn.Size = UDim2.new(1, -4, 0, 28)
-        Btn.BackgroundColor3 = Theme.CardBG
+        Btn.Size = UDim2.new(1, -4, 0, 26)
+        Btn.BackgroundColor3 = Theme.ItemBG
         Btn.Text = text
         Btn.TextColor3 = Theme.TextPrimary
         Btn.Font = Enum.Font.GothamMedium
-        Btn.TextSize = 11
+        Btn.TextSize = 10
         Btn.AutoButtonColor = true
         Btn.Parent = Target
 
         local Corner = Instance.new("UICorner")
-        Corner.CornerRadius = UDim.new(0, 8)
+        Corner.CornerRadius = UDim.new(0, 6)
         Corner.Parent = Btn
 
         Btn.MouseButton1Click:Connect(function()
