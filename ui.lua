@@ -37,7 +37,7 @@ end
 ---------------------------------------------------------
 local MobileBtn = Instance.new("TextButton")
 MobileBtn.Name = "MobileToggle"
-MobileBtn.Size = UDim2.new(0, 36, 0, 36)
+MobileBtn.Size = UDim2.new(0, 40, 0, 40)
 MobileBtn.Position = UDim2.new(0, 14, 0.35, 0)
 MobileBtn.BackgroundColor3 = Theme.Background
 MobileBtn.Text = "•"
@@ -65,7 +65,7 @@ MobStroke.Parent = MobileBtn
 local MainWindow = Instance.new("Frame")
 MainWindow.Name = "MainWindow"
 MainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
-MainWindow.Size = UDim2.new(0, 250, 0, 180)
+MainWindow.Size = UDim2.new(0, 320, 0, 230)
 MainWindow.Position = UDim2.new(0.5, 0, 0.45, 0)
 MainWindow.BackgroundTransparency = 1
 MainWindow.BorderSizePixel = 0
@@ -73,45 +73,55 @@ MainWindow.Active = true
 MainWindow.Draggable = true
 MainWindow.Parent = ScreenGui
 
--- Header
+-- Header (solid floating bar so the "ZxD" name is clearly visible)
 local Header = Instance.new("Frame")
 Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 32)
-Header.BackgroundTransparency = 1
+Header.Size = UDim2.new(1, 0, 0, 36)
+Header.BackgroundColor3 = Theme.CardBG
+Header.BorderSizePixel = 0
 Header.Parent = MainWindow
+
+local HeaderCorner = Instance.new("UICorner")
+HeaderCorner.CornerRadius = UDim.new(0, 12)
+HeaderCorner.Parent = Header
+
+local HeaderStroke = Instance.new("UIStroke")
+HeaderStroke.Color = Theme.Border
+HeaderStroke.Thickness = 1
+HeaderStroke.Parent = Header
 
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Size = UDim2.new(1, -70, 1, 0)
-Title.Position = UDim2.new(0, 12, 0, 0)
+Title.Position = UDim2.new(0, 14, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "ZxD"
 Title.TextColor3 = Theme.TextPrimary
-Title.TextSize = 13
+Title.TextSize = 15
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
 
 local SubTitle = Instance.new("TextLabel")
 SubTitle.Name = "SubTitle"
-SubTitle.Size = UDim2.new(0, 40, 0, 11)
-SubTitle.Position = UDim2.new(0, 12 + 30, 0, 1)
+SubTitle.Size = UDim2.new(0, 40, 0, 12)
+SubTitle.Position = UDim2.new(0, 14 + 34, 0, 2)
 SubTitle.BackgroundTransparency = 1
 SubTitle.Text = "HUB"
 SubTitle.TextColor3 = Theme.TextMuted
-SubTitle.TextSize = 9
+SubTitle.TextSize = 10
 SubTitle.Font = Enum.Font.Gotham
 SubTitle.TextXAlignment = Enum.TextXAlignment.Left
 SubTitle.Parent = Header
 
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Name = "CloseBtn"
-CloseBtn.Size = UDim2.new(0, 22, 0, 22)
-CloseBtn.Position = UDim2.new(1, -30, 0.5, -11)
+CloseBtn.Size = UDim2.new(0, 24, 0, 24)
+CloseBtn.Position = UDim2.new(1, -32, 0.5, -12)
 CloseBtn.BackgroundColor3 = Theme.InactivePill
 CloseBtn.Text = "×"
 CloseBtn.TextColor3 = Theme.TextMuted
-CloseBtn.TextSize = 13
+CloseBtn.TextSize = 14
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.AutoButtonColor = false
 CloseBtn.Parent = Header
@@ -130,21 +140,13 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- Divider
-local Divider = Instance.new("Frame")
-Divider.Size = UDim2.new(1, -24, 0, 1)
-Divider.Position = UDim2.new(0, 12, 0, 32)
-Divider.BackgroundColor3 = Theme.Border
-Divider.BorderSizePixel = 0
-Divider.Parent = MainWindow
-
 ---------------------------------------------------------
 -- TAB NAV (separated pill tabs with clear gap)
 ---------------------------------------------------------
 local TabNav = Instance.new("ScrollingFrame")
 TabNav.Name = "TabNav"
-TabNav.Size = UDim2.new(1, -16, 0, 26)
-TabNav.Position = UDim2.new(0, 8, 0, 40)
+TabNav.Size = UDim2.new(1, -16, 0, 28)
+TabNav.Position = UDim2.new(0, 8, 0, 46)
 TabNav.BackgroundTransparency = 1
 TabNav.ScrollBarThickness = 0
 TabNav.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -166,8 +168,8 @@ end)
 ---------------------------------------------------------
 local Viewport = Instance.new("Frame")
 Viewport.Name = "Viewport"
-Viewport.Size = UDim2.new(1, -16, 1, -76)
-Viewport.Position = UDim2.new(0, 8, 0, 72)
+Viewport.Size = UDim2.new(1, -16, 1, -82)
+Viewport.Position = UDim2.new(0, 8, 0, 80)
 Viewport.BackgroundTransparency = 1
 Viewport.ClipsDescendants = true
 Viewport.Parent = MainWindow
