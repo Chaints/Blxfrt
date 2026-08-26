@@ -1,18 +1,19 @@
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local VirtualUser = game:GetService("VirtualUser")
 local LocalPlayer = Players.LocalPlayer
-
--- DEKLARASI REMOTE EVENT (Sesuaikan nama remote dengan yang ada di game)
-local NetFolder = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net") -- Contoh path remote Blox Fruits
-local RegisterAttack = NetFolder:WaitForChild("RegisterAttack") 
-local RegisterHit = NetFolder:WaitForChild("RegisterHit")
 
 local ScriptLoad = {}
 
 _G.AutoFarm = _G.AutoFarm or false
 _G.AutoEquipMelee = true
 _G.AutoAttack = true
+
+-- MENGAMBIL REMOTE EVENT BLOX FRUITS ASLI
+local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
+local RegisterAttack = Net:WaitForChild("RegisterAttack")
+local RegisterHit = Net:WaitForChild("RegisterHit")
 
 -- 1. FUNGSI TWEEN MOVEMENT
 function ScriptLoad.TweenTo(targetCFrame, speed)
@@ -61,33 +62,33 @@ function ScriptLoad.EquipMelee()
     end
 end
 
--- 3. AUTO ATTACK (SUDAH DIPERBAIKI)
+-- 3. AUTO ATTACK (PERBAIKAN SYSTEM HIT)
 function ScriptLoad.AttackTarget(targetEnemy)
-    pcall(function()
-        local character = LocalPlayer.Character
-        if not character or not targetEnemy then return end
+    local character = LocalPlayer.Character
+    if not character or not targetEnemy then return end
+    
+    local enemyHrp = targetEnemy:FindFirstChild("HumanoidRootPart")
+    local tool = character:FindFirstChildOfClass("Tool")
+    
+    if enemyHrp and tool then
+        -- 1. Simulasi Klik Virtual Client
+        VirtualUser:CaptureController()
+        VirtualUser:Button1Down(Vector2.new(0, 0))
+        tool:Activate()
         
-        local enemyHrp = targetEnemy:FindFirstChild("HumanoidRootPart")
-        local tool = character:FindFirstChildOfClass("Tool")
-        
-        if enemyHrp and tool then
-            -- Fire Remote Event
-            RegisterAttack:FireServer(0)
-            RegisterHit:FireServer(enemyHrp, {enemyHrp})
-            
-            -- Tool Click Fallback
-            tool:Activate()
-        end
-    end)
+        -- 2. Fire Remote Blox Fruits
+        local hitPart = tool:FindFirstChild("Handle") or tool:FindFirstChildOfClass("Part") or enemyHrp
+        RegisterAttack:FireServer(0)
+        RegisterHit:FireServer(hitPart, {enemyHrp})
+    end
 end
 
--- 4. LOOP UTAMA (SUDAH DIPERBAIKI)
+-- 4. LOOP UTAMA
 task.spawn(function()
-    while task.wait(0.1) do -- Disarankan minimal 0.1s agar tidak lag/crash
+    while task.wait(0.1) do
         if _G.AutoFarm then
-            pcall(function()
-                local character = LocalPlayer.Character
-                if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+            local character = LocalPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
 
                 if _G.AutoEquipMelee then
                     ScriptLoad.EquipMelee()
@@ -100,10 +101,10 @@ task.spawn(function()
                         local hum = enemy:FindFirstChild("Humanoid")
                         
                         if hrp and hum and hum.Health > 0 then
-                            local targetPos = hrp.CFrame * CFrame.new(0, 4, 1)
+                            -- Teleport ke atas musuh 5 stud
+                            local targetPos = hrp.CFrame * CFrame.new(0, 5, 0)
                             ScriptLoad.TweenTo(targetPos, 300)
 
-                            -- DIPERBAIKI: Memanggil fungsi AttackTarget dengan memasukkan target musuh
                             if _G.AutoAttack then
                                 ScriptLoad.AttackTarget(enemy)
                             end
@@ -111,7 +112,7 @@ task.spawn(function()
                         end
                     end
                 end
-            end)
+            end
         end
     end
 end)
