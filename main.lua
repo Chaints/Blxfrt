@@ -104,3 +104,58 @@ SpeedButton.MouseButton1Click:Connect(function()
         player.Character.Humanoid.WalkSpeed = 100
     end
 end)
+-- ==========================================
+-- SISTEM AUTO FARM (CORE LOGIC)
+-- ==========================================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+-- Fungsi untuk ngecek dan nge-handle Auto Farm
+task.spawn(function()
+    while true do
+        task.wait(0.5) -- Jeda agar tidak memberatkan CPU / nge-lag
+        
+        if _G.AutoFarm then
+            pcall(function()
+                local character = LocalPlayer.Character
+                if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+                
+                -- Contoh sederhana: Cari musuh terdekat di Workspace.Enemies
+                local enemiesFolder = workspace:FindFirstChild("Enemies")
+                if enemiesFolder then
+                    local closestEnemy = nil
+                    local shortestDistance = math.huge
+                    
+                    for _, enemy in ipairs(enemiesFolder:GetChildren()) do
+                        local hrp = enemy:FindFirstChild("HumanoidRootPart")
+                        local hum = enemy:FindFirstChild("Humanoid")
+                        
+                        if hrp and hum and hum.Health > 0 then
+                            local distance = (character.HumanoidRootPart.Position - hrp.Position).Magnitude
+                            if distance < shortestDistance then
+                                shortestDistance = distance
+                                closestEnemy = enemy
+                            end
+                        end
+                    end
+                    
+                    -- Kalau musuh ketemu, gerak ke arah musuh (bisa dikembangkan jadi tween/teleport)
+                    if closestEnemy and closestEnemy:FindFirstChild("HumanoidRootPart") then
+                        local targetHRP = closestEnemy.HumanoidRootPart
+                        
+                        -- Posisikan karakter sedikit di atas musuh biar aman dari serangan melee biasa
+                        character.HumanoidRootPart.CFrame = targetHRP.CFrame * CFrame.new(0, 5, 3)
+                        
+                        -- Trigger serangan (Simulasi klik/tool)
+                        local tool = character:FindFirstChildOfClass("Tool")
+                        if tool then
+                            tool:Activate()
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
