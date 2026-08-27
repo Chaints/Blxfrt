@@ -1,6 +1,7 @@
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
 local ScriptLoad = {}
@@ -23,6 +24,20 @@ local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 
 local currentTween = nil
 local activeHash = "12796888"
+
+-- NOCLIP AMAN (ANTI RUBBER-BAND)
+RunService.Stepped:Connect(function()
+    if _G.AutoFarm then
+        local character = LocalPlayer.Character
+        if character then
+            for _, part in ipairs(character:GetChildren()) do
+                if part:IsA("BasePart") and part.CanCollide then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end
+end)
 
 -- CACHE ENEMIES FOLDER (hindari FindFirstChild berulang tiap loop di banyak tempat)
 local _enemiesFolderCache = nil
@@ -171,13 +186,25 @@ function ScriptLoad.BringMob(enemy, groundCFrame)
     end
 end
 
--- 5. TAKE QUEST
+-- 5. TAKE QUEST (FIXED)
 function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
     if CommF then
+        local character = LocalPlayer.Character
+        if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+        
+        local hrp = character.HumanoidRootPart
+        
         if questCFrame then
-            ScriptLoad.TweenTo(questCFrame, _G.TweenSpeed)
-            task.wait(0.4)
+            local distance = (hrp.Position - questCFrame.Position).Magnitude
+            -- Kalau masih jauh, jalankan tween dan jangan ambil quest dulu
+            if distance > 10 then
+                ScriptLoad.TweenTo(questCFrame, _G.TweenSpeed)
+                return 
+            end
         end
+        
+        -- Kalau sudah dekat (distance <= 10), berhentikan tween lalu ambil quest
+        if currentTween then currentTween:Cancel() end
         CommF:InvokeServer("StartQuest", questName, levelReq)
     end
 end
@@ -283,11 +310,6 @@ task.spawn(function()
         if _G.AutoFarm then
             local character = LocalPlayer.Character
             if character and character:FindFirstChild("HumanoidRootPart") then
-
-                -- Noclip Native Super Enteng (cuma trigger sekali pas belum di state itu)
-                if character:FindFirstChild("Humanoid") and character.Humanoid:GetState() ~= Enum.HumanoidStateType.Physics then
-                    character.Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-                end
 
                 if _G.AutoEquipMelee then
                     ScriptLoad.EquipMelee()
