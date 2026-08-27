@@ -90,7 +90,8 @@ function ScriptLoad.EquipMelee()
         end
     end
 end
--- 4. FAST ATTACK MULTI-TARGET FIX (MUKUL SEMUA KALIGUS DALAM 1 PAYLOAD)
+
+-- 4. FAST ATTACK MULTI-TARGET (PAKE HASH REMOTESPY RECENT "12796888")
 function ScriptLoad.FastAttack()
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -98,13 +99,13 @@ function ScriptLoad.FastAttack()
     local myHrp = character.HumanoidRootPart
     local hitTargets = {}
 
-    -- 1. Kumpulkan SELURUH Part Target (NPC) ke dalam 1 Tabel
+    -- Scan NPC
     local enemiesFolder = workspace:FindFirstChild("Enemies")
     if enemiesFolder then
         for _, enemy in ipairs(enemiesFolder:GetChildren()) do
             local hum = enemy:FindFirstChild("Humanoid")
-            local targetPart = enemy:FindFirstChild("UpperTorso") 
-                or enemy:FindFirstChild("Torso") 
+            local targetPart = enemy:FindFirstChild("LeftFoot") 
+                or enemy:FindFirstChild("UpperTorso") 
                 or enemy:FindFirstChild("HumanoidRootPart")
             
             if hum and hum.Health > 0 and targetPart then
@@ -116,13 +117,13 @@ function ScriptLoad.FastAttack()
         end
     end
 
-    -- 2. Kumpulkan Player (Jika Dinyalakan)
+    -- Scan Player
     if _G.AttackPlayers then
         for _, otherPlayer in ipairs(Players:GetPlayers()) do
             if otherPlayer ~= LocalPlayer and otherPlayer.Character then
                 local hum = otherPlayer.Character:FindFirstChild("Humanoid")
-                local targetPart = otherPlayer.Character:FindFirstChild("UpperTorso") 
-                    or otherPlayer.Character:FindFirstChild("Torso") 
+                local targetPart = otherPlayer.Character:FindFirstChild("LeftFoot") 
+                    or otherPlayer.Character:FindFirstChild("UpperTorso") 
                     or otherPlayer.Character:FindFirstChild("HumanoidRootPart")
                 
                 if hum and hum.Health > 0 and targetPart then
@@ -135,26 +136,32 @@ function ScriptLoad.FastAttack()
         end
     end
 
-    -- 3. Kirim SELURUH Tabel Target Sekaligus ke Remote Hit
+    -- Eksekusi Hit Multi-Target
     if #hitTargets > 0 then
         if RegisterAttack then
-            RegisterAttack:FireServer(0.5, 3)
+            RegisterAttack:FireServer(0.5, 1) -- Payload RegisterAttack terbaru
         end
         
         if RegisterHit then
-            -- Tembakkan Main Target (Target Pertama) & Masukkan Tabel Seluruh Target di Argumen Kedua
+            -- Pisahkan Target Utama (Arg 1) dan Daftar Target Tambahan (Arg 2)
+            local mainTarget = hitTargets[1]
+            local subTargets = {}
+
+            for i = 2, #hitTargets do
+                table.insert(subTargets, hitTargets[i])
+            end
+
             local hitArgs = {
-                [1] = hitTargets[1],  -- Head Target
-                [2] = hitTargets,     -- Multi-Hit List (Bikin Damage Kena Semua Sekaligus)
-                [4] = "1270b44e"
+                [1] = mainTarget,
+                [2] = subTargets,     -- Array musuh tambahan biar kena banyak sekaligus
+                [4] = "12796888"       -- HASH REMOTESPY TERBARU
             }
             RegisterHit:FireServer(unpack(hitArgs))
         end
     end
 end
 
-
--- 5. BRING MOB FIX (ANTI-SERVER DESYNC)
+-- 5. BRING MOB FIX
 function ScriptLoad.BringMob(enemy, groundCFrame)
     local hrp = enemy:FindFirstChild("HumanoidRootPart")
     local hum = enemy:FindFirstChild("Humanoid")
@@ -162,10 +169,18 @@ function ScriptLoad.BringMob(enemy, groundCFrame)
     if hrp and hum and hum.Health > 0 then
         ScriptLoad.ExpandHitbox(enemy)
 
-        -- Pindahkan CFrame NPC secara halus tanpa merusak server sync
         hrp.CFrame = groundCFrame
-        hrp.Velocity = Vector3.new(0, 0, 0)
-        hrp.RotVelocity = Vector3.new(0, 0, 0)
+        
+        local bv = hrp:FindFirstChild("BringMobBV")
+        if not bv then
+            bv = Instance.new("BodyVelocity")
+            bv.Name = "BringMobBV"
+            bv.MaxForce = Vector3.new(1, 1, 1) * 100000
+            bv.Velocity = Vector3.new(0, 0, 0)
+            bv.Parent = hrp
+        else
+            bv.Velocity = Vector3.new(0, 0, 0)
+        end
     end
 end
 
