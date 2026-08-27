@@ -12,9 +12,9 @@ _G.AutoFarm = _G.AutoFarm or false
 _G.AutoEquipMelee = true
 _G.FastAttack = true
 _G.AttackPlayers = false 
-_G.AttackRadius = 60     -- Jangkauan area Fast Attack (studs)
+_G.AttackRadius = 60
 _G.BringMob = true
-_G.AttackRange = 350     -- Jangkauan narik NPC
+_G.AttackRange = 350
 
 -- DEKLARASI REMOTE
 local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
@@ -26,9 +26,10 @@ local currentTween = nil
 
 -- 1. EXPAND HITBOX & FIX PHYSICS NPC
 function ScriptLoad.ExpandHitbox(enemy)
-    local hrp = enemy:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        hrp.CanCollide = false
+    for _, part in ipairs(enemy:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = false
+        end
     end
 end
 
@@ -90,7 +91,7 @@ function ScriptLoad.EquipMelee()
     end
 end
 
--- 4. FAST ATTACK MULTI-TARGET (SEKALI PUKUL KENA SEMUA NPC DI RADIUS)
+-- 4. FAST ATTACK FIX (DENGAN FALLBACK TARGET BODY PART)
 function ScriptLoad.FastAttack()
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -98,49 +99,54 @@ function ScriptLoad.FastAttack()
     local myHrp = character.HumanoidRootPart
     local hitTargets = {}
 
-    -- Scan SEMUA NPC dalam radius tanpa batasan (Multi-Target)
+    -- Scan NPC
     local enemiesFolder = workspace:FindFirstChild("Enemies")
     if enemiesFolder then
         for _, enemy in ipairs(enemiesFolder:GetChildren()) do
             local hum = enemy:FindFirstChild("Humanoid")
-            local torso = enemy:FindFirstChild("UpperTorso") or enemy:FindFirstChild("HumanoidRootPart")
+            -- FIX: Cari part tubuh apapun yang tersedia (UpperTorso / Torso / HumanoidRootPart)
+            local targetPart = enemy:FindFirstChild("UpperTorso") 
+                or enemy:FindFirstChild("Torso") 
+                or enemy:FindFirstChild("HumanoidRootPart")
             
-            if hum and hum.Health > 0 and torso then
-                local distance = (torso.Position - myHrp.Position).Magnitude
+            if hum and hum.Health > 0 and targetPart then
+                local distance = (targetPart.Position - myHrp.Position).Magnitude
                 if distance <= _G.AttackRadius then
-                    table.insert(hitTargets, torso) -- Masukkan semua NPC yang masuk radius
+                    table.insert(hitTargets, targetPart)
                 end
             end
         end
     end
 
-    -- Scan Player lain jika dinyalakan
+    -- Scan Player
     if _G.AttackPlayers then
         for _, otherPlayer in ipairs(Players:GetPlayers()) do
             if otherPlayer ~= LocalPlayer and otherPlayer.Character then
                 local hum = otherPlayer.Character:FindFirstChild("Humanoid")
-                local torso = otherPlayer.Character:FindFirstChild("UpperTorso") or otherPlayer.Character:FindFirstChild("HumanoidRootPart")
+                local targetPart = otherPlayer.Character:FindFirstChild("UpperTorso") 
+                    or otherPlayer.Character:FindFirstChild("Torso") 
+                    or otherPlayer.Character:FindFirstChild("HumanoidRootPart")
                 
-                if hum and hum.Health > 0 and torso then
-                    local distance = (torso.Position - myHrp.Position).Magnitude
+                if hum and hum.Health > 0 and targetPart then
+                    local distance = (targetPart.Position - myHrp.Position).Magnitude
                     if distance <= _G.AttackRadius then
-                        table.insert(hitTargets, torso)
+                        table.insert(hitTargets, targetPart)
                     end
                 end
             end
         end
     end
 
-    -- Kirim damage instan sekaligus ke SELURUH target di hitTargets
+    -- Eksekusi Hit
     if #hitTargets > 0 then
         if RegisterAttack then
             RegisterAttack:FireServer(0.5, 3)
         end
         
         if RegisterHit then
-            for _, targetTorso in ipairs(hitTargets) do
+            for _, targetPart in ipairs(hitTargets) do
                 local hitArgs = {
-                    [1] = targetTorso,
+                    [1] = targetPart,
                     [2] = {},
                     [4] = "1270b44e"
                 }
@@ -150,33 +156,18 @@ function ScriptLoad.FastAttack()
     end
 end
 
--- 5. BRING MOB FIX (PAKAI BODYVELOCITY BIAR GAK TERBANG & KUNCI DI TANAH)
+-- 5. BRING MOB FIX (ANTI-SERVER DESYNC)
 function ScriptLoad.BringMob(enemy, groundCFrame)
     local hrp = enemy:FindFirstChild("HumanoidRootPart")
     local hum = enemy:FindFirstChild("Humanoid")
     
     if hrp and hum and hum.Health > 0 then
-        -- Matikan tabrakan untuk seluruh part NPC
-        for _, part in ipairs(enemy:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
-        end
+        ScriptLoad.ExpandHitbox(enemy)
 
-        -- Paksa posisi kunci tepat di tanah
+        -- Pindahkan CFrame NPC secara halus tanpa merusak server sync
         hrp.CFrame = groundCFrame
-        
-        -- Kunci gerak fisik biar gak memantul ke atas
-        local bv = hrp:FindFirstChild("BringMobBV")
-        if not bv then
-            bv = Instance.new("BodyVelocity")
-            bv.Name = "BringMobBV"
-            bv.MaxForce = Vector3.new(1, 1, 1) * 100000
-            bv.Velocity = Vector3.new(0, 0, 0)
-            bv.Parent = hrp
-        else
-            bv.Velocity = Vector3.new(0, 0, 0)
-        end
+        hrp.Velocity = Vector3.new(0, 0, 0)
+        hrp.RotVelocity = Vector3.new(0, 0, 0)
     end
 end
 
@@ -254,7 +245,7 @@ local function GetQuestData()
     end
 end
 
--- 8. NOCLIP KARAKTER & ANTI-GRAVITY
+-- 8. NOCLIP KARAKTER
 RunService.Stepped:Connect(function()
     if _G.AutoFarm then
         local character = LocalPlayer.Character
@@ -271,10 +262,10 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- 9. LOOP FAST ATTACK (MULTI-TARGET INSTAN)
+-- 9. LOOP FAST ATTACK
 task.spawn(function()
     while true do
-        task.wait(0.01) -- Kecepatan spam remote hit
+        task.wait(0.01)
         if _G.FastAttack then
             pcall(function()
                 ScriptLoad.FastAttack()
@@ -283,7 +274,7 @@ task.spawn(function()
     end
 end)
 
--- 10. LOOP UTAMA AUTO FARM & BRING MOB
+-- 10. LOOP UTAMA
 task.spawn(function()
     while task.wait(0.1) do
         if _G.AutoFarm then
@@ -296,7 +287,6 @@ task.spawn(function()
 
                 local targetName, questName, questIndex, questCFrame = GetQuestData()
                 
-                -- Pengecekan status Quest GUI
                 local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
                 local hasQuest = playerGui and playerGui:FindFirstChild("Main") 
                     and playerGui.Main:FindFirstChild("Quest") 
@@ -323,8 +313,6 @@ task.spawn(function()
 
                         if mainTarget then
                             local mainHrp = mainTarget:FindFirstChild("HumanoidRootPart")
-                            
-                            -- Titik kumpul di tanah & karakter melayang di atasnya
                             local groundCFrame = mainHrp.CFrame
                             local farmPosPlayer = groundCFrame * CFrame.new(0, 9, 0)
                             local myHrp = character.HumanoidRootPart
@@ -335,12 +323,11 @@ task.spawn(function()
                                 myHrp.CFrame = farmPosPlayer
                             end
 
-                            -- Bring semua NPC sejenis & paksakan nempel di tanah
+                            -- Bring semua NPC sejenis
                             for _, enemy in ipairs(enemiesFolder:GetChildren()) do
                                 if string.find(enemy.Name, targetName) then
                                     local eHrp = enemy:FindFirstChild("HumanoidRootPart")
                                     if eHrp and (eHrp.Position - groundCFrame.Position).Magnitude <= _G.AttackRange then
-                                        ScriptLoad.ExpandHitbox(enemy)
                                         if _G.BringMob then
                                             ScriptLoad.BringMob(enemy, groundCFrame)
                                         end
