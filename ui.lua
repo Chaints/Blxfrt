@@ -174,6 +174,7 @@ QuickPad.Parent = QuickPanel
 local ActiveQuickRows = {}
 
 local function RegisterQuick(text, offCallback)
+    if ActiveQuickRows[text] then return end
     local Row = Instance.new("Frame")
     Row.Size = UDim2.new(1, 0, 0, 26)
     Row.BackgroundTransparency = 1
@@ -272,7 +273,7 @@ BackgroundPanelStroke.Color = Theme.Border
 BackgroundPanelStroke.Thickness = 1
 BackgroundPanelStroke.Parent = BackgroundPanel
 
--- Header (solid floating bar so the "ZxD" name is clearly visible)
+-- Header
 local Header = Instance.new("Frame")
 Header.Name = "Header"
 Header.Size = UDim2.new(1, -16, 0, 92)
@@ -342,7 +343,7 @@ CloseBtn.MouseButton1Click:Connect(function()
 end)
 
 ---------------------------------------------------------
--- TAB NAV (separated pill tabs with clear gap)
+-- TAB NAV
 ---------------------------------------------------------
 local TabNav = Instance.new("ScrollingFrame")
 TabNav.Name = "TabNav"
@@ -379,7 +380,7 @@ TabUnderlineCorner.CornerRadius = UDim.new(1, 0)
 TabUnderlineCorner.Parent = TabUnderline
 
 ---------------------------------------------------------
--- CONTENT VIEWPORT (holds all tab pages; only the active one is Visible)
+-- CONTENT VIEWPORT
 ---------------------------------------------------------
 local Viewport = Instance.new("Frame")
 Viewport.Name = "Viewport"
@@ -438,9 +439,7 @@ function UI:CreateTab(tabName)
     TabPage.Visible = FirstTab
     TabPage.Parent = Viewport
 
-    ---------------------------------------------------------
-    -- CARD 1: LEFT
-    ---------------------------------------------------------
+    -- Left Side Card
     local LeftCard = Instance.new("Frame")
     LeftCard.Name = "LeftCard"
     LeftCard.Size = UDim2.new(0.5, 0, 1, 0)
@@ -466,9 +465,7 @@ function UI:CreateTab(tabName)
         LeftScroll.CanvasSize = UDim2.new(0, 0, 0, LeftList.AbsoluteContentSize.Y + 4)
     end)
 
-    ---------------------------------------------------------
-    -- DIVIDER: pemisah tipis antar card kiri-kanan
-    ---------------------------------------------------------
+    -- Divider
     local CardDivider = Instance.new("Frame")
     CardDivider.Name = "CardDivider"
     CardDivider.AnchorPoint = Vector2.new(0.5, 0)
@@ -478,9 +475,7 @@ function UI:CreateTab(tabName)
     CardDivider.BorderSizePixel = 0
     CardDivider.Parent = TabPage
 
-    ---------------------------------------------------------
-    -- CARD 2: RIGHT
-    ---------------------------------------------------------
+    -- Right Side Card
     local RightCard = Instance.new("Frame")
     RightCard.Name = "RightCard"
     RightCard.Size = UDim2.new(0.5, 0, 1, 0)
@@ -526,7 +521,6 @@ function UI:CreateTab(tabName)
     end
 
     TabButton.MouseButton1Click:Connect(goToTab)
-
     table.insert(Tabs, TabObj)
 
     if FirstTab then
@@ -829,6 +823,7 @@ function UI:CreateTab(tabName)
 
         local dragging = false
         local currentVal = default
+        local moveConn, releaseConn
 
         local function setValue(val, fromBox)
             val = math.clamp(math.floor(val), min, max)
@@ -851,18 +846,20 @@ function UI:CreateTab(tabName)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 dragging = true
                 updateFromDrag(input)
-            end
-        end)
 
-        UserInputService.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = false
-            end
-        end)
+                moveConn = UserInputService.InputChanged:Connect(function(inp)
+                    if dragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
+                        updateFromDrag(inp)
+                    end
+                end)
 
-        UserInputService.InputChanged:Connect(function(input)
-            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                updateFromDrag(input)
+                releaseConn = UserInputService.InputEnded:Connect(function(inp)
+                    if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+                        dragging = false
+                        if moveConn then moveConn:Disconnect() end
+                        if releaseConn then releaseConn:Disconnect() end
+                    end
+                end)
             end
         end)
 
@@ -1009,113 +1006,7 @@ function UI:CreateTab(tabName)
     end
 
     function Elements:CreateSlider(text, min, max, default, side, callback)
-        local Target = GetTargetScroll(side)
-
-        local Item = Instance.new("Frame")
-        Item.LayoutOrder = nextLayoutOrder(side)
-        Item.Size = UDim2.new(1, 0, 0, 58)
-        Item.BackgroundColor3 = Theme.InactivePill
-        Item.Parent = Target
-
-        local ItemCorner = Instance.new("UICorner")
-        ItemCorner.CornerRadius = UDim.new(0, 10)
-        ItemCorner.Parent = Item
-
-        local Padding = Instance.new("UIPadding")
-        Padding.PaddingLeft = UDim.new(0, 14)
-        Padding.PaddingRight = UDim.new(0, 14)
-        Padding.PaddingTop = UDim.new(0, 10)
-        Padding.Parent = Item
-
-        local TitleLbl = Instance.new("TextLabel")
-        TitleLbl.Size = UDim2.new(1, -56, 0, 18)
-        TitleLbl.BackgroundTransparency = 1
-        TitleLbl.Text = text
-        TitleLbl.TextColor3 = Theme.TextPrimary
-        TitleLbl.Font = Enum.Font.GothamMedium
-        TitleLbl.TextSize = 12
-        TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
-        TitleLbl.TextScaled = true
-        TitleLbl.Parent = Item
-
-        local TitleLbl2Constraint = Instance.new("UITextSizeConstraint")
-        TitleLbl2Constraint.MaxTextSize = 12
-        TitleLbl2Constraint.MinTextSize = 8
-        TitleLbl2Constraint.Parent = TitleLbl
-
-        local ValueLbl = Instance.new("TextLabel")
-        ValueLbl.Size = UDim2.new(0, 50, 0, 18)
-        ValueLbl.Position = UDim2.new(1, -50, 0, 0)
-        ValueLbl.BackgroundTransparency = 1
-        ValueLbl.Text = tostring(default)
-        ValueLbl.TextColor3 = Theme.Accent
-        ValueLbl.Font = Enum.Font.GothamBold
-        ValueLbl.TextSize = 13
-        ValueLbl.TextXAlignment = Enum.TextXAlignment.Right
-        ValueLbl.Parent = Item
-
-        local SliderBar = Instance.new("TextButton")
-        SliderBar.Size = UDim2.new(1, 0, 0, 6)
-        SliderBar.Position = UDim2.new(0, 0, 0, 32)
-        SliderBar.BackgroundColor3 = Theme.CardBG
-        SliderBar.Text = ""
-        SliderBar.AutoButtonColor = false
-        SliderBar.Parent = Item
-
-        local BarCorner = Instance.new("UICorner")
-        BarCorner.CornerRadius = UDim.new(1, 0)
-        BarCorner.Parent = SliderBar
-
-        local Fill = Instance.new("Frame")
-        Fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
-        Fill.BackgroundColor3 = Theme.Accent
-        Fill.BorderSizePixel = 0
-        Fill.Parent = SliderBar
-
-        local FillCorner = Instance.new("UICorner")
-        FillCorner.CornerRadius = UDim.new(1, 0)
-        FillCorner.Parent = Fill
-
-        local Knob = Instance.new("Frame")
-        Knob.Size = UDim2.new(0, 16, 0, 16)
-        Knob.AnchorPoint = Vector2.new(0.5, 0.5)
-        Knob.Position = UDim2.new((default - min) / (max - min), 0, 0.5, 0)
-        Knob.BackgroundColor3 = Theme.Accent
-        Knob.Parent = SliderBar
-
-        local KnobCorner = Instance.new("UICorner")
-        KnobCorner.CornerRadius = UDim.new(1, 0)
-        KnobCorner.Parent = Knob
-
-        local dragging = false
-
-        local function update(input)
-            local pos = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
-            local val = math.floor(min + ((max - min) * pos))
-            Fill.Size = UDim2.new(pos, 0, 1, 0)
-            Knob.Position = UDim2.new(pos, 0, 0.5, 0)
-            ValueLbl.Text = tostring(val)
-            pcall(callback, val)
-        end
-
-        SliderBar.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = true
-                update(input)
-            end
-        end)
-
-        UserInputService.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = false
-            end
-        end)
-
-        UserInputService.InputChanged:Connect(function(input)
-            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                update(input)
-            end
-        end)
+        self:CreateSliderInput(text, min, max, default, side, callback)
     end
 
     function Elements:CreateButton(text, side, callback)

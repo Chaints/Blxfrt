@@ -33,7 +33,6 @@ RunService.Stepped:Connect(function()
             local hrp = character:FindFirstChild("HumanoidRootPart")
             
             if hrp then
-                -- Buat BodyVelocity kalau belum ada biar karakter ga jatuh ditarik gravitasi
                 if not hrp:FindFirstChild("AntiFall") then
                     local bv = Instance.new("BodyVelocity")
                     bv.Name = "AntiFall"
@@ -43,7 +42,6 @@ RunService.Stepped:Connect(function()
                 end
             end
 
-            -- Noclip murni biar tembus tembok
             for _, part in ipairs(character:GetChildren()) do
                 if part:IsA("BasePart") and part.CanCollide then
                     part.CanCollide = false
@@ -51,7 +49,6 @@ RunService.Stepped:Connect(function()
             end
         end
     else
-        -- Hapus BodyVelocity kalau AutoFarm dimatiin biar bisa turun/jatuh normal
         local character = LocalPlayer.Character
         if character then
             local hrp = character:FindFirstChild("HumanoidRootPart")
@@ -62,7 +59,7 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- CACHE ENEMIES FOLDER (hindari FindFirstChild berulang tiap loop di banyak tempat)
+-- CACHE ENEMIES FOLDER
 local _enemiesFolderCache = nil
 local function GetEnemiesFolder()
     if not _enemiesFolderCache or not _enemiesFolderCache.Parent then
@@ -71,7 +68,7 @@ local function GetEnemiesFolder()
     return _enemiesFolderCache
 end
 
--- HOOK HASH OTOMATIS (ENTENG)
+-- HOOK HASH OTOMATIS
 if hookmetamethod then
     local oldNamecall
     oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
@@ -86,7 +83,7 @@ if hookmetamethod then
     end)
 end
 
--- 1. TWEEN MOVEMENT (SMOOTH & NATURAL, ANTI PATAH-PATAH)
+-- 1. TWEEN MOVEMENT
 local lastTweenTarget = nil
 
 function ScriptLoad.TweenTo(targetCFrame, speed)
@@ -103,7 +100,6 @@ function ScriptLoad.TweenTo(targetCFrame, speed)
         return
     end
 
-    -- Kalau target belum bergeser jauh dari tween sebelumnya, biarkan tween yang jalan
     if lastTweenTarget and currentTween and currentTween.PlaybackState == Enum.PlaybackState.Playing then
         local targetShift = (lastTweenTarget.Position - targetCFrame.Position).Magnitude
         if targetShift < 7 then
@@ -154,7 +150,7 @@ function ScriptLoad.EquipMelee()
     end
 end
 
--- 3. FAST ATTACK MULTI-TARGET (RINGAN DAN SMOOTH)
+-- 3. FAST ATTACK MULTI-TARGET
 function ScriptLoad.FastAttack()
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -169,7 +165,7 @@ function ScriptLoad.FastAttack()
             local targetPart = enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("UpperTorso")
             
             if hum and hum.Health > 0 and targetPart then
-                if (targetPart.Position - myHrp.Position).Magnitude <= _G.AttackRadius then
+                if (targetPart.Position - myHrp.Position).Magnitude <= (_G.AttackRadius or 55) then
                     table.insert(hitTargets, targetPart)
                 end
             end
@@ -177,24 +173,22 @@ function ScriptLoad.FastAttack()
     end
 
     if #hitTargets > 0 then
-        if RegisterAttack then RegisterAttack:FireServer(0.5, 1) end
-        if RegisterHit then
-            local mainTarget = hitTargets[1]
-            local subTargets = {}
-            for i = 2, #hitTargets do
-                table.insert(subTargets, hitTargets[i])
-            end
+        pcall(function()
+            if RegisterAttack then RegisterAttack:FireServer(0.5) end
+            if RegisterHit then
+                local mainTarget = hitTargets[1]
+                local subTargets = {}
+                for i = 2, #hitTargets do
+                    table.insert(subTargets, hitTargets[i])
+                end
 
-            RegisterHit:FireServer(unpack({
-                [1] = mainTarget,
-                [2] = subTargets,
-                [4] = activeHash
-            }))
-        end
+                RegisterHit:FireServer(mainTarget, subTargets, nil, activeHash or "12796888")
+            end
+        end)
     end
 end
 
--- 4. BRING MOB ULTRA LIGHT (TANPA BODYVELOCITY MEMORY LEAK)
+-- 4. BRING MOB ULTRA LIGHT
 function ScriptLoad.BringMob(enemy, groundCFrame)
     local hrp = enemy:FindFirstChild("HumanoidRootPart")
     local hum = enemy:FindFirstChild("Humanoid")
@@ -206,29 +200,32 @@ function ScriptLoad.BringMob(enemy, groundCFrame)
     end
 end
 
--- 5. TAKE QUEST DENGAN PAKSAAN KABUR DARI NPC
+-- 5. TAKE QUEST (WITH ANTI-STUCK COOLDOWN)
+local lastQuestCheck = 0
 function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
-    if CommF then
-        local character = LocalPlayer.Character
-        if not character or not character:FindFirstChild("HumanoidRootPart") then return end
-        
-        local hrp = character.HumanoidRootPart
-        
-        if questCFrame then
-            local distance = (hrp.Position - questCFrame.Position).Magnitude
-            if distance > 10 then
-                ScriptLoad.TweenTo(questCFrame, _G.TweenSpeed)
-                return 
-            end
+    if not CommF then return end
+    local character = LocalPlayer.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+    
+    local hrp = character.HumanoidRootPart
+    
+    if questCFrame then
+        local distance = (hrp.Position - questCFrame.Position).Magnitude
+        if distance > 12 then
+            ScriptLoad.TweenTo(questCFrame, _G.TweenSpeed)
+            return 
         end
-        
-        if currentTween then currentTween:Cancel() end
-        if questCFrame then
-            -- Nempel ke NPC buat ambil quest
-            hrp.CFrame = questCFrame
-        end
-        
-        -- Eksekusi ambil quest
+    end
+    
+    if tick() - lastQuestCheck < 1.5 then return end
+    lastQuestCheck = tick()
+
+    if currentTween then currentTween:Cancel() end
+    if questCFrame then
+        hrp.CFrame = questCFrame
+    end
+    
+    task.spawn(function()
         pcall(function()
             local args = {
                 "StartQuest",
@@ -238,14 +235,11 @@ function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
             CommF:InvokeServer(unpack(args))
         end)
         
-        -- TAMBAHAN: Begitu quest kepanggil, langsung lempar/dorong dikit karakternya 
-        -- biar posisinya gak nempel mulu di NPC dan gak dikira "lagi di NPC" terus!
-        task.wait(0.5)
-        if questCFrame then
-            hrp.CFrame = questCFrame * CFrame.new(0, 0, -10) -- Dorong maju 10 stud ke depan NPC
+        task.wait(0.3)
+        if questCFrame and hrp then
+            hrp.CFrame = questCFrame * CFrame.new(0, 0, -10)
         end
-        task.wait(0.5)
-    end
+    end)
 end
 
 -- 6. DATABASE QUEST (LEVEL 1 - 700)
@@ -311,7 +305,7 @@ local function GetQuestData()
     end
 end
 
--- 6.5 CARI MOB TERDEKAT DARI PLAYER (UNTUK MODE NEAREST)
+-- 6.5 CARI MOB TERDEKAT
 local function GetNearestEnemy(myHrp)
     local enemiesFolder = GetEnemiesFolder()
     if not enemiesFolder then return nil end
@@ -334,7 +328,7 @@ local function GetNearestEnemy(myHrp)
     return nearest
 end
 
--- 7. LOOP ATTACK (CUKUP 0.15s SUDAH KENCANG & BEBAS DROP FPS)
+-- 7. LOOP ATTACK
 task.spawn(function()
     while task.wait(0.15) do
         if _G.FastAttack and _G.AutoFarm then
@@ -343,7 +337,7 @@ task.spawn(function()
     end
 end)
 
--- 8. LOOP UTAMA FARMING (FIXED TANPA NYANGKUT)
+-- 8. LOOP UTAMA FARMING
 task.spawn(function()
     while task.wait(0.2) do
         if _G.AutoFarm then
@@ -392,7 +386,6 @@ task.spawn(function()
                         and playerGui.Main:FindFirstChild("Quest")
                         and playerGui.Main.Quest.Visible
 
-                    -- Kalau belum punya quest, ambil ke NPC. Kalau sudah punya, LANGSUNG FARM!
                     if method == "Quest" and not hasQuest then
                         ScriptLoad.TakeQuest(questName, questIndex, questCFrame)
                     else
@@ -445,6 +438,5 @@ task.spawn(function()
         end
     end
 end)
-
 
 return ScriptLoad
