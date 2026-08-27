@@ -29,6 +29,18 @@ local FarmTab = UI:CreateTab("Auto Farm")
 -- CARD KIRI (dipakai setiap saat)
 FarmTab:AddSection("Main Farming", "left")
 
+_G.AutoFarm = false
+FarmTab:CreateToggle("Auto Farm Level (" .. currentSea .. ")", _G.AutoFarm, "left", function(state)
+    _G.AutoFarm = state
+    print("Auto Farm Status:", _G.AutoFarm)
+end)
+
+_G.EnableMastery = false
+FarmTab:CreateToggle("Auto Mastery", _G.EnableMastery, "left", function(state)
+    _G.EnableMastery = state
+    print("Enable Mastery Status:", state)
+end)
+
 _G.SelectedWeapon = "Melee"
 FarmTab:CreateDropdown("Select Weapon", {"Melee", "Sword", "Fruit", "Gun"}, "Melee", "left", function(choice)
     _G.SelectedWeapon = choice
@@ -46,12 +58,6 @@ FarmTab:CreateSliderInput("Distance (Nearest)", 5, 100, 15, "left", function(val
     _G.FarmDistance = value
 end)
 
-_G.AutoFarm = false
-FarmTab:CreateToggle("Auto Farm Level (" .. currentSea .. ")", _G.AutoFarm, "left", function(state)
-    _G.AutoFarm = state
-    print("Auto Farm Status:", _G.AutoFarm)
-end)
-
 _G.HealthMobPercent = 15
 FarmTab:CreateSliderInput("Health Mob %", 1, 100, 15, "left", function(value)
     _G.HealthMobPercent = value
@@ -62,12 +68,6 @@ FarmTab:AddSection("Farm Config", "right")
 
 FarmTab:CreateSlider("Distance Y-Axis", 5, 25, 12, "right", function(value)
     _G.FarmDistanceYAxis = value
-end)
-
-_G.EnableMastery = false
-FarmTab:CreateToggle("Enable Mastery", _G.EnableMastery, "right", function(state)
-    _G.EnableMastery = state
-    print("Enable Mastery Status:", state)
 end)
 
 FarmTab:AddSection("Boss Farm", "right")
