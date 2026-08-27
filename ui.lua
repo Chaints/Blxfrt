@@ -15,15 +15,15 @@ ScreenGui.IgnoreGuiInset = true
 
 -- Theme Palette: Minimalist Monochrome Dark
 local Theme = {
-    Background   = Color3.fromRGB(16, 16, 18),
-    CardBG       = Color3.fromRGB(26, 26, 29),
-    ItemHover    = Color3.fromRGB(36, 36, 40),
-    Accent       = Color3.fromRGB(245, 245, 245),  -- Pure-ish white accent
-    AccentDim    = Color3.fromRGB(180, 180, 185),
-    InactivePill = Color3.fromRGB(32, 32, 36),
-    TextPrimary  = Color3.fromRGB(240, 240, 243),
-    TextMuted    = Color3.fromRGB(130, 130, 138),
-    Border       = Color3.fromRGB(46, 46, 51),
+    Background   = Color3.fromRGB(0, 0, 0),
+    CardBG       = Color3.fromRGB(15, 13, 12),
+    ItemHover    = Color3.fromRGB(26, 22, 19),
+    Accent       = Color3.fromRGB(198, 141, 92),   -- Bronze/copper accent
+    AccentDim    = Color3.fromRGB(140, 100, 68),
+    InactivePill = Color3.fromRGB(20, 17, 15),
+    TextPrimary  = Color3.fromRGB(238, 231, 224),
+    TextMuted    = Color3.fromRGB(128, 116, 106),
+    Border       = Color3.fromRGB(48, 40, 34),
     Success      = Color3.fromRGB(53, 199, 89),
     SuccessDim   = Color3.fromRGB(30, 110, 55)
 }
@@ -258,7 +258,8 @@ MainWindow.Parent = ScreenGui
 -- Header (solid floating bar so the "ZxD" name is clearly visible)
 local Header = Instance.new("Frame")
 Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 92)
+Header.Size = UDim2.new(1, -16, 0, 92)
+Header.Position = UDim2.new(0, 8, 0, 0)
 Header.BackgroundColor3 = Theme.CardBG
 Header.BorderSizePixel = 0
 Header.Parent = MainWindow
