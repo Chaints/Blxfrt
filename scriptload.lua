@@ -334,7 +334,7 @@ task.spawn(function()
     end
 end)
 
--- 8. LOOP UTAMA FARMING
+-- 8. LOOP UTAMA FARMING (FIXED TANPA NYANGKUT)
 task.spawn(function()
     while task.wait(0.2) do
         if _G.AutoFarm then
@@ -378,22 +378,15 @@ task.spawn(function()
 
                 else
                     local targetName, questName, questIndex, questCFrame = GetQuestData()
-                    local skipRest = false
+                    local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+                    local hasQuest = playerGui and playerGui:FindFirstChild("Main")
+                        and playerGui.Main:FindFirstChild("Quest")
+                        and playerGui.Main.Quest.Visible
 
-                    if method == "Quest" then
-                        local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-                        local hasQuest = playerGui and playerGui:FindFirstChild("Main")
-                            and playerGui.Main:FindFirstChild("Quest")
-                            and playerGui.Main.Quest.Visible
-
-                        if not hasQuest then
-                            ScriptLoad.TakeQuest(questName, questIndex, questCFrame)
-                            task.wait(1.5) -- Jeda biar server & UI sempat nge-refresh status quest
-                            skipRest = true
-                        end
-                    end
-
-                    if not skipRest then
+                    -- Kalau belum punya quest, ambil ke NPC. Kalau sudah punya, LANGSUNG FARM!
+                    if method == "Quest" and not hasQuest then
+                        ScriptLoad.TakeQuest(questName, questIndex, questCFrame)
+                    else
                         local enemiesFolder = GetEnemiesFolder()
                         if enemiesFolder then
                             local mainTarget = nil
@@ -443,5 +436,6 @@ task.spawn(function()
         end
     end
 end)
+
 
 return ScriptLoad
