@@ -423,7 +423,7 @@ Viewport.Parent = MainWindow
 -- Track holds all tab pages side by side; slides horizontally on tab switch
 local Track = Instance.new("Frame")
 Track.Name = "Track"
-Track.Size = UDim2.new(0, 0, 1, 0) -- width grows per tab added
+Track.Size = UDim2.new(1, 0, 1, 0) -- resized to scale once TabCount is known
 Track.Position = UDim2.new(0, 0, 0, 0)
 Track.BackgroundTransparency = 1
 Track.Parent = Viewport
@@ -561,8 +561,8 @@ function UI:CreateTab(tabName)
         }, 0.28, Enum.EasingStyle.Quint)
 
         currentIndex = pageIndex
-        local targetX = -(Viewport.AbsoluteSize.X * pageIndex)
-        tween(Track, {Position = UDim2.new(0, targetX, 0, 0)}, 0.32, Enum.EasingStyle.Quint)
+        local targetXScale = -(pageIndex / math.max(TabCount, 1))
+        tween(Track, {Position = UDim2.new(targetXScale, 0, 0, 0)}, 0.32, Enum.EasingStyle.Quint)
     end
 
     TabButton.MouseButton1Click:Connect(goToTab)
@@ -879,23 +879,15 @@ function UI:CreateTab(tabName)
 end
 
 ---------------------------------------------------------
--- FINAL SIZING PASS (once all tabs are declared, main.lua finishes running
--- this ensures Track + Pages have correct pixel widths, then snaps to tab 1)
+-- FINAL SIZING PASS (scale-based: no need to wait for AbsoluteSize,
+-- works immediately regardless of render timing / executor)
 ---------------------------------------------------------
 task.defer(function()
-    local w = Viewport.AbsoluteSize.X
-    local tries = 0
-    while w <= 0 and tries < 40 do
-        task.wait(0.05)
-        w = Viewport.AbsoluteSize.X
-        tries = tries + 1
-    end
-    if w <= 0 then w = 400 end -- fallback so pages are never zero-width
-
-    Track.Size = UDim2.new(0, w * math.max(TabCount, 1), 1, 0)
+    local n = math.max(TabCount, 1)
+    Track.Size = UDim2.new(n, 0, 1, 0)
     for _, t in pairs(Tabs) do
-        t.Page.Size = UDim2.new(0, w, 1, 0)
-        t.Page.Position = UDim2.new(0, w * t.Index, 0, 0)
+        t.Page.Size = UDim2.new(1 / n, 0, 1, 0)
+        t.Page.Position = UDim2.new(t.Index / n, 0, 0, 0)
     end
     Track.Position = UDim2.new(0, 0, 0, 0)
 end)
