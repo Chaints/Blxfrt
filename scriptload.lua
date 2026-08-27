@@ -24,6 +24,15 @@ local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 local currentTween = nil
 local activeHash = "12796888"
 
+-- CACHE ENEMIES FOLDER (hindari FindFirstChild berulang tiap loop di banyak tempat)
+local _enemiesFolderCache = nil
+local function GetEnemiesFolder()
+    if not _enemiesFolderCache or not _enemiesFolderCache.Parent then
+        _enemiesFolderCache = workspace:FindFirstChild("Enemies")
+    end
+    return _enemiesFolderCache
+end
+
 -- HOOK HASH OTOMATIS (ENTENG)
 if hookmetamethod then
     local oldNamecall
@@ -60,15 +69,15 @@ function ScriptLoad.TweenTo(targetCFrame, speed)
     -- terus jalan sampai selesai (jangan di-cancel & restart tiap loop -> ini yang bikin patah-patah)
     if lastTweenTarget and currentTween and currentTween.PlaybackState == Enum.PlaybackState.Playing then
         local targetShift = (lastTweenTarget.Position - targetCFrame.Position).Magnitude
-        if targetShift < 4 then
+        if targetShift < 7 then
             return currentTween
         end
     end
 
-    -- Durasi tetap (bukan dihitung dari speed/jarak) supaya gerakan konsisten halus,
-    -- makin jauh jaraknya baru durasinya nambah dikit biar gak "meluncur" kelamaan
+    -- Duration dihitung dari jarak/speed: makin tinggi TweenSpeed (100-350), makin cepat durasinya.
+    -- Range clamp disesuaikan biar slider beneran kerasa efeknya di seluruh rentang.
     local baseSpeed = speed or _G.TweenSpeed or 300
-    local duration = math.clamp(distance / baseSpeed, 0.15, 0.6)
+    local duration = math.clamp(distance / baseSpeed, 0.1, 0.9)
 
     local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
 
@@ -117,7 +126,7 @@ function ScriptLoad.FastAttack()
     
     local myHrp = character.HumanoidRootPart
     local hitTargets = {}
-    local enemiesFolder = workspace:FindFirstChild("Enemies")
+    local enemiesFolder = GetEnemiesFolder()
 
     if enemiesFolder then
         for _, enemy in ipairs(enemiesFolder:GetChildren()) do
@@ -238,7 +247,7 @@ end
 
 -- 6.5 CARI MOB TERDEKAT DARI PLAYER (UNTUK MODE NEAREST)
 local function GetNearestEnemy(myHrp)
-    local enemiesFolder = workspace:FindFirstChild("Enemies")
+    local enemiesFolder = GetEnemiesFolder()
     if not enemiesFolder then return nil end
 
     local nearest = nil
@@ -275,9 +284,9 @@ task.spawn(function()
             local character = LocalPlayer.Character
             if character and character:FindFirstChild("HumanoidRootPart") then
 
-                -- Noclip Native Super Enteng
-                if character:FindFirstChild("Humanoid") then
-                    character.Humanoid:ChangeState(11)
+                -- Noclip Native Super Enteng (cuma trigger sekali pas belum di state itu)
+                if character:FindFirstChild("Humanoid") and character.Humanoid:GetState() ~= Enum.HumanoidStateType.Physics then
+                    character.Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
                 end
 
                 if _G.AutoEquipMelee then
@@ -303,7 +312,7 @@ task.spawn(function()
                         end
 
                         if _G.BringMob then
-                            local enemiesFolder = workspace:FindFirstChild("Enemies")
+                            local enemiesFolder = GetEnemiesFolder()
                             if enemiesFolder then
                                 for _, enemy in ipairs(enemiesFolder:GetChildren()) do
                                     local eHrp = enemy:FindFirstChild("HumanoidRootPart")
@@ -336,7 +345,7 @@ task.spawn(function()
                     -- method == "No Quest" langsung skip pengambilan quest, langsung cari target
 
                     if not skipRest then
-                        local enemiesFolder = workspace:FindFirstChild("Enemies")
+                        local enemiesFolder = GetEnemiesFolder()
                         if enemiesFolder then
                             local mainTarget = nil
 

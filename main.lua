@@ -54,7 +54,7 @@ FarmTab:CreateDropdown("Farm Method", {"Quest", "Nearest", "No Quest"}, "Nearest
 end)
 
 _G.TweenSpeed = 300
-FarmTab:CreateSliderInput("Tween Speed", 100, 500, 300, "left", function(value)
+FarmTab:CreateSliderInput("Tween Speed", 100, 350, 300, "left", function(value)
     _G.TweenSpeed = value
 end)
 
