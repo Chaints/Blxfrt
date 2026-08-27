@@ -90,6 +90,12 @@ function ScriptLoad.TweenTo(targetCFrame, speed)
     local hrp = character.HumanoidRootPart
     local distance = (hrp.Position - targetCFrame.Position).Magnitude
 
+    -- TAMBAHAN: Paksa kamera fokus ke karakter biar ga lepas/ketinggalan
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid and workspace.CurrentCamera.CameraSubject ~= humanoid then
+        workspace.CurrentCamera.CameraSubject = humanoid
+    end
+
     if distance < 3 then
         if currentTween then currentTween:Cancel() end
         lastTweenTarget = nil
@@ -117,21 +123,6 @@ function ScriptLoad.TweenTo(targetCFrame, speed)
     lastTweenTarget = targetCFrame
     currentTween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
     currentTween:Play()
-
-    -- TAMBAHAN: Biar kamera ngikutin mulus selama tween jalan
-    local camera = workspace.CurrentCamera
-    local connection
-    connection = RunService.RenderStepped:Connect(function()
-        if currentTween and currentTween.PlaybackState == Enum.PlaybackState.Playing and hrp then
-            -- Posisikan kamera agar tetap fokus ke karakter selama terbang
-            camera.CFrame = CFrame.new(camera.CFrame.Position, hrp.Position)
-        else
-            if connection then
-                connection:Disconnect()
-            end
-        end
-    end)
-
     return currentTween
 end
 
