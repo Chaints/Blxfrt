@@ -23,7 +23,9 @@ local Theme = {
     InactivePill = Color3.fromRGB(32, 32, 36),
     TextPrimary  = Color3.fromRGB(240, 240, 243),
     TextMuted    = Color3.fromRGB(130, 130, 138),
-    Border       = Color3.fromRGB(46, 46, 51)
+    Border       = Color3.fromRGB(46, 46, 51),
+    Success      = Color3.fromRGB(53, 199, 89),
+    SuccessDim   = Color3.fromRGB(30, 110, 55)
 }
 
 local function tween(obj, props, time, style)
@@ -245,7 +247,7 @@ end
 local MainWindow = Instance.new("Frame")
 MainWindow.Name = "MainWindow"
 MainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
-MainWindow.Size = UDim2.new(0, 340, 0, 300)
+MainWindow.Size = UDim2.new(0, 430, 0, 320)
 MainWindow.Position = UDim2.new(0.5, 0, 0.45, 0)
 MainWindow.BackgroundTransparency = 1
 MainWindow.BorderSizePixel = 0
@@ -256,7 +258,7 @@ MainWindow.Parent = ScreenGui
 -- Header (solid floating bar so the "ZxD" name is clearly visible)
 local Header = Instance.new("Frame")
 Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 78)
+Header.Size = UDim2.new(1, 0, 0, 92)
 Header.BackgroundColor3 = Theme.CardBG
 Header.BorderSizePixel = 0
 Header.Parent = MainWindow
@@ -269,6 +271,15 @@ local HeaderStroke = Instance.new("UIStroke")
 HeaderStroke.Color = Theme.Border
 HeaderStroke.Thickness = 1
 HeaderStroke.Parent = Header
+
+local HeaderDivider = Instance.new("Frame")
+HeaderDivider.Name = "HeaderDivider"
+HeaderDivider.Size = UDim2.new(1, -16, 0, 1)
+HeaderDivider.Position = UDim2.new(0, 8, 0, 90)
+HeaderDivider.BackgroundColor3 = Theme.Border
+HeaderDivider.BorderSizePixel = 0
+HeaderDivider.BackgroundTransparency = 0.3
+HeaderDivider.Parent = Header
 
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
@@ -326,8 +337,8 @@ end)
 ---------------------------------------------------------
 local TabNav = Instance.new("ScrollingFrame")
 TabNav.Name = "TabNav"
-TabNav.Size = UDim2.new(1, -16, 0, 32)
-TabNav.Position = UDim2.new(0, 8, 0, 42)
+TabNav.Size = UDim2.new(1, -16, 0, 36)
+TabNav.Position = UDim2.new(0, 8, 0, 48)
 TabNav.BackgroundTransparency = 1
 TabNav.ScrollBarThickness = 0
 TabNav.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -363,8 +374,8 @@ TabUnderlineCorner.Parent = TabUnderline
 ---------------------------------------------------------
 local Viewport = Instance.new("Frame")
 Viewport.Name = "Viewport"
-Viewport.Size = UDim2.new(1, -16, 1, -88)
-Viewport.Position = UDim2.new(0, 8, 0, 84)
+Viewport.Size = UDim2.new(1, -16, 1, -110)
+Viewport.Position = UDim2.new(0, 8, 0, 104)
 Viewport.BackgroundTransparency = 1
 Viewport.ClipsDescendants = true
 Viewport.Parent = MainWindow
@@ -423,7 +434,7 @@ function UI:CreateTab(tabName)
     ---------------------------------------------------------
     local LeftCard = Instance.new("Frame")
     LeftCard.Name = "LeftCard"
-    LeftCard.Size = UDim2.new(0.5, -3, 1, 0)
+    LeftCard.Size = UDim2.new(0.5, -8, 1, 0)
     LeftCard.Position = UDim2.new(0, 0, 0, 0)
     LeftCard.BackgroundColor3 = Theme.CardBG
     LeftCard.Parent = TabPage
@@ -438,8 +449,8 @@ function UI:CreateTab(tabName)
     LeftCardStroke.Parent = LeftCard
 
     local LeftScroll = Instance.new("ScrollingFrame")
-    LeftScroll.Size = UDim2.new(1, -16, 1, -16)
-    LeftScroll.Position = UDim2.new(0, 8, 0, 8)
+    LeftScroll.Size = UDim2.new(1, -22, 1, -20)
+    LeftScroll.Position = UDim2.new(0, 12, 0, 10)
     LeftScroll.BackgroundTransparency = 1
     LeftScroll.ScrollBarThickness = 2
     LeftScroll.ScrollBarImageColor3 = Theme.AccentDim
@@ -448,7 +459,7 @@ function UI:CreateTab(tabName)
 
     local LeftList = Instance.new("UIListLayout")
     LeftList.Parent = LeftScroll
-    LeftList.Padding = UDim.new(0, 10)
+    LeftList.Padding = UDim.new(0, 12)
 
     LeftList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         LeftScroll.CanvasSize = UDim2.new(0, 0, 0, LeftList.AbsoluteContentSize.Y + 4)
@@ -459,8 +470,8 @@ function UI:CreateTab(tabName)
     ---------------------------------------------------------
     local RightCard = Instance.new("Frame")
     RightCard.Name = "RightCard"
-    RightCard.Size = UDim2.new(0.5, -3, 1, 0)
-    RightCard.Position = UDim2.new(0.5, 3, 0, 0)
+    RightCard.Size = UDim2.new(0.5, -8, 1, 0)
+    RightCard.Position = UDim2.new(0.5, 8, 0, 0)
     RightCard.BackgroundColor3 = Theme.CardBG
     RightCard.Parent = TabPage
 
@@ -474,8 +485,8 @@ function UI:CreateTab(tabName)
     RightCardStroke.Parent = RightCard
 
     local RightScroll = Instance.new("ScrollingFrame")
-    RightScroll.Size = UDim2.new(1, -16, 1, -16)
-    RightScroll.Position = UDim2.new(0, 8, 0, 8)
+    RightScroll.Size = UDim2.new(1, -22, 1, -20)
+    RightScroll.Position = UDim2.new(0, 12, 0, 10)
     RightScroll.BackgroundTransparency = 1
     RightScroll.ScrollBarThickness = 2
     RightScroll.ScrollBarImageColor3 = Theme.AccentDim
@@ -484,7 +495,7 @@ function UI:CreateTab(tabName)
 
     local RightList = Instance.new("UIListLayout")
     RightList.Parent = RightScroll
-    RightList.Padding = UDim.new(0, 10)
+    RightList.Padding = UDim.new(0, 12)
 
     RightList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         RightScroll.CanvasSize = UDim2.new(0, 0, 0, RightList.AbsoluteContentSize.Y + 4)
@@ -559,7 +570,7 @@ function UI:CreateTab(tabName)
         local Target = GetTargetScroll(side)
 
         local Item = Instance.new("Frame")
-        Item.Size = UDim2.new(1, 0, 0, 42)
+        Item.Size = UDim2.new(1, 0, 0, 46)
         Item.BackgroundColor3 = Theme.InactivePill
         Item.ClipsDescendants = false
         Item.ZIndex = 2
@@ -570,7 +581,7 @@ function UI:CreateTab(tabName)
         ItemCorner.Parent = Item
 
         local Label = Instance.new("TextLabel")
-        Label.Size = UDim2.new(0.5, -10, 1, 0)
+        Label.Size = UDim2.new(0.46, -10, 1, 0)
         Label.Position = UDim2.new(0, 14, 0, 0)
         Label.BackgroundTransparency = 1
         Label.Text = text
@@ -583,8 +594,8 @@ function UI:CreateTab(tabName)
         Label.Parent = Item
 
         local Selector = Instance.new("TextButton")
-        Selector.Size = UDim2.new(0.5, -14, 0, 28)
-        Selector.Position = UDim2.new(0.5, 0, 0.5, -14)
+        Selector.Size = UDim2.new(0.54, -14, 0, 30)
+        Selector.Position = UDim2.new(0.46, 0, 0.5, -15)
         Selector.BackgroundColor3 = Theme.CardBG
         Selector.Text = ""
         Selector.AutoButtonColor = false
@@ -617,16 +628,16 @@ function UI:CreateTab(tabName)
         Arrow.Size = UDim2.new(0, 18, 1, 0)
         Arrow.Position = UDim2.new(1, -20, 0, 0)
         Arrow.BackgroundTransparency = 1
-        Arrow.Text = "▾"
+        Arrow.Text = "v"
         Arrow.TextColor3 = Theme.TextMuted
         Arrow.Font = Enum.Font.GothamBold
-        Arrow.TextSize = 12
+        Arrow.TextSize = 11
         Arrow.ZIndex = 2
         Arrow.Parent = Selector
 
         local OptionsFrame = Instance.new("Frame")
-        OptionsFrame.Size = UDim2.new(0.5, -14, 0, #options * 28)
-        OptionsFrame.Position = UDim2.new(0.5, 0, 1, 2)
+        OptionsFrame.Size = UDim2.new(0.54, -14, 0, #options * 28)
+        OptionsFrame.Position = UDim2.new(0.46, 0, 1, 2)
         OptionsFrame.BackgroundColor3 = Theme.CardBG
         OptionsFrame.Visible = false
         OptionsFrame.ZIndex = 20
@@ -708,7 +719,7 @@ function UI:CreateTab(tabName)
         local Target = GetTargetScroll(side)
 
         local Item = Instance.new("Frame")
-        Item.Size = UDim2.new(1, 0, 0, 54)
+        Item.Size = UDim2.new(1, 0, 0, 58)
         Item.BackgroundColor3 = Theme.InactivePill
         Item.Parent = Target
 
@@ -840,7 +851,7 @@ function UI:CreateTab(tabName)
         local Target = GetTargetScroll(side)
 
         local Item = Instance.new("TextButton")
-        Item.Size = UDim2.new(1, 0, 0, 42)
+        Item.Size = UDim2.new(1, 0, 0, 46)
         Item.BackgroundColor3 = Theme.InactivePill
         Item.Text = ""
         Item.AutoButtonColor = false
@@ -851,7 +862,7 @@ function UI:CreateTab(tabName)
         ItemCorner.Parent = Item
 
         local Label = Instance.new("TextLabel")
-        Label.Size = UDim2.new(1, -54, 1, 0)
+        Label.Size = UDim2.new(1, -62, 1, 0)
         Label.Position = UDim2.new(0, 14, 0, 0)
         Label.BackgroundTransparency = 1
         Label.Text = text
@@ -863,9 +874,9 @@ function UI:CreateTab(tabName)
         Label.Parent = Item
 
         local Indicator = Instance.new("Frame")
-        Indicator.Size = UDim2.new(0, 34, 0, 18)
-        Indicator.Position = UDim2.new(1, -44, 0.5, -9)
-        Indicator.BackgroundColor3 = defaultState and Theme.Accent or Theme.CardBG
+        Indicator.Size = UDim2.new(0, 40, 0, 22)
+        Indicator.Position = UDim2.new(1, -50, 0.5, -11)
+        Indicator.BackgroundColor3 = defaultState and Theme.Success or Theme.InactivePill
         Indicator.Parent = Item
 
         local IndCorner = Instance.new("UICorner")
@@ -878,9 +889,9 @@ function UI:CreateTab(tabName)
         IndStroke.Parent = Indicator
 
         local Dot = Instance.new("Frame")
-        Dot.Size = UDim2.new(0, 14, 0, 14)
-        Dot.Position = defaultState and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
-        Dot.BackgroundColor3 = defaultState and Theme.Background or Theme.TextMuted
+        Dot.Size = UDim2.new(0, 18, 0, 18)
+        Dot.Position = defaultState and UDim2.new(1, -20, 0.5, -9) or UDim2.new(0, 2, 0.5, -9)
+        Dot.BackgroundColor3 = Theme.TextPrimary
         Dot.Parent = Indicator
 
         local DotCorner = Instance.new("UICorner")
@@ -890,7 +901,7 @@ function UI:CreateTab(tabName)
         local PulseDot = Instance.new("Frame")
         PulseDot.Size = UDim2.new(0, 6, 0, 6)
         PulseDot.Position = UDim2.new(1, -12, 0, 6)
-        PulseDot.BackgroundColor3 = Theme.Accent
+        PulseDot.BackgroundColor3 = Theme.Success
         PulseDot.BackgroundTransparency = defaultState and 0 or 1
         PulseDot.ZIndex = 3
         PulseDot.Parent = Item
@@ -924,10 +935,10 @@ function UI:CreateTab(tabName)
 
         local function setEnabled(newState, fromQuickPanel)
             enabled = newState
-            tween(Indicator, {BackgroundColor3 = enabled and Theme.Accent or Theme.CardBG}, 0.18)
+            tween(Indicator, {BackgroundColor3 = enabled and Theme.Success or Theme.InactivePill}, 0.18)
             tween(Dot, {
-                Position = enabled and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7),
-                BackgroundColor3 = enabled and Theme.Background or Theme.TextMuted
+                Position = enabled and UDim2.new(1, -20, 0.5, -9) or UDim2.new(0, 2, 0.5, -9),
+                BackgroundColor3 = Theme.TextPrimary
             }, 0.18)
             if enabled then
                 startPulse()
@@ -962,7 +973,7 @@ function UI:CreateTab(tabName)
         local Target = GetTargetScroll(side)
 
         local Item = Instance.new("Frame")
-        Item.Size = UDim2.new(1, 0, 0, 54)
+        Item.Size = UDim2.new(1, 0, 0, 58)
         Item.BackgroundColor3 = Theme.InactivePill
         Item.Parent = Target
 
