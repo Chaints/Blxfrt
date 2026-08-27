@@ -1,8 +1,6 @@
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
-local VirtualUser = game:GetService("VirtualUser")
-local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
 local ScriptLoad = {}
@@ -11,10 +9,9 @@ local ScriptLoad = {}
 _G.AutoFarm = _G.AutoFarm or false
 _G.AutoEquipMelee = true
 _G.FastAttack = true
-_G.AttackPlayers = false 
-_G.AttackRadius = 60
+_G.AttackRadius = 55
 _G.BringMob = true
-_G.AttackRange = 350
+_G.AttackRange = 300
 
 -- DEKLARASI REMOTE
 local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
@@ -23,26 +20,9 @@ local RegisterHit = Net:FindFirstChild("RE/RegisterHit") or Net:FindFirstChild("
 local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 
 local currentTween = nil
-local activeHash = nil
+local activeHash = "12796888"
 
--- AUTO EXTRACT HASH
-local function GetServerHash()
-    if activeHash then return activeHash end
-    pcall(function()
-        for _, v in ipairs(getgc(true)) do
-            if type(v) == "function" and (getinfo(v).name == "RegisterHit" or getinfo(v).name == "attack") then
-                for _, upval in ipairs(getupvalues(v)) do
-                    if type(upval) == "string" and #upval == 8 then
-                        activeHash = upval
-                        return activeHash
-                    end
-                end
-            end
-        end
-    end)
-    return activeHash or "12796888"
-end
-
+-- HOOK HASH OTOMATIS (ENTENG)
 if hookmetamethod then
     local oldNamecall
     oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
@@ -57,7 +37,7 @@ if hookmetamethod then
     end)
 end
 
--- 1. SMOOTH TWEEN MOVEMENT (OPTIMIZED)
+-- 1. TWEEN MOVEMENT (OPTIMIZED)
 function ScriptLoad.TweenTo(targetCFrame, speed)
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -74,9 +54,7 @@ function ScriptLoad.TweenTo(targetCFrame, speed)
     local duration = distance / (speed or 300)
     local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
     
-    if currentTween then
-        currentTween:Cancel()
-    end
+    if currentTween then currentTween:Cancel() end
     
     currentTween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
     currentTween:Play()
@@ -87,8 +65,7 @@ end
 function ScriptLoad.EquipMelee()
     local character = LocalPlayer.Character
     local backpack = LocalPlayer:FindFirstChild("Backpack")
-    if not character or not backpack then return end
-    if character:FindFirstChildOfClass("Tool") then return end
+    if not character or not backpack or character:FindFirstChildOfClass("Tool") then return end
 
     local meleeKeywords = {"Combat", "Dark Step", "Electro", "Water Kung Fu", "Dragon Claw", "Superhuman", "Death Step", "Sharkman Karate", "Electric Claw", "Dragon Talon", "Godhuman", "Sanguine Art"}
 
@@ -114,25 +91,22 @@ function ScriptLoad.EquipMelee()
     end
 end
 
--- 3. FAST ATTACK MULTI-TARGET (DELAYS DIOPTIMASI SUPAYA TIDAK LAG/PATAH)
+-- 3. FAST ATTACK MULTI-TARGET (RINGAN DAN SMOOTH)
 function ScriptLoad.FastAttack()
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
     
     local myHrp = character.HumanoidRootPart
     local hitTargets = {}
-
     local enemiesFolder = workspace:FindFirstChild("Enemies")
+
     if enemiesFolder then
         for _, enemy in ipairs(enemiesFolder:GetChildren()) do
             local hum = enemy:FindFirstChild("Humanoid")
-            local targetPart = enemy:FindFirstChild("LeftFoot") 
-                or enemy:FindFirstChild("UpperTorso") 
-                or enemy:FindFirstChild("HumanoidRootPart")
+            local targetPart = enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("UpperTorso")
             
             if hum and hum.Health > 0 and targetPart then
-                local distance = (targetPart.Position - myHrp.Position).Magnitude
-                if distance <= _G.AttackRadius then
+                if (targetPart.Position - myHrp.Position).Magnitude <= _G.AttackRadius then
                     table.insert(hitTargets, targetPart)
                 end
             end
@@ -140,56 +114,32 @@ function ScriptLoad.FastAttack()
     end
 
     if #hitTargets > 0 then
-        local hash = GetServerHash()
-        if RegisterAttack then
-            RegisterAttack:FireServer(0.5, 1)
-        end
-        
+        if RegisterAttack then RegisterAttack:FireServer(0.5, 1) end
         if RegisterHit then
             local mainTarget = hitTargets[1]
             local subTargets = {}
-
             for i = 2, #hitTargets do
                 table.insert(subTargets, hitTargets[i])
             end
 
-            local hitArgs = {
+            RegisterHit:FireServer(unpack({
                 [1] = mainTarget,
                 [2] = subTargets,
-                [4] = hash
-            }
-            RegisterHit:FireServer(unpack(hitArgs))
+                [4] = activeHash
+            }))
         end
     end
 end
 
--- 4. BRING MOB OPTIMIZED
+-- 4. BRING MOB ULTRA LIGHT (TANPA BODYVELOCITY MEMORY LEAK)
 function ScriptLoad.BringMob(enemy, groundCFrame)
     local hrp = enemy:FindFirstChild("HumanoidRootPart")
     local hum = enemy:FindFirstChild("Humanoid")
     
     if hrp and hum and hum.Health > 0 then
-        if hrp.CanCollide then
-            hrp.CanCollide = false
-            for _, part in ipairs(enemy:GetChildren()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
-                end
-            end
-        end
-
+        hrp.CanCollide = false
         hrp.CFrame = groundCFrame
-        
-        local bv = hrp:FindFirstChild("BringMobBV")
-        if not bv then
-            bv = Instance.new("BodyVelocity")
-            bv.Name = "BringMobBV"
-            bv.MaxForce = Vector3.new(1, 1, 1) * 100000
-            bv.Velocity = Vector3.new(0, 0, 0)
-            bv.Parent = hrp
-        else
-            bv.Velocity = Vector3.new(0, 0, 0)
-        end
+        hrp.Velocity = Vector3.zero
     end
 end
 
@@ -198,7 +148,7 @@ function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
     if CommF then
         if questCFrame then
             ScriptLoad.TweenTo(questCFrame, 300)
-            task.wait(0.5)
+            task.wait(0.4)
         end
         CommF:InvokeServer("StartQuest", questName, levelReq)
     end
@@ -267,48 +217,32 @@ local function GetQuestData()
     end
 end
 
--- 7. NOCLIP KARAKTER
-RunService.Stepped:Connect(function()
-    if _G.AutoFarm then
-        local character = LocalPlayer.Character
-        if character then
-            for _, part in ipairs(character:GetChildren()) do
-                if part:IsA("BasePart") and part.CanCollide then
-                    part.CanCollide = false
-                end
-            end
-            if character:FindFirstChild("HumanoidRootPart") then
-                character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-            end
-        end
-    end
-end)
-
--- 8. LOOP FAST ATTACK (JEDA 0.1s SUPAYA TIDAK FRAMEDROP)
-task.spawn(function()
-    while true do
-        task.wait(0.1) -- Diubah dari 0.01 ke 0.1 agar lancar & anti patah-patah
-        if _G.FastAttack and _G.AutoFarm then
-            pcall(function()
-                ScriptLoad.FastAttack()
-            end)
-        end
-    end
-end)
-
--- 9. LOOP UTAMA
+-- 7. LOOP ATTACK (CUKUP 0.15s SUDAH KENCANG & BEBAS DROP FPS)
 task.spawn(function()
     while task.wait(0.15) do
+        if _G.FastAttack and _G.AutoFarm then
+            pcall(ScriptLoad.FastAttack)
+        end
+    end
+end)
+
+-- 8. LOOP UTAMA FARMING
+task.spawn(function()
+    while task.wait(0.2) do
         if _G.AutoFarm then
             local character = LocalPlayer.Character
             if character and character:FindFirstChild("HumanoidRootPart") then
+
+                -- Noclip Native Super Enteng
+                if character:FindFirstChild("Humanoid") then
+                    character.Humanoid:ChangeState(11)
+                end
 
                 if _G.AutoEquipMelee then
                     ScriptLoad.EquipMelee()
                 end
 
                 local targetName, questName, questIndex, questCFrame = GetQuestData()
-                
                 local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
                 local hasQuest = playerGui and playerGui:FindFirstChild("Main") 
                     and playerGui.Main:FindFirstChild("Quest") 
@@ -316,7 +250,7 @@ task.spawn(function()
 
                 if not hasQuest then
                     ScriptLoad.TakeQuest(questName, questIndex, questCFrame)
-                    task.wait(0.5)
+                    task.wait(0.4)
                 else
                     local enemiesFolder = workspace:FindFirstChild("Enemies")
                     if enemiesFolder then
@@ -345,11 +279,11 @@ task.spawn(function()
                                 myHrp.CFrame = farmPosPlayer
                             end
 
-                            for _, enemy in ipairs(enemiesFolder:GetChildren()) do
-                                if string.find(enemy.Name, targetName) then
-                                    local eHrp = enemy:FindFirstChild("HumanoidRootPart")
-                                    if eHrp and (eHrp.Position - groundCFrame.Position).Magnitude <= _G.AttackRange then
-                                        if _G.BringMob then
+                            if _G.BringMob then
+                                for _, enemy in ipairs(enemiesFolder:GetChildren()) do
+                                    if string.find(enemy.Name, targetName) then
+                                        local eHrp = enemy:FindFirstChild("HumanoidRootPart")
+                                        if eHrp and (eHrp.Position - groundCFrame.Position).Magnitude <= _G.AttackRange then
                                             ScriptLoad.BringMob(enemy, groundCFrame)
                                         end
                                     end
