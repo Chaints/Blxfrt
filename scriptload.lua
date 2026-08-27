@@ -150,8 +150,8 @@ function ScriptLoad.FastAttack()
     end
 end
 
--- 5. BRING MOB FIX (NPC DI-LOCK DI 1 TITIK TERKUNCI)
-function ScriptLoad.BringMob(enemy, exactPointCFrame)
+-- 5. BRING MOB FIX (NPC KUMPUL RAPI DI TANAH, ANTI TERBANG)
+function ScriptLoad.BringMob(enemy, groundCFrame)
     local hrp = enemy:FindFirstChild("HumanoidRootPart")
     local hum = enemy:FindFirstChild("Humanoid")
     
@@ -162,7 +162,7 @@ function ScriptLoad.BringMob(enemy, exactPointCFrame)
             end
         end
 
-        hrp.CFrame = exactPointCFrame
+        hrp.CFrame = groundCFrame
         hrp.Velocity = Vector3.new(0, 0, 0)
         hrp.RotVelocity = Vector3.new(0, 0, 0)
     end
@@ -313,26 +313,27 @@ task.spawn(function()
                         if mainTarget then
                             local mainHrp = mainTarget:FindFirstChild("HumanoidRootPart")
                             
-                            -- Titik melayang aman di udara
-                            local farmPosPlayer = mainHrp.CFrame * CFrame.new(0, 11, 0)
-                            local bringTargetPos = farmPosPlayer * CFrame.new(0, -5, 0)
+                            -- Titik kumpul NPC di permukaan tanah
+                            local groundCFrame = mainHrp.CFrame
+                            -- Karakter melayang tepat 9 stud di atas titik kumpul NPC
+                            local farmPosPlayer = groundCFrame * CFrame.new(0, 9, 0)
                             local myHrp = character.HumanoidRootPart
 
-                            -- Pindahkan Karakter ke posisi melayang di atas NPC
+                            -- Pindahkan Karakter ke posisi melayang
                             if (myHrp.Position - farmPosPlayer.Position).Magnitude > 3 then
                                 ScriptLoad.TweenTo(farmPosPlayer, 300)
                             else
                                 myHrp.CFrame = farmPosPlayer
                             end
 
-                            -- Bring SEMUA NPC sejenis dalam AttackRange ke 1 titik bringTargetPos
+                            -- Bring SEMUA NPC sejenis tepat ke groundCFrame (di permukaan tanah)
                             for _, enemy in ipairs(enemiesFolder:GetChildren()) do
                                 if string.find(enemy.Name, targetName) then
                                     local eHrp = enemy:FindFirstChild("HumanoidRootPart")
-                                    if eHrp and (eHrp.Position - farmPosPlayer.Position).Magnitude <= _G.AttackRange then
+                                    if eHrp and (eHrp.Position - groundCFrame.Position).Magnitude <= _G.AttackRange then
                                         ScriptLoad.ExpandHitbox(enemy)
                                         if _G.BringMob then
-                                            ScriptLoad.BringMob(enemy, bringTargetPos)
+                                            ScriptLoad.BringMob(enemy, groundCFrame)
                                         end
                                     end
                                 end
