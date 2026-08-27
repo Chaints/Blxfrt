@@ -21,7 +21,7 @@ local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 
 local currentTween = nil
 
--- 1. EXPAND HITBOX NPC (ASLI KAMU)
+-- 1. EXPAND HITBOX NPC
 function ScriptLoad.ExpandHitbox(enemy)
     local hrp = enemy:FindFirstChild("HumanoidRootPart")
     if hrp then
@@ -31,7 +31,7 @@ function ScriptLoad.ExpandHitbox(enemy)
     end
 end
 
--- 2. TWEEN MOVEMENT (SMOOTH & ANTI NJOT-NJOTAN)
+-- 2. TWEEN MOVEMENT (SMOOTH)
 function ScriptLoad.TweenTo(targetCFrame, speed)
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -57,7 +57,7 @@ function ScriptLoad.TweenTo(targetCFrame, speed)
     return currentTween
 end
 
--- 3. AUTO EQUIP MELEE (ASLI KAMU)
+-- 3. AUTO EQUIP MELEE
 function ScriptLoad.EquipMelee()
     local character = LocalPlayer.Character
     local backpack = LocalPlayer:FindFirstChild("Backpack")
@@ -115,16 +115,23 @@ function ScriptLoad.AttackTarget(targetEnemy)
     if tool then tool:Activate() end
 end
 
--- 5. BRING MOB (KUMPULIN NPC KE SATU TITIK)
-function ScriptLoad.BringMob(enemy, targetCFrame)
+-- 5. BRING MOB FIX (NPC TERKUNCI 1 TITIK DI UDARA & ANTI NEMBUS)
+function ScriptLoad.BringMob(enemy, exactPointCFrame)
     local hrp = enemy:FindFirstChild("HumanoidRootPart")
     local hum = enemy:FindFirstChild("Humanoid")
     
     if hrp and hum and hum.Health > 0 then
-        hrp.CanCollide = false
+        -- Matikan kolisi semua part NPC biar gak ada tabrakan antar NPC
+        for _, part in ipairs(enemy:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+
         hrp.Size = _G.HitboxSize
-        hrp.CFrame = targetCFrame * CFrame.new(0, -3, 0)
+        hrp.CFrame = exactPointCFrame -- Paksa kumpul pas di 1 koordinat ini
         hrp.Velocity = Vector3.new(0, 0, 0)
+        hrp.RotVelocity = Vector3.new(0, 0, 0)
     end
 end
 
@@ -202,7 +209,7 @@ local function GetQuestData()
     end
 end
 
--- 8. NOCLIP & FIX VELOCITY (SUPAYA CHARACTER MELAYANG HALUS SAAT AUTO FARM)
+-- 8. NOCLIP KARAKTER & ANTI GRAVITASI
 RunService.Stepped:Connect(function()
     if _G.AutoFarm then
         local character = LocalPlayer.Character
@@ -246,7 +253,7 @@ task.spawn(function()
                     if enemiesFolder then
                         local mainTarget = nil
 
-                        -- Cari Musuh Utama
+                        -- Cari NPC pertama untuk patokan awal
                         for _, enemy in ipairs(enemiesFolder:GetChildren()) do
                             if string.find(enemy.Name, targetName) then
                                 local hrp = enemy:FindFirstChild("HumanoidRootPart")
@@ -260,35 +267,38 @@ task.spawn(function()
 
                         if mainTarget then
                             local mainHrp = mainTarget:FindFirstChild("HumanoidRootPart")
-                            local farmPosition = mainHrp.CFrame * CFrame.new(0, 7, 0)
+                            
+                            -- FIX: TITIK KUMPUL FIX (Karakter di atas, NPC kumpul pas di bawahnya melayang)
+                            local farmPosPlayer = mainHrp.CFrame * CFrame.new(0, 10, 0)
+                            local bringTargetPos = farmPosPlayer * CFrame.new(0, -4, 0)
                             local myHrp = character.HumanoidRootPart
 
-                            -- Posisi Karakter Melayang Stabil
-                            if (myHrp.Position - farmPosition.Position).Magnitude > 3 then
-                                ScriptLoad.TweenTo(farmPosition, 300)
+                            -- Pindahkan Karakter ke Titik Udara Terkunci
+                            if (myHrp.Position - farmPosPlayer.Position).Magnitude > 3 then
+                                ScriptLoad.TweenTo(farmPosPlayer, 300)
                             else
-                                myHrp.CFrame = farmPosition
+                                myHrp.CFrame = farmPosPlayer
                             end
 
-                            -- Bring Mobs ke Musuh Utama
+                            -- Tarik SEMUA NPC yang cocok tepat ke 1 titik bringTargetPos
                             for _, enemy in ipairs(enemiesFolder:GetChildren()) do
                                 if string.find(enemy.Name, targetName) then
                                     local eHrp = enemy:FindFirstChild("HumanoidRootPart")
-                                    if eHrp and (eHrp.Position - mainHrp.Position).Magnitude < 350 then
+                                    if eHrp and (eHrp.Position - farmPosPlayer.Position).Magnitude < 350 then
                                         ScriptLoad.ExpandHitbox(enemy)
                                         if _G.BringMob then
-                                            ScriptLoad.BringMob(enemy, mainHrp.CFrame)
+                                            ScriptLoad.BringMob(enemy, bringTargetPos)
                                         end
                                     end
                                 end
                             end
 
-                            -- Serang
+                            -- Eksekusi Serangan kamu
                             if _G.AutoAttack then
                                 ScriptLoad.AttackTarget(mainTarget)
                             end
                         else
-                            -- Jika musuh belum spawn, tunggu di spot spawn
+                            -- Jika musuh belum spawn, tunggu di spot quest spawn
                             if questCFrame then
                                 ScriptLoad.TweenTo(questCFrame, 300)
                             end
