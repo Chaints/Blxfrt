@@ -34,13 +34,6 @@ local function tween(obj, props, time, style)
     return t
 end
 
--- Slightly bouncier easing used for accents/press feedback (still subtle, minimalist)
-local function tweenPop(obj, props, time)
-    local t = TweenService:Create(obj, TweenInfo.new(time or 0.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out), props)
-    t:Play()
-    return t
-end
-
 ---------------------------------------------------------
 -- TOAST NOTIFICATIONS (small pop-up feedback, top of screen)
 ---------------------------------------------------------
@@ -76,10 +69,6 @@ local function ShowToast(text, isOn)
     ToastStroke.Transparency = 1
     ToastStroke.Parent = Toast
 
-    local ToastScale = Instance.new("UIScale")
-    ToastScale.Scale = 0.85
-    ToastScale.Parent = Toast
-
     local Dot = Instance.new("Frame")
     Dot.Size = UDim2.new(0, 8, 0, 8)
     Dot.Position = UDim2.new(0, 12, 0.5, -4)
@@ -110,14 +99,12 @@ local function ShowToast(text, isOn)
     tween(ToastStroke, {Transparency = 0}, 0.18)
     tween(Dot, {BackgroundTransparency = 0}, 0.18)
     tween(Label, {TextTransparency = 0}, 0.18)
-    tweenPop(ToastScale, {Scale = 1}, 0.26)
 
     task.delay(1.4, function()
         tween(Toast, {BackgroundTransparency = 1}, 0.25)
         tween(ToastStroke, {Transparency = 1}, 0.25)
         tween(Dot, {BackgroundTransparency = 1}, 0.25)
         tween(Label, {TextTransparency = 1}, 0.25)
-        tween(ToastScale, {Scale = 0.9}, 0.25)
         task.wait(0.28)
         Toast:Destroy()
     end)
@@ -283,18 +270,7 @@ BackgroundPanelCorner.Parent = BackgroundPanel
 local BackgroundPanelStroke = Instance.new("UIStroke")
 BackgroundPanelStroke.Color = Theme.Border
 BackgroundPanelStroke.Thickness = 1
-BackgroundPanelStroke.Transparency = 0.15
 BackgroundPanelStroke.Parent = BackgroundPanel
-
--- Subtle top-to-bottom depth gradient (stays within the dark palette)
-local BackgroundGradient = Instance.new("UIGradient")
-BackgroundGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 17, 15)),
-    ColorSequenceKeypoint.new(0.5, Theme.CardBG),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 9, 8))
-})
-BackgroundGradient.Rotation = 90
-BackgroundGradient.Parent = BackgroundPanel
 
 -- Header (solid floating bar so the "ZxD" name is clearly visible)
 local Header = Instance.new("Frame")
@@ -314,16 +290,6 @@ HeaderDivider.BorderSizePixel = 0
 HeaderDivider.BackgroundTransparency = 0.3
 HeaderDivider.Parent = Header
 
--- Faint gradient fade on the divider so it doesn't feel like a hard line
-local DividerGradient = Instance.new("UIGradient")
-DividerGradient.Color = ColorSequence.new(Theme.Border)
-DividerGradient.Transparency = NumberSequence.new({
-    NumberSequenceKeypoint.new(0, 0.8),
-    NumberSequenceKeypoint.new(0.5, 0),
-    NumberSequenceKeypoint.new(1, 0.8)
-})
-DividerGradient.Parent = HeaderDivider
-
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Size = UDim2.new(1, -70, 0, 44)
@@ -336,14 +302,6 @@ Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.TextYAlignment = Enum.TextYAlignment.Center
 Title.Parent = Header
-
--- Tiny accent gradient stroke under the title for a more premium feel
-local TitleGradient = Instance.new("UIGradient")
-TitleGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Theme.TextPrimary),
-    ColorSequenceKeypoint.new(1, Theme.Accent)
-})
-TitleGradient.Parent = Title
 
 local SubTitle = Instance.new("TextLabel")
 SubTitle.Name = "SubTitle"
@@ -461,12 +419,6 @@ function UI:CreateTab(tabName)
     TabCorner.CornerRadius = UDim.new(1, 0)
     TabCorner.Parent = TabButton
 
-    local TabGlow = Instance.new("UIStroke")
-    TabGlow.Color = Theme.Accent
-    TabGlow.Thickness = 1
-    TabGlow.Transparency = FirstTab and 0.5 or 1
-    TabGlow.Parent = TabButton
-
     local TabLabel = Instance.new("TextLabel")
     TabLabel.Size = UDim2.new(1, 0, 1, 0)
     TabLabel.BackgroundTransparency = 1
@@ -508,6 +460,7 @@ function UI:CreateTab(tabName)
     local LeftList = Instance.new("UIListLayout")
     LeftList.Parent = LeftScroll
     LeftList.Padding = UDim.new(0, 12)
+    LeftList.SortOrder = Enum.SortOrder.LayoutOrder
 
     LeftList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         LeftScroll.CanvasSize = UDim2.new(0, 0, 0, LeftList.AbsoluteContentSize.Y + 4)
@@ -547,23 +500,22 @@ function UI:CreateTab(tabName)
     local RightList = Instance.new("UIListLayout")
     RightList.Parent = RightScroll
     RightList.Padding = UDim.new(0, 12)
+    RightList.SortOrder = Enum.SortOrder.LayoutOrder
 
     RightList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         RightScroll.CanvasSize = UDim2.new(0, 0, 0, RightList.AbsoluteContentSize.Y + 4)
     end)
 
-    local TabObj = { Button = TabButton, Label = TabLabel, Page = TabPage, Index = pageIndex, Glow = TabGlow }
+    local TabObj = { Button = TabButton, Label = TabLabel, Page = TabPage, Index = pageIndex }
 
     local function goToTab()
         for _, t in pairs(Tabs) do
             tween(t.Button, {BackgroundColor3 = Theme.InactivePill}, 0.18)
             tween(t.Label, {TextColor3 = Theme.TextMuted}, 0.18)
-            if t.Glow then tween(t.Glow, {Transparency = 1}, 0.18) end
             t.Page.Visible = false
         end
         tween(TabButton, {BackgroundColor3 = Theme.Accent}, 0.18)
         tween(TabLabel, {TextColor3 = Theme.Background}, 0.18)
-        tween(TabGlow, {Transparency = 0.5}, 0.18)
         tween(TabUnderline, {
             Position = UDim2.new(0, TabButton.AbsolutePosition.X - TabNav.AbsolutePosition.X + TabNav.CanvasPosition.X, 1, 2),
             Size = UDim2.new(0, TabButton.AbsoluteSize.X, 0, 2)
@@ -591,6 +543,13 @@ function UI:CreateTab(tabName)
     ---------------------------------------------------------
     local Elements = {}
 
+    local layoutOrderCount = {left = 0, right = 0}
+    local function nextLayoutOrder(side)
+        local key = (side and string.lower(side) == "right") and "right" or "left"
+        layoutOrderCount[key] = layoutOrderCount[key] + 1
+        return layoutOrderCount[key]
+    end
+
     local function GetTargetScroll(side)
         return (side and string.lower(side) == "right") and RightScroll or LeftScroll
     end
@@ -598,6 +557,7 @@ function UI:CreateTab(tabName)
     function Elements:AddSection(text, side)
         local Target = GetTargetScroll(side)
         local Sec = Instance.new("TextLabel")
+        Sec.LayoutOrder = nextLayoutOrder(side)
         Sec.Size = UDim2.new(1, 0, 0, 20)
         Sec.BackgroundTransparency = 1
         Sec.Text = string.upper(text)
@@ -623,6 +583,7 @@ function UI:CreateTab(tabName)
         local Target = GetTargetScroll(side)
 
         local Item = Instance.new("Frame")
+        Item.LayoutOrder = nextLayoutOrder(side)
         Item.Size = UDim2.new(1, 0, 0, 46)
         Item.BackgroundColor3 = Theme.InactivePill
         Item.ClipsDescendants = false
@@ -725,16 +686,12 @@ function UI:CreateTab(tabName)
             isOpen = false
             OptionsFrame.Visible = false
             Item.ZIndex = 2
-            tween(SelStroke, {Color = Theme.Border}, 0.15)
-            tweenPop(Arrow, {Rotation = 0}, 0.22)
         end
 
         Selector.MouseButton1Click:Connect(function()
             isOpen = not isOpen
             OptionsFrame.Visible = isOpen
             Item.ZIndex = isOpen and 21 or 2
-            tween(SelStroke, {Color = isOpen and Theme.Accent or Theme.Border}, 0.15)
-            tweenPop(Arrow, {Rotation = isOpen and 180 or 0}, 0.22)
         end)
 
         for _, opt in ipairs(options) do
@@ -786,6 +743,7 @@ function UI:CreateTab(tabName)
         local Target = GetTargetScroll(side)
 
         local Item = Instance.new("Frame")
+        Item.LayoutOrder = nextLayoutOrder(side)
         Item.Size = UDim2.new(1, 0, 0, 58)
         Item.BackgroundColor3 = Theme.InactivePill
         Item.Parent = Target
@@ -892,7 +850,6 @@ function UI:CreateTab(tabName)
         SliderBar.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 dragging = true
-                tweenPop(Knob, {Size = UDim2.new(0, 20, 0, 20)}, 0.18)
                 updateFromDrag(input)
             end
         end)
@@ -900,7 +857,6 @@ function UI:CreateTab(tabName)
         UserInputService.InputEnded:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 dragging = false
-                tweenPop(Knob, {Size = UDim2.new(0, 16, 0, 16)}, 0.18)
             end
         end)
 
@@ -925,6 +881,7 @@ function UI:CreateTab(tabName)
         local Target = GetTargetScroll(side)
 
         local Item = Instance.new("TextButton")
+        Item.LayoutOrder = nextLayoutOrder(side)
         Item.Size = UDim2.new(1, 0, 0, 46)
         Item.AutomaticSize = Enum.AutomaticSize.Y
         Item.BackgroundColor3 = Theme.InactivePill
@@ -966,9 +923,8 @@ function UI:CreateTab(tabName)
         IndCorner.Parent = Indicator
 
         local IndStroke = Instance.new("UIStroke")
-        IndStroke.Color = defaultState and Theme.Success or Theme.Border
+        IndStroke.Color = Theme.Border
         IndStroke.Thickness = 1
-        IndStroke.Transparency = defaultState and 0.4 or 0
         IndStroke.Parent = Indicator
 
         local Dot = Instance.new("Frame")
@@ -1019,12 +975,10 @@ function UI:CreateTab(tabName)
         local function setEnabled(newState, fromQuickPanel)
             enabled = newState
             tween(Indicator, {BackgroundColor3 = enabled and Theme.Success or Theme.InactivePill}, 0.18)
-            IndStroke.Color = enabled and Theme.Success or Theme.Border
-            tween(IndStroke, {Transparency = enabled and 0.4 or 0}, 0.18)
-            tweenPop(Dot, {
+            tween(Dot, {
                 Position = enabled and UDim2.new(1, -20, 0.5, -9) or UDim2.new(0, 2, 0.5, -9),
                 BackgroundColor3 = Theme.TextPrimary
-            }, 0.24)
+            }, 0.18)
             if enabled then
                 startPulse()
                 RegisterQuick(text, function() setEnabled(false) end)
@@ -1058,6 +1012,7 @@ function UI:CreateTab(tabName)
         local Target = GetTargetScroll(side)
 
         local Item = Instance.new("Frame")
+        Item.LayoutOrder = nextLayoutOrder(side)
         Item.Size = UDim2.new(1, 0, 0, 58)
         Item.BackgroundColor3 = Theme.InactivePill
         Item.Parent = Target
@@ -1146,7 +1101,6 @@ function UI:CreateTab(tabName)
         SliderBar.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 dragging = true
-                tweenPop(Knob, {Size = UDim2.new(0, 20, 0, 20)}, 0.18)
                 update(input)
             end
         end)
@@ -1154,7 +1108,6 @@ function UI:CreateTab(tabName)
         UserInputService.InputEnded:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 dragging = false
-                tweenPop(Knob, {Size = UDim2.new(0, 16, 0, 16)}, 0.18)
             end
         end)
 
@@ -1169,6 +1122,7 @@ function UI:CreateTab(tabName)
         local Target = GetTargetScroll(side)
 
         local Btn = Instance.new("TextButton")
+        Btn.LayoutOrder = nextLayoutOrder(side)
         Btn.Size = UDim2.new(1, 0, 0, 40)
         Btn.BackgroundColor3 = Theme.InactivePill
         Btn.Text = text
@@ -1194,10 +1148,8 @@ function UI:CreateTab(tabName)
             tween(Btn, {BackgroundColor3 = Theme.InactivePill}, 0.15)
         end)
         Btn.MouseButton1Click:Connect(function()
-            tweenPop(Btn, {Size = UDim2.new(1, 0, 0, 38)}, 0.1)
             tween(Btn, {BackgroundColor3 = Theme.Accent}, 0.08)
-            task.delay(0.09, function()
-                tweenPop(Btn, {Size = UDim2.new(1, 0, 0, 40)}, 0.18)
+            task.delay(0.08, function()
                 tween(Btn, {BackgroundColor3 = Theme.ItemHover}, 0.15)
             end)
             ShowToast(text, true)
