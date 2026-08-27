@@ -33,6 +33,82 @@ local function tween(obj, props, time, style)
 end
 
 ---------------------------------------------------------
+-- TOAST NOTIFICATIONS (small pop-up feedback, top of screen)
+---------------------------------------------------------
+local ToastHolder = Instance.new("Frame")
+ToastHolder.Name = "ToastHolder"
+ToastHolder.AnchorPoint = Vector2.new(0.5, 0)
+ToastHolder.Position = UDim2.new(0.5, 0, 0, 14)
+ToastHolder.Size = UDim2.new(0, 260, 0, 0)
+ToastHolder.BackgroundTransparency = 1
+ToastHolder.ZIndex = 50
+ToastHolder.Parent = ScreenGui
+
+local ToastList = Instance.new("UIListLayout")
+ToastList.Parent = ToastHolder
+ToastList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+ToastList.Padding = UDim.new(0, 6)
+
+local function ShowToast(text, isOn)
+    local Toast = Instance.new("Frame")
+    Toast.Size = UDim2.new(0, 240, 0, 36)
+    Toast.BackgroundColor3 = Theme.CardBG
+    Toast.BackgroundTransparency = 1
+    Toast.ZIndex = 51
+    Toast.Parent = ToastHolder
+
+    local ToastCorner = Instance.new("UICorner")
+    ToastCorner.CornerRadius = UDim.new(0, 10)
+    ToastCorner.Parent = Toast
+
+    local ToastStroke = Instance.new("UIStroke")
+    ToastStroke.Color = Theme.Border
+    ToastStroke.Thickness = 1
+    ToastStroke.Transparency = 1
+    ToastStroke.Parent = Toast
+
+    local Dot = Instance.new("Frame")
+    Dot.Size = UDim2.new(0, 8, 0, 8)
+    Dot.Position = UDim2.new(0, 12, 0.5, -4)
+    Dot.BackgroundColor3 = (isOn == nil or isOn) and Theme.Accent or Theme.TextMuted
+    Dot.BackgroundTransparency = 1
+    Dot.ZIndex = 52
+    Dot.Parent = Toast
+
+    local DotCorner = Instance.new("UICorner")
+    DotCorner.CornerRadius = UDim.new(1, 0)
+    DotCorner.Parent = Dot
+
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(1, -34, 1, 0)
+    Label.Position = UDim2.new(0, 28, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = text
+    Label.TextColor3 = Theme.TextPrimary
+    Label.TextTransparency = 1
+    Label.Font = Enum.Font.GothamMedium
+    Label.TextSize = 12
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.TextTruncate = Enum.TextTruncate.AtEnd
+    Label.ZIndex = 52
+    Label.Parent = Toast
+
+    tween(Toast, {BackgroundTransparency = 0.05}, 0.18)
+    tween(ToastStroke, {Transparency = 0}, 0.18)
+    tween(Dot, {BackgroundTransparency = 0}, 0.18)
+    tween(Label, {TextTransparency = 0}, 0.18)
+
+    task.delay(1.4, function()
+        tween(Toast, {BackgroundTransparency = 1}, 0.25)
+        tween(ToastStroke, {Transparency = 1}, 0.25)
+        tween(Dot, {BackgroundTransparency = 1}, 0.25)
+        tween(Label, {TextTransparency = 1}, 0.25)
+        task.wait(0.28)
+        Toast:Destroy()
+    end)
+end
+
+---------------------------------------------------------
 -- MOBILE TOGGLE (Floating minimal dot/button)
 ---------------------------------------------------------
 local MobileBtn = Instance.new("TextButton")
@@ -92,7 +168,7 @@ HeaderStroke.Parent = Header
 
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
-Title.Size = UDim2.new(1, -70, 1, 0)
+Title.Size = UDim2.new(1, -70, 0, 44)
 Title.Position = UDim2.new(0, 14, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "ZxD"
@@ -100,12 +176,13 @@ Title.TextColor3 = Theme.TextPrimary
 Title.TextSize = 19
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.TextYAlignment = Enum.TextYAlignment.Center
 Title.Parent = Header
 
 local SubTitle = Instance.new("TextLabel")
 SubTitle.Name = "SubTitle"
 SubTitle.Size = UDim2.new(0, 44, 0, 14)
-SubTitle.Position = UDim2.new(0, 14 + 40, 0, 4)
+SubTitle.Position = UDim2.new(0, 14 + 40, 0, 15)
 SubTitle.BackgroundTransparency = 1
 SubTitle.Text = "HUB"
 SubTitle.TextColor3 = Theme.TextMuted
@@ -117,7 +194,7 @@ SubTitle.Parent = Header
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Name = "CloseBtn"
 CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Position = UDim2.new(1, -38, 0.5, -15)
+CloseBtn.Position = UDim2.new(1, -38, 0, 7)
 CloseBtn.BackgroundColor3 = Theme.InactivePill
 CloseBtn.Text = "×"
 CloseBtn.TextColor3 = Theme.TextMuted
@@ -428,6 +505,7 @@ function UI:CreateTab(tabName)
                 Position = enabled and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7),
                 BackgroundColor3 = enabled and Theme.Background or Theme.TextMuted
             }, 0.18)
+            ShowToast(text .. (enabled and ": ON" or ": OFF"), enabled)
             pcall(callback, enabled)
         end)
     end
@@ -569,6 +647,7 @@ function UI:CreateTab(tabName)
             task.delay(0.08, function()
                 tween(Btn, {BackgroundColor3 = Theme.ItemHover}, 0.15)
             end)
+            ShowToast(text, true)
             pcall(callback)
         end)
     end
