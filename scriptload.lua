@@ -12,9 +12,9 @@ _G.AutoFarm = _G.AutoFarm or false
 _G.AutoEquipMelee = true
 _G.FastAttack = true
 _G.AttackPlayers = false 
-_G.AttackRadius = 60     -- Jangkauan area Fast Attack (studs)
+_G.AttackRadius = 60
 _G.BringMob = true
-_G.AttackRange = 350     -- Radius tarik NPC
+_G.AttackRange = 350
 
 -- DEKLARASI REMOTE
 local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
@@ -25,7 +25,7 @@ local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 local currentTween = nil
 local activeHash = nil
 
--- AUTO EXTRACT HASH SERVERSIDE
+-- AUTO EXTRACT HASH
 local function GetServerHash()
     if activeHash then return activeHash end
     pcall(function()
@@ -57,7 +57,7 @@ if hookmetamethod then
     end)
 end
 
--- 1. SMOOTH TWEEN MOVEMENT (ANTI NJOT-NJOTAN)
+-- 1. SMOOTH TWEEN MOVEMENT (OPTIMIZED)
 function ScriptLoad.TweenTo(targetCFrame, speed)
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -114,7 +114,7 @@ function ScriptLoad.EquipMelee()
     end
 end
 
--- 3. MULTI-TARGET FAST ATTACK (MUKUL BANYAK NPC SEKALIGUS)
+-- 3. FAST ATTACK MULTI-TARGET (DELAYS DIOPTIMASI SUPAYA TIDAK LAG/PATAH)
 function ScriptLoad.FastAttack()
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -149,14 +149,13 @@ function ScriptLoad.FastAttack()
             local mainTarget = hitTargets[1]
             local subTargets = {}
 
-            -- Masukkan seluruh NPC yang masuk radius ke daftar subTargets untuk serangan AoE
             for i = 2, #hitTargets do
                 table.insert(subTargets, hitTargets[i])
             end
 
             local hitArgs = {
                 [1] = mainTarget,
-                [2] = subTargets, -- Array Multi-Hit
+                [2] = subTargets,
                 [4] = hash
             }
             RegisterHit:FireServer(unpack(hitArgs))
@@ -164,15 +163,18 @@ function ScriptLoad.FastAttack()
     end
 end
 
--- 4. BRING MOB FIX (PAKAI BODYVELOCITY AGAR NPC DI TANAH & ANTI-TERBANG)
+-- 4. BRING MOB OPTIMIZED
 function ScriptLoad.BringMob(enemy, groundCFrame)
     local hrp = enemy:FindFirstChild("HumanoidRootPart")
     local hum = enemy:FindFirstChild("Humanoid")
     
     if hrp and hum and hum.Health > 0 then
-        for _, part in ipairs(enemy:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
+        if hrp.CanCollide then
+            hrp.CanCollide = false
+            for _, part in ipairs(enemy:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
             end
         end
 
@@ -265,13 +267,13 @@ local function GetQuestData()
     end
 end
 
--- 7. NOCLIP & VELOCITY ZEROING (PENYEBAB UTAMA TWEEN HALUS / ANTI PATAR-PATAH)
+-- 7. NOCLIP KARAKTER
 RunService.Stepped:Connect(function()
     if _G.AutoFarm then
         local character = LocalPlayer.Character
         if character then
             for _, part in ipairs(character:GetChildren()) do
-                if part:IsA("BasePart") then
+                if part:IsA("BasePart") and part.CanCollide then
                     part.CanCollide = false
                 end
             end
@@ -282,11 +284,11 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- 8. LOOP FAST ATTACK
+-- 8. LOOP FAST ATTACK (JEDA 0.1s SUPAYA TIDAK FRAMEDROP)
 task.spawn(function()
     while true do
-        task.wait(0.01)
-        if _G.FastAttack then
+        task.wait(0.1) -- Diubah dari 0.01 ke 0.1 agar lancar & anti patah-patah
+        if _G.FastAttack and _G.AutoFarm then
             pcall(function()
                 ScriptLoad.FastAttack()
             end)
@@ -296,7 +298,7 @@ end)
 
 -- 9. LOOP UTAMA
 task.spawn(function()
-    while task.wait(0.1) do
+    while task.wait(0.15) do
         if _G.AutoFarm then
             local character = LocalPlayer.Character
             if character and character:FindFirstChild("HumanoidRootPart") then
@@ -343,7 +345,6 @@ task.spawn(function()
                                 myHrp.CFrame = farmPosPlayer
                             end
 
-                            -- Bring SEMUA NPC sejenis
                             for _, enemy in ipairs(enemiesFolder:GetChildren()) do
                                 if string.find(enemy.Name, targetName) then
                                     local eHrp = enemy:FindFirstChild("HumanoidRootPart")
