@@ -136,64 +136,13 @@ MobStroke.Thickness = 1
 MobStroke.Parent = MobileBtn
 
 ---------------------------------------------------------
--- WATERMARK (floating, separate from main window, draggable)
----------------------------------------------------------
-local Watermark = Instance.new("Frame")
-Watermark.Name = "Watermark"
-Watermark.Size = UDim2.new(0, 150, 0, 26)
-Watermark.Position = UDim2.new(0, 14, 0, 14)
-Watermark.BackgroundColor3 = Theme.CardBG
-Watermark.BackgroundTransparency = 0.05
-Watermark.Active = true
-Watermark.Draggable = true
-Watermark.ZIndex = 8
-Watermark.Parent = ScreenGui
-
-local WatermarkCorner = Instance.new("UICorner")
-WatermarkCorner.CornerRadius = UDim.new(0, 8)
-WatermarkCorner.Parent = Watermark
-
-local WatermarkStroke = Instance.new("UIStroke")
-WatermarkStroke.Color = Theme.Border
-WatermarkStroke.Thickness = 1
-WatermarkStroke.Parent = Watermark
-
-local WatermarkDot = Instance.new("Frame")
-WatermarkDot.Size = UDim2.new(0, 6, 0, 6)
-WatermarkDot.Position = UDim2.new(0, 10, 0.5, -3)
-WatermarkDot.BackgroundColor3 = Theme.Accent
-WatermarkDot.Parent = Watermark
-
-local WatermarkDotCorner = Instance.new("UICorner")
-WatermarkDotCorner.CornerRadius = UDim.new(1, 0)
-WatermarkDotCorner.Parent = WatermarkDot
-
-local WatermarkLabel = Instance.new("TextLabel")
-WatermarkLabel.Size = UDim2.new(1, -24, 1, 0)
-WatermarkLabel.Position = UDim2.new(0, 22, 0, 0)
-WatermarkLabel.BackgroundTransparency = 1
-WatermarkLabel.Text = "ZxD Hub | 00:00:00"
-WatermarkLabel.TextColor3 = Theme.TextPrimary
-WatermarkLabel.Font = Enum.Font.GothamMedium
-WatermarkLabel.TextSize = 11
-WatermarkLabel.TextXAlignment = Enum.TextXAlignment.Left
-WatermarkLabel.Parent = Watermark
-
-task.spawn(function()
-    while Watermark.Parent do
-        WatermarkLabel.Text = "ZxD Hub | " .. os.date("%H:%M:%S")
-        task.wait(1)
-    end
-end)
-
----------------------------------------------------------
 -- QUICK PANEL (mini floating list of currently-active toggles)
 ---------------------------------------------------------
 local QuickPanel = Instance.new("Frame")
 QuickPanel.Name = "QuickPanel"
 QuickPanel.Size = UDim2.new(0, 170, 0, 0)
 QuickPanel.AutomaticSize = Enum.AutomaticSize.Y
-QuickPanel.Position = UDim2.new(0, 14, 0, 48)
+QuickPanel.Position = UDim2.new(0, 14, 0, 14)
 QuickPanel.BackgroundColor3 = Theme.CardBG
 QuickPanel.BackgroundTransparency = 0.05
 QuickPanel.Active = true
@@ -604,6 +553,287 @@ function UI:CreateTab(tabName)
         local UnderCorner = Instance.new("UICorner")
         UnderCorner.CornerRadius = UDim.new(1, 0)
         UnderCorner.Parent = Underline
+    end
+
+    function Elements:CreateDropdown(text, options, default, side, callback)
+        local Target = GetTargetScroll(side)
+
+        local Item = Instance.new("Frame")
+        Item.Size = UDim2.new(1, 0, 0, 42)
+        Item.BackgroundColor3 = Theme.InactivePill
+        Item.ClipsDescendants = false
+        Item.ZIndex = 2
+        Item.Parent = Target
+
+        local ItemCorner = Instance.new("UICorner")
+        ItemCorner.CornerRadius = UDim.new(0, 8)
+        ItemCorner.Parent = Item
+
+        local Label = Instance.new("TextLabel")
+        Label.Size = UDim2.new(0.5, -10, 1, 0)
+        Label.Position = UDim2.new(0, 14, 0, 0)
+        Label.BackgroundTransparency = 1
+        Label.Text = text
+        Label.TextColor3 = Theme.TextPrimary
+        Label.Font = Enum.Font.GothamMedium
+        Label.TextSize = 12
+        Label.TextXAlignment = Enum.TextXAlignment.Left
+        Label.TextTruncate = Enum.TextTruncate.AtEnd
+        Label.ZIndex = 2
+        Label.Parent = Item
+
+        local Selector = Instance.new("TextButton")
+        Selector.Size = UDim2.new(0.5, -14, 0, 28)
+        Selector.Position = UDim2.new(0.5, 0, 0.5, -14)
+        Selector.BackgroundColor3 = Theme.CardBG
+        Selector.Text = ""
+        Selector.AutoButtonColor = false
+        Selector.ZIndex = 2
+        Selector.Parent = Item
+
+        local SelCorner = Instance.new("UICorner")
+        SelCorner.CornerRadius = UDim.new(0, 6)
+        SelCorner.Parent = Selector
+
+        local SelStroke = Instance.new("UIStroke")
+        SelStroke.Color = Theme.Border
+        SelStroke.Thickness = 1
+        SelStroke.Parent = Selector
+
+        local SelLabel = Instance.new("TextLabel")
+        SelLabel.Size = UDim2.new(1, -26, 1, 0)
+        SelLabel.Position = UDim2.new(0, 10, 0, 0)
+        SelLabel.BackgroundTransparency = 1
+        SelLabel.Text = default or options[1]
+        SelLabel.TextColor3 = Theme.Accent
+        SelLabel.Font = Enum.Font.GothamBold
+        SelLabel.TextSize = 11
+        SelLabel.TextXAlignment = Enum.TextXAlignment.Left
+        SelLabel.TextTruncate = Enum.TextTruncate.AtEnd
+        SelLabel.ZIndex = 2
+        SelLabel.Parent = Selector
+
+        local Arrow = Instance.new("TextLabel")
+        Arrow.Size = UDim2.new(0, 18, 1, 0)
+        Arrow.Position = UDim2.new(1, -20, 0, 0)
+        Arrow.BackgroundTransparency = 1
+        Arrow.Text = "▾"
+        Arrow.TextColor3 = Theme.TextMuted
+        Arrow.Font = Enum.Font.GothamBold
+        Arrow.TextSize = 12
+        Arrow.ZIndex = 2
+        Arrow.Parent = Selector
+
+        local OptionsFrame = Instance.new("Frame")
+        OptionsFrame.Size = UDim2.new(0.5, -14, 0, #options * 28)
+        OptionsFrame.Position = UDim2.new(0.5, 0, 1, 2)
+        OptionsFrame.BackgroundColor3 = Theme.CardBG
+        OptionsFrame.Visible = false
+        OptionsFrame.ZIndex = 20
+        OptionsFrame.Parent = Item
+
+        local OptCorner = Instance.new("UICorner")
+        OptCorner.CornerRadius = UDim.new(0, 6)
+        OptCorner.Parent = OptionsFrame
+
+        local OptStroke = Instance.new("UIStroke")
+        OptStroke.Color = Theme.Border
+        OptStroke.Thickness = 1
+        OptStroke.Parent = OptionsFrame
+
+        local OptList = Instance.new("UIListLayout")
+        OptList.Parent = OptionsFrame
+
+        local selected = default or options[1]
+        local isOpen = false
+
+        local function closeDropdown()
+            isOpen = false
+            OptionsFrame.Visible = false
+            Item.ZIndex = 2
+        end
+
+        Selector.MouseButton1Click:Connect(function()
+            isOpen = not isOpen
+            OptionsFrame.Visible = isOpen
+            Item.ZIndex = isOpen and 21 or 2
+        end)
+
+        for _, opt in ipairs(options) do
+            local OptBtn = Instance.new("TextButton")
+            OptBtn.Size = UDim2.new(1, 0, 0, 28)
+            OptBtn.BackgroundColor3 = Theme.CardBG
+            OptBtn.Text = ""
+            OptBtn.AutoButtonColor = false
+            OptBtn.ZIndex = 21
+            OptBtn.Parent = OptionsFrame
+
+            local OptLabel = Instance.new("TextLabel")
+            OptLabel.Size = UDim2.new(1, -16, 1, 0)
+            OptLabel.Position = UDim2.new(0, 10, 0, 0)
+            OptLabel.BackgroundTransparency = 1
+            OptLabel.Text = opt
+            OptLabel.TextColor3 = (opt == selected) and Theme.Accent or Theme.TextPrimary
+            OptLabel.Font = Enum.Font.GothamMedium
+            OptLabel.TextSize = 11
+            OptLabel.TextXAlignment = Enum.TextXAlignment.Left
+            OptLabel.ZIndex = 21
+            OptLabel.Parent = OptBtn
+
+            OptBtn.MouseEnter:Connect(function()
+                tween(OptBtn, {BackgroundColor3 = Theme.ItemHover}, 0.12)
+            end)
+            OptBtn.MouseLeave:Connect(function()
+                tween(OptBtn, {BackgroundColor3 = Theme.CardBG}, 0.12)
+            end)
+            OptBtn.MouseButton1Click:Connect(function()
+                selected = opt
+                SelLabel.Text = opt
+                for _, child in ipairs(OptionsFrame:GetChildren()) do
+                    if child:IsA("TextButton") then
+                        local lbl = child:FindFirstChildOfClass("TextLabel")
+                        if lbl then
+                            lbl.TextColor3 = (lbl.Text == opt) and Theme.Accent or Theme.TextPrimary
+                        end
+                    end
+                end
+                closeDropdown()
+                ShowToast(text .. ": " .. opt, true)
+                pcall(callback, opt)
+            end)
+        end
+    end
+
+    function Elements:CreateSliderInput(text, min, max, default, side, callback)
+        local Target = GetTargetScroll(side)
+
+        local Item = Instance.new("Frame")
+        Item.Size = UDim2.new(1, 0, 0, 54)
+        Item.BackgroundColor3 = Theme.InactivePill
+        Item.Parent = Target
+
+        local ItemCorner = Instance.new("UICorner")
+        ItemCorner.CornerRadius = UDim.new(0, 10)
+        ItemCorner.Parent = Item
+
+        local Padding = Instance.new("UIPadding")
+        Padding.PaddingLeft = UDim.new(0, 14)
+        Padding.PaddingRight = UDim.new(0, 14)
+        Padding.PaddingTop = UDim.new(0, 10)
+        Padding.Parent = Item
+
+        local TitleLbl = Instance.new("TextLabel")
+        TitleLbl.Size = UDim2.new(1, -60, 0, 18)
+        TitleLbl.BackgroundTransparency = 1
+        TitleLbl.Text = text
+        TitleLbl.TextColor3 = Theme.TextPrimary
+        TitleLbl.Font = Enum.Font.GothamMedium
+        TitleLbl.TextSize = 12
+        TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
+        TitleLbl.TextTruncate = Enum.TextTruncate.AtEnd
+        TitleLbl.Parent = Item
+
+        local ValueBox = Instance.new("TextBox")
+        ValueBox.Size = UDim2.new(0, 46, 0, 20)
+        ValueBox.Position = UDim2.new(1, -46, 0, -2)
+        ValueBox.BackgroundColor3 = Theme.CardBG
+        ValueBox.Text = tostring(default)
+        ValueBox.TextColor3 = Theme.Accent
+        ValueBox.Font = Enum.Font.GothamBold
+        ValueBox.TextSize = 12
+        ValueBox.ClearTextOnFocus = false
+        ValueBox.Parent = Item
+
+        local BoxCorner = Instance.new("UICorner")
+        BoxCorner.CornerRadius = UDim.new(0, 6)
+        BoxCorner.Parent = ValueBox
+
+        local BoxStroke = Instance.new("UIStroke")
+        BoxStroke.Color = Theme.Border
+        BoxStroke.Thickness = 1
+        BoxStroke.Parent = ValueBox
+
+        local SliderBar = Instance.new("TextButton")
+        SliderBar.Size = UDim2.new(1, 0, 0, 6)
+        SliderBar.Position = UDim2.new(0, 0, 0, 32)
+        SliderBar.BackgroundColor3 = Theme.CardBG
+        SliderBar.Text = ""
+        SliderBar.AutoButtonColor = false
+        SliderBar.Parent = Item
+
+        local BarCorner = Instance.new("UICorner")
+        BarCorner.CornerRadius = UDim.new(1, 0)
+        BarCorner.Parent = SliderBar
+
+        local Fill = Instance.new("Frame")
+        Fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+        Fill.BackgroundColor3 = Theme.Accent
+        Fill.BorderSizePixel = 0
+        Fill.Parent = SliderBar
+
+        local FillCorner = Instance.new("UICorner")
+        FillCorner.CornerRadius = UDim.new(1, 0)
+        FillCorner.Parent = Fill
+
+        local Knob = Instance.new("Frame")
+        Knob.Size = UDim2.new(0, 16, 0, 16)
+        Knob.AnchorPoint = Vector2.new(0.5, 0.5)
+        Knob.Position = UDim2.new((default - min) / (max - min), 0, 0.5, 0)
+        Knob.BackgroundColor3 = Theme.Accent
+        Knob.Parent = SliderBar
+
+        local KnobCorner = Instance.new("UICorner")
+        KnobCorner.CornerRadius = UDim.new(1, 0)
+        KnobCorner.Parent = Knob
+
+        local dragging = false
+        local currentVal = default
+
+        local function setValue(val, fromBox)
+            val = math.clamp(math.floor(val), min, max)
+            currentVal = val
+            local pos = (val - min) / (max - min)
+            Fill.Size = UDim2.new(pos, 0, 1, 0)
+            Knob.Position = UDim2.new(pos, 0, 0.5, 0)
+            if not fromBox then
+                ValueBox.Text = tostring(val)
+            end
+            pcall(callback, val)
+        end
+
+        local function updateFromDrag(input)
+            local pos = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
+            setValue(min + ((max - min) * pos))
+        end
+
+        SliderBar.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                updateFromDrag(input)
+            end
+        end)
+
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = false
+            end
+        end)
+
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                updateFromDrag(input)
+            end
+        end)
+
+        ValueBox.FocusLost:Connect(function(enterPressed)
+            local num = tonumber(ValueBox.Text)
+            if num then
+                setValue(num, true)
+                ValueBox.Text = tostring(currentVal)
+            else
+                ValueBox.Text = tostring(currentVal)
+            end
+        end)
     end
 
     function Elements:CreateToggle(text, defaultState, side, callback)

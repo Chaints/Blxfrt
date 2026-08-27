@@ -29,25 +29,63 @@ local FarmTab = UI:CreateTab("Auto Farm")
 -- CARD KIRI
 FarmTab:AddSection("Main Farming", "left")
 
+_G.SelectedWeapon = "Melee"
+FarmTab:CreateDropdown("Select Weapon", {"Melee", "Sword", "Fruit", "Gun"}, "Melee", "left", function(choice)
+    _G.SelectedWeapon = choice
+    print("Weapon Selected:", choice)
+end)
+
+_G.FarmMethod = "Nearest"
+FarmTab:CreateDropdown("Farm Method", {"Quest", "Nearest", "No Quest"}, "Nearest", "left", function(choice)
+    _G.FarmMethod = choice
+    print("Farm Method:", choice)
+end)
+
+_G.FarmDistance = 15
+FarmTab:CreateSliderInput("Distance (Nearest)", 5, 100, 15, "left", function(value)
+    _G.FarmDistance = value
+end)
+
 _G.AutoFarm = false
 FarmTab:CreateToggle("Auto Farm Level (" .. currentSea .. ")", _G.AutoFarm, "left", function(state)
     _G.AutoFarm = state
     print("Auto Farm Status:", _G.AutoFarm)
 end)
 
-FarmTab:CreateToggle("Auto Bone / Katakuri", false, "left", function(state)
-    print("Auto Bone Status:", state)
+_G.EnableMastery = false
+FarmTab:CreateToggle("Enable Mastery", _G.EnableMastery, "left", function(state)
+    _G.EnableMastery = state
+    print("Enable Mastery Status:", state)
 end)
 
-FarmTab:CreateToggle("Auto Stats (Melee/Def)", false, "left", function(state)
-    print("Auto Stats Status:", state)
+_G.HealthMobPercent = 15
+FarmTab:CreateSliderInput("Health Mob %", 1, 100, 15, "left", function(value)
+    _G.HealthMobPercent = value
+end)
+
+_G.AutoBones = false
+FarmTab:CreateToggle("Auto Bones", _G.AutoBones, "left", function(state)
+    _G.AutoBones = state
+    print("Auto Bones Status:", state)
+end)
+
+_G.AutoKatakuri = false
+FarmTab:CreateToggle("Auto Katakuri", _G.AutoKatakuri, "left", function(state)
+    _G.AutoKatakuri = state
+    print("Auto Katakuri Status:", state)
+end)
+
+_G.AutoSummonTyrant = false
+FarmTab:CreateToggle("Auto Summon Kill Tyrant of the Skies", _G.AutoSummonTyrant, "left", function(state)
+    _G.AutoSummonTyrant = state
+    print("Auto Summon Tyrant Status:", state)
 end)
 
 -- CARD KANAN
 FarmTab:AddSection("Farm Config", "right")
 
 FarmTab:CreateSlider("Distance Y-Axis", 5, 25, 12, "right", function(value)
-    _G.FarmDistance = value
+    _G.FarmDistanceYAxis = value
 end)
 
 FarmTab:CreateButton("Fast Attack Mode", "right", function()
