@@ -15,15 +15,15 @@ ScreenGui.IgnoreGuiInset = true
 
 -- Theme Palette: Minimalist Monochrome Dark
 local Theme = {
-    Background   = Color3.fromRGB(10, 10, 11),
-    CardBG       = Color3.fromRGB(16, 16, 18),
-    ItemHover    = Color3.fromRGB(22, 22, 25),
+    Background   = Color3.fromRGB(16, 16, 18),
+    CardBG       = Color3.fromRGB(26, 26, 29),
+    ItemHover    = Color3.fromRGB(36, 36, 40),
     Accent       = Color3.fromRGB(245, 245, 245),  -- Pure-ish white accent
     AccentDim    = Color3.fromRGB(180, 180, 185),
-    InactivePill = Color3.fromRGB(20, 20, 22),
-    TextPrimary  = Color3.fromRGB(235, 235, 238),
-    TextMuted    = Color3.fromRGB(110, 110, 118),
-    Border       = Color3.fromRGB(28, 28, 31)
+    InactivePill = Color3.fromRGB(32, 32, 36),
+    TextPrimary  = Color3.fromRGB(240, 240, 243),
+    TextMuted    = Color3.fromRGB(130, 130, 138),
+    Border       = Color3.fromRGB(46, 46, 51)
 }
 
 local function tween(obj, props, time, style)
@@ -363,8 +363,8 @@ TabUnderlineCorner.Parent = TabUnderline
 ---------------------------------------------------------
 local Viewport = Instance.new("Frame")
 Viewport.Name = "Viewport"
-Viewport.Size = UDim2.new(1, -16, 1, -120)
-Viewport.Position = UDim2.new(0, 8, 0, 116)
+Viewport.Size = UDim2.new(1, -16, 1, -104)
+Viewport.Position = UDim2.new(0, 8, 0, 100)
 Viewport.BackgroundTransparency = 1
 Viewport.ClipsDescendants = true
 Viewport.Parent = MainWindow
