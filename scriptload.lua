@@ -25,11 +25,17 @@ local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 local currentTween = nil
 local activeHash = "12796888"
 
--- NOCLIP AMAN (ANTI RUBBER-BAND)
+-- NOCLIP AMAN & ANTI NJOT-NJOTAN (FREEZE GRAVITY)
 RunService.Stepped:Connect(function()
     if _G.AutoFarm then
         local character = LocalPlayer.Character
         if character then
+            local hrp = character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                hrp.Velocity = Vector3.zero
+                hrp.RotVelocity = Vector3.zero
+            end
+
             for _, part in ipairs(character:GetChildren()) do
                 if part:IsA("BasePart") and part.CanCollide then
                     part.CanCollide = false
