@@ -187,6 +187,110 @@ task.spawn(function()
 end)
 
 ---------------------------------------------------------
+-- QUICK PANEL (mini floating list of currently-active toggles)
+---------------------------------------------------------
+local QuickPanel = Instance.new("Frame")
+QuickPanel.Name = "QuickPanel"
+QuickPanel.Size = UDim2.new(0, 170, 0, 0)
+QuickPanel.AutomaticSize = Enum.AutomaticSize.Y
+QuickPanel.Position = UDim2.new(0, 14, 0, 48)
+QuickPanel.BackgroundColor3 = Theme.CardBG
+QuickPanel.BackgroundTransparency = 0.05
+QuickPanel.Active = true
+QuickPanel.Draggable = true
+QuickPanel.Visible = false
+QuickPanel.ZIndex = 8
+QuickPanel.Parent = ScreenGui
+
+local QuickPanelCorner = Instance.new("UICorner")
+QuickPanelCorner.CornerRadius = UDim.new(0, 8)
+QuickPanelCorner.Parent = QuickPanel
+
+local QuickPanelStroke = Instance.new("UIStroke")
+QuickPanelStroke.Color = Theme.Border
+QuickPanelStroke.Thickness = 1
+QuickPanelStroke.Parent = QuickPanel
+
+local QuickList = Instance.new("UIListLayout")
+QuickList.Parent = QuickPanel
+QuickList.Padding = UDim.new(0, 2)
+
+local QuickPad = Instance.new("UIPadding")
+QuickPad.PaddingTop = UDim.new(0, 6)
+QuickPad.PaddingBottom = UDim.new(0, 6)
+QuickPad.Parent = QuickPanel
+
+local ActiveQuickRows = {}
+
+local function RegisterQuick(text, offCallback)
+    local Row = Instance.new("Frame")
+    Row.Size = UDim2.new(1, 0, 0, 26)
+    Row.BackgroundTransparency = 1
+    Row.ZIndex = 9
+    Row.Parent = QuickPanel
+
+    local Dot = Instance.new("Frame")
+    Dot.Size = UDim2.new(0, 6, 0, 6)
+    Dot.Position = UDim2.new(0, 10, 0.5, -3)
+    Dot.BackgroundColor3 = Theme.Accent
+    Dot.ZIndex = 9
+    Dot.Parent = Row
+
+    local DotCorner = Instance.new("UICorner")
+    DotCorner.CornerRadius = UDim.new(1, 0)
+    DotCorner.Parent = Dot
+
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(1, -46, 1, 0)
+    Label.Position = UDim2.new(0, 22, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = text
+    Label.TextColor3 = Theme.TextPrimary
+    Label.Font = Enum.Font.GothamMedium
+    Label.TextSize = 11
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.TextTruncate = Enum.TextTruncate.AtEnd
+    Label.ZIndex = 9
+    Label.Parent = Row
+
+    local CloseX = Instance.new("TextButton")
+    CloseX.Size = UDim2.new(0, 20, 0, 20)
+    CloseX.Position = UDim2.new(1, -26, 0.5, -10)
+    CloseX.BackgroundTransparency = 1
+    CloseX.Text = "×"
+    CloseX.TextColor3 = Theme.TextMuted
+    CloseX.Font = Enum.Font.GothamBold
+    CloseX.TextSize = 15
+    CloseX.AutoButtonColor = false
+    CloseX.ZIndex = 9
+    CloseX.Parent = Row
+
+    CloseX.MouseEnter:Connect(function()
+        tween(CloseX, {TextColor3 = Theme.TextPrimary}, 0.15)
+    end)
+    CloseX.MouseLeave:Connect(function()
+        tween(CloseX, {TextColor3 = Theme.TextMuted}, 0.15)
+    end)
+    CloseX.MouseButton1Click:Connect(function()
+        pcall(offCallback)
+    end)
+
+    ActiveQuickRows[text] = Row
+    QuickPanel.Visible = true
+end
+
+local function UnregisterQuick(text)
+    local Row = ActiveQuickRows[text]
+    if Row then
+        Row:Destroy()
+        ActiveQuickRows[text] = nil
+    end
+    if next(ActiveQuickRows) == nil then
+        QuickPanel.Visible = false
+    end
+end
+
+---------------------------------------------------------
 -- MAIN WINDOW (single floating container, responsive)
 ---------------------------------------------------------
 local MainWindow = Instance.new("Frame")
@@ -466,10 +570,7 @@ function UI:CreateTab(tabName)
     table.insert(Tabs, TabObj)
 
     if FirstTab then
-        -- defer initial layout until viewport has real size
         task.defer(function()
-            TabPage.Size = UDim2.new(0, Viewport.AbsoluteSize.X, 1, 0)
-            Track.Size = UDim2.new(0, Viewport.AbsoluteSize.X * TabCount, 1, 0)
             task.wait(0.05)
             TabUnderline.Position = UDim2.new(0, TabButton.AbsolutePosition.X - TabNav.AbsolutePosition.X, 1, 2)
             TabUnderline.Size = UDim2.new(0, TabButton.AbsoluteSize.X, 0, 2)
@@ -596,6 +697,26 @@ function UI:CreateTab(tabName)
 
         local enabled = defaultState or false
 
+        local function setEnabled(newState, fromQuickPanel)
+            enabled = newState
+            tween(Indicator, {BackgroundColor3 = enabled and Theme.Accent or Theme.CardBG}, 0.18)
+            tween(Dot, {
+                Position = enabled and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7),
+                BackgroundColor3 = enabled and Theme.Background or Theme.TextMuted
+            }, 0.18)
+            if enabled then
+                startPulse()
+                RegisterQuick(text, function() setEnabled(false) end)
+            else
+                stopPulse()
+                UnregisterQuick(text)
+            end
+            if not fromQuickPanel then
+                ShowToast(text .. (enabled and ": ON" or ": OFF"), enabled)
+            end
+            pcall(callback, enabled)
+        end
+
         Item.MouseEnter:Connect(function()
             tween(Item, {BackgroundColor3 = Theme.ItemHover}, 0.15)
         end)
@@ -604,16 +725,12 @@ function UI:CreateTab(tabName)
         end)
 
         Item.MouseButton1Click:Connect(function()
-            enabled = not enabled
-            tween(Indicator, {BackgroundColor3 = enabled and Theme.Accent or Theme.CardBG}, 0.18)
-            tween(Dot, {
-                Position = enabled and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7),
-                BackgroundColor3 = enabled and Theme.Background or Theme.TextMuted
-            }, 0.18)
-            if enabled then startPulse() else stopPulse() end
-            ShowToast(text .. (enabled and ": ON" or ": OFF"), enabled)
-            pcall(callback, enabled)
+            setEnabled(not enabled)
         end)
+
+        if defaultState then
+            RegisterQuick(text, function() setEnabled(false) end)
+        end
     end
 
     function Elements:CreateSlider(text, min, max, default, side, callback)
@@ -766,8 +883,15 @@ end
 -- this ensures Track + Pages have correct pixel widths, then snaps to tab 1)
 ---------------------------------------------------------
 task.defer(function()
-    task.wait(0.05)
     local w = Viewport.AbsoluteSize.X
+    local tries = 0
+    while w <= 0 and tries < 40 do
+        task.wait(0.05)
+        w = Viewport.AbsoluteSize.X
+        tries = tries + 1
+    end
+    if w <= 0 then w = 400 end -- fallback so pages are never zero-width
+
     Track.Size = UDim2.new(0, w * math.max(TabCount, 1), 1, 0)
     for _, t in pairs(Tabs) do
         t.Page.Size = UDim2.new(0, w, 1, 0)
