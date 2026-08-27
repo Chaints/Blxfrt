@@ -25,13 +25,22 @@ local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 local currentTween = nil
 local activeHash = "12796888"
 
--- NOCLIP AMAN & ANTI NJOT-NJOTAN (FREEZE GRAVITY)
+-- ANTI GRAVITASI & LOCK POSISI (ANTI JATUH)
+local lockedCFrame = nil
+
 RunService.Stepped:Connect(function()
     if _G.AutoFarm then
         local character = LocalPlayer.Character
         if character then
             local hrp = character:FindFirstChild("HumanoidRootPart")
             if hrp then
+                -- Kalau lagi ga tweening dan posisi lock ada, paksa tahan posisinya biar ga jatuh
+                if lockedCFrame and (currentTween == nil or currentTween.PlaybackState ~= Enum.PlaybackState.Playing) then
+                    hrp.CFrame = lockedCFrame
+                elseif hrp then
+                    lockedCFrame = hrp.CFrame
+                end
+                
                 hrp.Velocity = Vector3.zero
                 hrp.RotVelocity = Vector3.zero
             end
@@ -42,6 +51,8 @@ RunService.Stepped:Connect(function()
                 end
             end
         end
+    else
+        lockedCFrame = nil
     end
 end)
 
