@@ -90,8 +90,7 @@ function ScriptLoad.EquipMelee()
         end
     end
 end
-
--- 4. FAST ATTACK FIX (DENGAN FALLBACK TARGET BODY PART)
+-- 4. FAST ATTACK MULTI-TARGET FIX (MUKUL SEMUA KALIGUS DALAM 1 PAYLOAD)
 function ScriptLoad.FastAttack()
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -99,12 +98,11 @@ function ScriptLoad.FastAttack()
     local myHrp = character.HumanoidRootPart
     local hitTargets = {}
 
-    -- Scan NPC
+    -- 1. Kumpulkan SELURUH Part Target (NPC) ke dalam 1 Tabel
     local enemiesFolder = workspace:FindFirstChild("Enemies")
     if enemiesFolder then
         for _, enemy in ipairs(enemiesFolder:GetChildren()) do
             local hum = enemy:FindFirstChild("Humanoid")
-            -- FIX: Cari part tubuh apapun yang tersedia (UpperTorso / Torso / HumanoidRootPart)
             local targetPart = enemy:FindFirstChild("UpperTorso") 
                 or enemy:FindFirstChild("Torso") 
                 or enemy:FindFirstChild("HumanoidRootPart")
@@ -118,7 +116,7 @@ function ScriptLoad.FastAttack()
         end
     end
 
-    -- Scan Player
+    -- 2. Kumpulkan Player (Jika Dinyalakan)
     if _G.AttackPlayers then
         for _, otherPlayer in ipairs(Players:GetPlayers()) do
             if otherPlayer ~= LocalPlayer and otherPlayer.Character then
@@ -137,24 +135,24 @@ function ScriptLoad.FastAttack()
         end
     end
 
-    -- Eksekusi Hit
+    -- 3. Kirim SELURUH Tabel Target Sekaligus ke Remote Hit
     if #hitTargets > 0 then
         if RegisterAttack then
             RegisterAttack:FireServer(0.5, 3)
         end
         
         if RegisterHit then
-            for _, targetPart in ipairs(hitTargets) do
-                local hitArgs = {
-                    [1] = targetPart,
-                    [2] = {},
-                    [4] = "1270b44e"
-                }
-                RegisterHit:FireServer(unpack(hitArgs))
-            end
+            -- Tembakkan Main Target (Target Pertama) & Masukkan Tabel Seluruh Target di Argumen Kedua
+            local hitArgs = {
+                [1] = hitTargets[1],  -- Head Target
+                [2] = hitTargets,     -- Multi-Hit List (Bikin Damage Kena Semua Sekaligus)
+                [4] = "1270b44e"
+            }
+            RegisterHit:FireServer(unpack(hitArgs))
         end
     end
 end
+
 
 -- 5. BRING MOB FIX (ANTI-SERVER DESYNC)
 function ScriptLoad.BringMob(enemy, groundCFrame)
