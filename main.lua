@@ -53,6 +53,11 @@ FarmTab:CreateDropdown("Farm Method", {"Quest", "Nearest", "No Quest"}, "Nearest
     print("Farm Method:", choice)
 end)
 
+_G.TweenSpeed = 300
+FarmTab:CreateSliderInput("Tween Speed", 100, 500, 300, "left", function(value)
+    _G.TweenSpeed = value
+end)
+
 _G.FarmDistance = 15
 FarmTab:CreateSliderInput("Distance (Nearest)", 5, 100, 15, "left", function(value)
     _G.FarmDistance = value
@@ -61,6 +66,17 @@ end)
 _G.HealthMobPercent = 15
 FarmTab:CreateSliderInput("Health Mob %", 1, 100, 15, "left", function(value)
     _G.HealthMobPercent = value
+end)
+
+_G.BringMob = false
+FarmTab:CreateToggle("Bring Mob", _G.BringMob, "left", function(state)
+    _G.BringMob = state
+    print("Bring Mob Status:", state)
+end)
+
+_G.BringRange = 55
+FarmTab:CreateSliderInput("Bring Range (Stud)", 5, 150, 55, "left", function(value)
+    _G.BringRange = value
 end)
 
 -- CARD KANAN (config + boss farming Sea 1)

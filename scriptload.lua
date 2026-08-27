@@ -10,8 +10,10 @@ _G.AutoFarm = _G.AutoFarm or false
 _G.AutoEquipMelee = true
 _G.FastAttack = true
 _G.AttackRadius = 55
-_G.BringMob = true
-_G.AttackRange = 300
+_G.BringMob = _G.BringMob or false
+_G.BringRange = _G.BringRange or 55
+_G.TweenSpeed = _G.TweenSpeed or 300
+_G.FarmMethod = _G.FarmMethod or "Quest"
 
 -- DEKLARASI REMOTE
 local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
@@ -51,7 +53,7 @@ function ScriptLoad.TweenTo(targetCFrame, speed)
         return
     end
 
-    local duration = distance / (speed or 300)
+    local duration = distance / (speed or _G.TweenSpeed or 300)
     local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
     
     if currentTween then currentTween:Cancel() end
@@ -147,7 +149,7 @@ end
 function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
     if CommF then
         if questCFrame then
-            ScriptLoad.TweenTo(questCFrame, 300)
+            ScriptLoad.TweenTo(questCFrame, _G.TweenSpeed)
             task.wait(0.4)
         end
         CommF:InvokeServer("StartQuest", questName, levelReq)
@@ -217,6 +219,29 @@ local function GetQuestData()
     end
 end
 
+-- 6.5 CARI MOB TERDEKAT DARI PLAYER (UNTUK MODE NEAREST)
+local function GetNearestEnemy(myHrp)
+    local enemiesFolder = workspace:FindFirstChild("Enemies")
+    if not enemiesFolder then return nil end
+
+    local nearest = nil
+    local nearestDist = math.huge
+
+    for _, enemy in ipairs(enemiesFolder:GetChildren()) do
+        local hrp = enemy:FindFirstChild("HumanoidRootPart")
+        local hum = enemy:FindFirstChild("Humanoid")
+        if hrp and hum and hum.Health > 0 then
+            local dist = (hrp.Position - myHrp.Position).Magnitude
+            if dist < nearestDist then
+                nearestDist = dist
+                nearest = enemy
+            end
+        end
+    end
+
+    return nearest
+end
+
 -- 7. LOOP ATTACK (CUKUP 0.15s SUDAH KENCANG & BEBAS DROP FPS)
 task.spawn(function()
     while task.wait(0.15) do
@@ -242,56 +267,98 @@ task.spawn(function()
                     ScriptLoad.EquipMelee()
                 end
 
-                local targetName, questName, questIndex, questCFrame = GetQuestData()
-                local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-                local hasQuest = playerGui and playerGui:FindFirstChild("Main") 
-                    and playerGui.Main:FindFirstChild("Quest") 
-                    and playerGui.Main.Quest.Visible
+                local myHrp = character.HumanoidRootPart
+                local method = _G.FarmMethod or "Quest"
 
-                if not hasQuest then
-                    ScriptLoad.TakeQuest(questName, questIndex, questCFrame)
-                    task.wait(0.4)
-                else
-                    local enemiesFolder = workspace:FindFirstChild("Enemies")
-                    if enemiesFolder then
-                        local mainTarget = nil
+                if method == "Nearest" then
+                    -- MODE NEAREST: serang mob terdekat dari posisi player, tanpa peduli quest
+                    local mainTarget = GetNearestEnemy(myHrp)
 
-                        for _, enemy in ipairs(enemiesFolder:GetChildren()) do
-                            if string.find(enemy.Name, targetName) then
-                                local hrp = enemy:FindFirstChild("HumanoidRootPart")
-                                local hum = enemy:FindFirstChild("Humanoid")
-                                if hrp and hum and hum.Health > 0 then
-                                    mainTarget = enemy
-                                    break
-                                end
-                            end
+                    if mainTarget then
+                        local mainHrp = mainTarget:FindFirstChild("HumanoidRootPart")
+                        local groundCFrame = mainHrp.CFrame
+                        local farmPosPlayer = groundCFrame * CFrame.new(0, 9, 0)
+
+                        if (myHrp.Position - farmPosPlayer.Position).Magnitude > 3 then
+                            ScriptLoad.TweenTo(farmPosPlayer, _G.TweenSpeed)
+                        else
+                            myHrp.CFrame = farmPosPlayer
                         end
 
-                        if mainTarget then
-                            local mainHrp = mainTarget:FindFirstChild("HumanoidRootPart")
-                            local groundCFrame = mainHrp.CFrame
-                            local farmPosPlayer = groundCFrame * CFrame.new(0, 9, 0)
-                            local myHrp = character.HumanoidRootPart
-
-                            if (myHrp.Position - farmPosPlayer.Position).Magnitude > 3 then
-                                ScriptLoad.TweenTo(farmPosPlayer, 300)
-                            else
-                                myHrp.CFrame = farmPosPlayer
-                            end
-
-                            if _G.BringMob then
+                        if _G.BringMob then
+                            local enemiesFolder = workspace:FindFirstChild("Enemies")
+                            if enemiesFolder then
                                 for _, enemy in ipairs(enemiesFolder:GetChildren()) do
-                                    if string.find(enemy.Name, targetName) then
-                                        local eHrp = enemy:FindFirstChild("HumanoidRootPart")
-                                        if eHrp and (eHrp.Position - groundCFrame.Position).Magnitude <= _G.AttackRange then
-                                            ScriptLoad.BringMob(enemy, groundCFrame)
-                                        end
+                                    local eHrp = enemy:FindFirstChild("HumanoidRootPart")
+                                    local eHum = enemy:FindFirstChild("Humanoid")
+                                    if eHrp and eHum and eHum.Health > 0 and (eHrp.Position - groundCFrame.Position).Magnitude <= _G.BringRange then
+                                        ScriptLoad.BringMob(enemy, groundCFrame)
                                     end
                                 end
                             end
-                        else
-                            if questCFrame then
-                                ScriptLoad.TweenTo(questCFrame, 300)
+                        end
+                    end
+
+                else
+                    -- MODE QUEST / NO QUEST: pakai target berbasis level quest data
+                    local targetName, questName, questIndex, questCFrame = GetQuestData()
+                    local skipRest = false
+
+                    if method == "Quest" then
+                        local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+                        local hasQuest = playerGui and playerGui:FindFirstChild("Main")
+                            and playerGui.Main:FindFirstChild("Quest")
+                            and playerGui.Main.Quest.Visible
+
+                        if not hasQuest then
+                            ScriptLoad.TakeQuest(questName, questIndex, questCFrame)
+                            task.wait(0.4)
+                            skipRest = true
+                        end
+                    end
+                    -- method == "No Quest" langsung skip pengambilan quest, langsung cari target
+
+                    if not skipRest then
+                        local enemiesFolder = workspace:FindFirstChild("Enemies")
+                        if enemiesFolder then
+                            local mainTarget = nil
+
+                            for _, enemy in ipairs(enemiesFolder:GetChildren()) do
+                                if string.find(enemy.Name, targetName) then
+                                    local hrp = enemy:FindFirstChild("HumanoidRootPart")
+                                    local hum = enemy:FindFirstChild("Humanoid")
+                                    if hrp and hum and hum.Health > 0 then
+                                        mainTarget = enemy
+                                        break
+                                    end
+                                end
+                            end
+
+                            if mainTarget then
+                                local mainHrp = mainTarget:FindFirstChild("HumanoidRootPart")
+                                local groundCFrame = mainHrp.CFrame
+                                local farmPosPlayer = groundCFrame * CFrame.new(0, 9, 0)
+
+                                if (myHrp.Position - farmPosPlayer.Position).Magnitude > 3 then
+                                    ScriptLoad.TweenTo(farmPosPlayer, _G.TweenSpeed)
+                                else
+                                    myHrp.CFrame = farmPosPlayer
+                                end
+
+                                if _G.BringMob then
+                                    for _, enemy in ipairs(enemiesFolder:GetChildren()) do
+                                        if string.find(enemy.Name, targetName) then
+                                            local eHrp = enemy:FindFirstChild("HumanoidRootPart")
+                                            if eHrp and (eHrp.Position - groundCFrame.Position).Magnitude <= _G.BringRange then
+                                                ScriptLoad.BringMob(enemy, groundCFrame)
+                                            end
+                                        end
+                                    end
+                                end
+                            else
+                                if questCFrame then
+                                    ScriptLoad.TweenTo(questCFrame, _G.TweenSpeed)
+                                end
                             end
                         end
                     end
