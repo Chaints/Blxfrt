@@ -205,8 +205,7 @@ function ScriptLoad.BringMob(enemy, groundCFrame)
         hrp.Velocity = Vector3.zero
     end
 end
-
--- 5. TAKE QUEST (FIXED DENGAN JEDA REFRESH)
+-- 5. TAKE QUEST (FIXED DENGAN FORMAT COMMF_ ASLI)
 function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
     if CommF then
         local character = LocalPlayer.Character
@@ -222,17 +221,21 @@ function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
             end
         end
         
+        -- Kalau sudah dekat NPC, stop tween, lock posisi nempel pas ke NPC
         if currentTween then currentTween:Cancel() end
         if questCFrame then
             hrp.CFrame = questCFrame
         end
         
+        -- Panggil remote quest pakai format asli CommF_
         pcall(function()
-            CommF:InvokeServer("StartQuest", questName, levelReq)
+            local args = {
+                "StartQuest",
+                questName,
+                levelReq
+            }
+            CommF:InvokeServer(unpack(args))
         end)
-        
-        -- TAMBAHAN: Kasih jeda 1 detik biar GUI game sempat update & ga nyangkut di NPC
-        task.wait(1)
     end
 end
 
@@ -385,7 +388,7 @@ task.spawn(function()
 
                         if not hasQuest then
                             ScriptLoad.TakeQuest(questName, questIndex, questCFrame)
-                            task.wait(0.4)
+                            task.wait(1.5) -- Jeda biar server & UI sempat nge-refresh status quest
                             skipRest = true
                         end
                     end
