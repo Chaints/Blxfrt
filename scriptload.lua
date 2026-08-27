@@ -39,25 +39,42 @@ if hookmetamethod then
     end)
 end
 
--- 1. TWEEN MOVEMENT (OPTIMIZED)
+-- 1. TWEEN MOVEMENT (SMOOTH & NATURAL, ANTI PATAH-PATAH)
+local lastTweenTarget = nil
+
 function ScriptLoad.TweenTo(targetCFrame, speed)
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
-    
+
     local hrp = character.HumanoidRootPart
     local distance = (hrp.Position - targetCFrame.Position).Magnitude
-    
+
     if distance < 3 then
         if currentTween then currentTween:Cancel() end
+        lastTweenTarget = nil
         hrp.CFrame = targetCFrame
         return
     end
 
-    local duration = distance / (speed or _G.TweenSpeed or 300)
-    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
-    
+    -- Kalau target belum bergeser jauh dari tween sebelumnya, biarkan tween yang jalan
+    -- terus jalan sampai selesai (jangan di-cancel & restart tiap loop -> ini yang bikin patah-patah)
+    if lastTweenTarget and currentTween and currentTween.PlaybackState == Enum.PlaybackState.Playing then
+        local targetShift = (lastTweenTarget.Position - targetCFrame.Position).Magnitude
+        if targetShift < 4 then
+            return currentTween
+        end
+    end
+
+    -- Durasi tetap (bukan dihitung dari speed/jarak) supaya gerakan konsisten halus,
+    -- makin jauh jaraknya baru durasinya nambah dikit biar gak "meluncur" kelamaan
+    local baseSpeed = speed or _G.TweenSpeed or 300
+    local duration = math.clamp(distance / baseSpeed, 0.15, 0.6)
+
+    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+
     if currentTween then currentTween:Cancel() end
-    
+
+    lastTweenTarget = targetCFrame
     currentTween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
     currentTween:Play()
     return currentTween
