@@ -2,6 +2,7 @@ local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local VirtualUser = game:GetService("VirtualUser")
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
 local ScriptLoad = {}
@@ -9,15 +10,18 @@ local ScriptLoad = {}
 _G.AutoFarm = _G.AutoFarm or false
 _G.AutoEquipMelee = true
 _G.AutoAttack = true
+_G.BringMob = true
 _G.HitboxSize = Vector3.new(15, 15, 15)
 
--- DEKLARASI REMOTE (BAWAAN KAMU + QUEST REMOTE)
+-- DEKLARASI REMOTE
 local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
 local RegisterAttack = Net:FindFirstChild("RE/RegisterAttack")
 local RegisterHit = Net:FindFirstChild("RE/RegisterHit") or Net:FindFirstChild("RegisterHit")
 local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 
--- 1. EXPAND HITBOX NPC (FUNGSI ASLI KAMU)
+local currentTween = nil
+
+-- 1. EXPAND HITBOX NPC (ASLI KAMU)
 function ScriptLoad.ExpandHitbox(enemy)
     local hrp = enemy:FindFirstChild("HumanoidRootPart")
     if hrp then
@@ -27,22 +31,33 @@ function ScriptLoad.ExpandHitbox(enemy)
     end
 end
 
--- 2. TWEEN MOVEMENT (FUNGSI ASLI KAMU)
+-- 2. TWEEN MOVEMENT (SMOOTH & ANTI NJOT-NJOTAN)
 function ScriptLoad.TweenTo(targetCFrame, speed)
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
     
     local hrp = character.HumanoidRootPart
     local distance = (hrp.Position - targetCFrame.Position).Magnitude
-    local duration = distance / (speed or 300)
     
+    if distance < 3 then
+        if currentTween then currentTween:Cancel() end
+        hrp.CFrame = targetCFrame
+        return
+    end
+
+    local duration = distance / (speed or 300)
     local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
-    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
-    tween:Play()
-    return tween
+    
+    if currentTween then
+        currentTween:Cancel()
+    end
+    
+    currentTween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
+    currentTween:Play()
+    return currentTween
 end
 
--- 3. AUTO EQUIP MELEE (FUNGSI ASLI KAMU)
+-- 3. AUTO EQUIP MELEE (ASLI KAMU)
 function ScriptLoad.EquipMelee()
     local character = LocalPlayer.Character
     local backpack = LocalPlayer:FindFirstChild("Backpack")
@@ -74,7 +89,7 @@ function ScriptLoad.EquipMelee()
     end
 end
 
--- 4. AUTO ATTACK (FUNGSI ASLI KAMU PAKE LOGIKA PAYLOAD REMOTESPY)
+-- 4. AUTO ATTACK (ASLI KAMU)
 function ScriptLoad.AttackTarget(targetEnemy)
     local character = LocalPlayer.Character
     if not character or not targetEnemy then return end
@@ -100,7 +115,20 @@ function ScriptLoad.AttackTarget(targetEnemy)
     if tool then tool:Activate() end
 end
 
--- 5. TAMBAHAN: FUNGSI AMBIL QUEST
+-- 5. BRING MOB (KUMPULIN NPC KE SATU TITIK)
+function ScriptLoad.BringMob(enemy, targetCFrame)
+    local hrp = enemy:FindFirstChild("HumanoidRootPart")
+    local hum = enemy:FindFirstChild("Humanoid")
+    
+    if hrp and hum and hum.Health > 0 then
+        hrp.CanCollide = false
+        hrp.Size = _G.HitboxSize
+        hrp.CFrame = targetCFrame * CFrame.new(0, -3, 0)
+        hrp.Velocity = Vector3.new(0, 0, 0)
+    end
+end
+
+-- 6. TAKE QUEST
 function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
     if CommF then
         if questCFrame then
@@ -111,7 +139,7 @@ function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
     end
 end
 
--- 6. TAMBAHAN: DATABASE QUEST LEVEL 1 - 700 (FIRST SEA)
+-- 7. DATABASE QUEST & NPC TARGET (LEVEL 1 - 700)
 local function GetQuestData()
     local level = LocalPlayer.Data.Level.Value
 
@@ -174,9 +202,26 @@ local function GetQuestData()
     end
 end
 
--- 7. LOOP UTAMA (DITINGKATKAN LOGIKANYA)
+-- 8. NOCLIP & FIX VELOCITY (SUPAYA CHARACTER MELAYANG HALUS SAAT AUTO FARM)
+RunService.Stepped:Connect(function()
+    if _G.AutoFarm then
+        local character = LocalPlayer.Character
+        if character then
+            for _, part in ipairs(character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+            if character:FindFirstChild("HumanoidRootPart") then
+                character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+            end
+        end
+    end
+end)
+
+-- 9. LOOP UTAMA
 task.spawn(function()
-    while task.wait(0.2) do
+    while task.wait(0.1) do
         if _G.AutoFarm then
             local character = LocalPlayer.Character
             if character and character:FindFirstChild("HumanoidRootPart") then
@@ -187,7 +232,7 @@ task.spawn(function()
 
                 local targetName, questName, questIndex, questCFrame = GetQuestData()
                 
-                -- Pengecekan Quest GUI
+                -- Cek GUI Quest
                 local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
                 local hasQuest = playerGui and playerGui:FindFirstChild("Main") 
                     and playerGui.Main:FindFirstChild("Quest") 
@@ -199,30 +244,54 @@ task.spawn(function()
                 else
                     local enemiesFolder = workspace:FindFirstChild("Enemies")
                     if enemiesFolder then
-                        local foundTarget = false
+                        local mainTarget = nil
+
+                        -- Cari Musuh Utama
                         for _, enemy in ipairs(enemiesFolder:GetChildren()) do
-                            -- Filter target sesuai nama NPC quest
                             if string.find(enemy.Name, targetName) then
                                 local hrp = enemy:FindFirstChild("HumanoidRootPart")
                                 local hum = enemy:FindFirstChild("Humanoid")
-                                
                                 if hrp and hum and hum.Health > 0 then
-                                    foundTarget = true
-                                    ScriptLoad.ExpandHitbox(enemy)
-
-                                    local targetPos = hrp.CFrame * CFrame.new(0, 5, 0)
-                                    ScriptLoad.TweenTo(targetPos, 300)
-
-                                    if _G.AutoAttack then
-                                        ScriptLoad.AttackTarget(enemy)
-                                    end
+                                    mainTarget = enemy
                                     break
                                 end
                             end
                         end
 
-                        if not foundTarget and questCFrame then
-                            ScriptLoad.TweenTo(questCFrame, 300)
+                        if mainTarget then
+                            local mainHrp = mainTarget:FindFirstChild("HumanoidRootPart")
+                            local farmPosition = mainHrp.CFrame * CFrame.new(0, 7, 0)
+                            local myHrp = character.HumanoidRootPart
+
+                            -- Posisi Karakter Melayang Stabil
+                            if (myHrp.Position - farmPosition.Position).Magnitude > 3 then
+                                ScriptLoad.TweenTo(farmPosition, 300)
+                            else
+                                myHrp.CFrame = farmPosition
+                            end
+
+                            -- Bring Mobs ke Musuh Utama
+                            for _, enemy in ipairs(enemiesFolder:GetChildren()) do
+                                if string.find(enemy.Name, targetName) then
+                                    local eHrp = enemy:FindFirstChild("HumanoidRootPart")
+                                    if eHrp and (eHrp.Position - mainHrp.Position).Magnitude < 350 then
+                                        ScriptLoad.ExpandHitbox(enemy)
+                                        if _G.BringMob then
+                                            ScriptLoad.BringMob(enemy, mainHrp.CFrame)
+                                        end
+                                    end
+                                end
+                            end
+
+                            -- Serang
+                            if _G.AutoAttack then
+                                ScriptLoad.AttackTarget(mainTarget)
+                            end
+                        else
+                            -- Jika musuh belum spawn, tunggu di spot spawn
+                            if questCFrame then
+                                ScriptLoad.TweenTo(questCFrame, 300)
+                            end
                         end
                     end
                 end
