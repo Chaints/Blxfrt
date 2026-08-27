@@ -245,7 +245,7 @@ end
 local MainWindow = Instance.new("Frame")
 MainWindow.Name = "MainWindow"
 MainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
-MainWindow.Size = UDim2.new(0, 430, 0, 320)
+MainWindow.Size = UDim2.new(0, 340, 0, 300)
 MainWindow.Position = UDim2.new(0.5, 0, 0.45, 0)
 MainWindow.BackgroundTransparency = 1
 MainWindow.BorderSizePixel = 0
@@ -256,7 +256,7 @@ MainWindow.Parent = ScreenGui
 -- Header (solid floating bar so the "ZxD" name is clearly visible)
 local Header = Instance.new("Frame")
 Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 92)
+Header.Size = UDim2.new(1, 0, 0, 78)
 Header.BackgroundColor3 = Theme.CardBG
 Header.BorderSizePixel = 0
 Header.Parent = MainWindow
@@ -326,8 +326,8 @@ end)
 ---------------------------------------------------------
 local TabNav = Instance.new("ScrollingFrame")
 TabNav.Name = "TabNav"
-TabNav.Size = UDim2.new(1, -16, 0, 36)
-TabNav.Position = UDim2.new(0, 8, 0, 48)
+TabNav.Size = UDim2.new(1, -16, 0, 32)
+TabNav.Position = UDim2.new(0, 8, 0, 42)
 TabNav.BackgroundTransparency = 1
 TabNav.ScrollBarThickness = 0
 TabNav.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -363,8 +363,8 @@ TabUnderlineCorner.Parent = TabUnderline
 ---------------------------------------------------------
 local Viewport = Instance.new("Frame")
 Viewport.Name = "Viewport"
-Viewport.Size = UDim2.new(1, -16, 1, -104)
-Viewport.Position = UDim2.new(0, 8, 0, 100)
+Viewport.Size = UDim2.new(1, -16, 1, -88)
+Viewport.Position = UDim2.new(0, 8, 0, 84)
 Viewport.BackgroundTransparency = 1
 Viewport.ClipsDescendants = true
 Viewport.Parent = MainWindow
@@ -423,7 +423,7 @@ function UI:CreateTab(tabName)
     ---------------------------------------------------------
     local LeftCard = Instance.new("Frame")
     LeftCard.Name = "LeftCard"
-    LeftCard.Size = UDim2.new(0.5, -7, 1, 0)
+    LeftCard.Size = UDim2.new(0.5, -3, 1, 0)
     LeftCard.Position = UDim2.new(0, 0, 0, 0)
     LeftCard.BackgroundColor3 = Theme.CardBG
     LeftCard.Parent = TabPage
@@ -438,8 +438,8 @@ function UI:CreateTab(tabName)
     LeftCardStroke.Parent = LeftCard
 
     local LeftScroll = Instance.new("ScrollingFrame")
-    LeftScroll.Size = UDim2.new(1, -24, 1, -20)
-    LeftScroll.Position = UDim2.new(0, 12, 0, 10)
+    LeftScroll.Size = UDim2.new(1, -16, 1, -16)
+    LeftScroll.Position = UDim2.new(0, 8, 0, 8)
     LeftScroll.BackgroundTransparency = 1
     LeftScroll.ScrollBarThickness = 2
     LeftScroll.ScrollBarImageColor3 = Theme.AccentDim
@@ -448,7 +448,7 @@ function UI:CreateTab(tabName)
 
     local LeftList = Instance.new("UIListLayout")
     LeftList.Parent = LeftScroll
-    LeftList.Padding = UDim.new(0, 14)
+    LeftList.Padding = UDim.new(0, 10)
 
     LeftList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         LeftScroll.CanvasSize = UDim2.new(0, 0, 0, LeftList.AbsoluteContentSize.Y + 4)
@@ -459,8 +459,8 @@ function UI:CreateTab(tabName)
     ---------------------------------------------------------
     local RightCard = Instance.new("Frame")
     RightCard.Name = "RightCard"
-    RightCard.Size = UDim2.new(0.5, -7, 1, 0)
-    RightCard.Position = UDim2.new(0.5, 7, 0, 0)
+    RightCard.Size = UDim2.new(0.5, -3, 1, 0)
+    RightCard.Position = UDim2.new(0.5, 3, 0, 0)
     RightCard.BackgroundColor3 = Theme.CardBG
     RightCard.Parent = TabPage
 
@@ -474,8 +474,8 @@ function UI:CreateTab(tabName)
     RightCardStroke.Parent = RightCard
 
     local RightScroll = Instance.new("ScrollingFrame")
-    RightScroll.Size = UDim2.new(1, -24, 1, -20)
-    RightScroll.Position = UDim2.new(0, 12, 0, 10)
+    RightScroll.Size = UDim2.new(1, -16, 1, -16)
+    RightScroll.Position = UDim2.new(0, 8, 0, 8)
     RightScroll.BackgroundTransparency = 1
     RightScroll.ScrollBarThickness = 2
     RightScroll.ScrollBarImageColor3 = Theme.AccentDim
@@ -484,7 +484,7 @@ function UI:CreateTab(tabName)
 
     local RightList = Instance.new("UIListLayout")
     RightList.Parent = RightScroll
-    RightList.Padding = UDim.new(0, 14)
+    RightList.Padding = UDim.new(0, 10)
 
     RightList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         RightScroll.CanvasSize = UDim2.new(0, 0, 0, RightList.AbsoluteContentSize.Y + 4)
