@@ -206,7 +206,7 @@ function ScriptLoad.BringMob(enemy, groundCFrame)
     end
 end
 
--- 5. TAKE QUEST (FIXED & AUTO TRIGGER)
+-- 5. TAKE QUEST (FIXED DENGAN JEDA REFRESH)
 function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
     if CommF then
         local character = LocalPlayer.Character
@@ -222,7 +222,6 @@ function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
             end
         end
         
-        -- Kalau sudah dekat NPC, stop tween, lock posisi nempel ke NPC, lalu ambil quest
         if currentTween then currentTween:Cancel() end
         if questCFrame then
             hrp.CFrame = questCFrame
@@ -231,6 +230,9 @@ function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
         pcall(function()
             CommF:InvokeServer("StartQuest", questName, levelReq)
         end)
+        
+        -- TAMBAHAN: Kasih jeda 1 detik biar GUI game sempat update & ga nyangkut di NPC
+        task.wait(1)
     end
 end
 
