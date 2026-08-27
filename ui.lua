@@ -255,23 +255,31 @@ MainWindow.Active = true
 MainWindow.Draggable = true
 MainWindow.Parent = ScreenGui
 
+local BackgroundPanel = Instance.new("Frame")
+BackgroundPanel.Name = "BackgroundPanel"
+BackgroundPanel.Size = UDim2.new(1, 0, 1, 0)
+BackgroundPanel.BackgroundColor3 = Theme.CardBG
+BackgroundPanel.BorderSizePixel = 0
+BackgroundPanel.ZIndex = 0
+BackgroundPanel.Parent = MainWindow
+
+local BackgroundPanelCorner = Instance.new("UICorner")
+BackgroundPanelCorner.CornerRadius = UDim.new(0, 12)
+BackgroundPanelCorner.Parent = BackgroundPanel
+
+local BackgroundPanelStroke = Instance.new("UIStroke")
+BackgroundPanelStroke.Color = Theme.Border
+BackgroundPanelStroke.Thickness = 1
+BackgroundPanelStroke.Parent = BackgroundPanel
+
 -- Header (solid floating bar so the "ZxD" name is clearly visible)
 local Header = Instance.new("Frame")
 Header.Name = "Header"
 Header.Size = UDim2.new(1, -16, 0, 92)
 Header.Position = UDim2.new(0, 8, 0, 0)
-Header.BackgroundColor3 = Theme.CardBG
+Header.BackgroundTransparency = 1
 Header.BorderSizePixel = 0
 Header.Parent = MainWindow
-
-local HeaderCorner = Instance.new("UICorner")
-HeaderCorner.CornerRadius = UDim.new(0, 12)
-HeaderCorner.Parent = Header
-
-local HeaderStroke = Instance.new("UIStroke")
-HeaderStroke.Color = Theme.Border
-HeaderStroke.Thickness = 1
-HeaderStroke.Parent = Header
 
 local HeaderDivider = Instance.new("Frame")
 HeaderDivider.Name = "HeaderDivider"
@@ -435,19 +443,10 @@ function UI:CreateTab(tabName)
     ---------------------------------------------------------
     local LeftCard = Instance.new("Frame")
     LeftCard.Name = "LeftCard"
-    LeftCard.Size = UDim2.new(0.5, -4, 1, 0)
+    LeftCard.Size = UDim2.new(0.5, 0, 1, 0)
     LeftCard.Position = UDim2.new(0, 0, 0, 0)
-    LeftCard.BackgroundColor3 = Theme.CardBG
+    LeftCard.BackgroundTransparency = 1
     LeftCard.Parent = TabPage
-
-    local LeftCardCorner = Instance.new("UICorner")
-    LeftCardCorner.CornerRadius = UDim.new(0, 12)
-    LeftCardCorner.Parent = LeftCard
-
-    local LeftCardStroke = Instance.new("UIStroke")
-    LeftCardStroke.Color = Theme.Border
-    LeftCardStroke.Thickness = 1
-    LeftCardStroke.Parent = LeftCard
 
     local LeftScroll = Instance.new("ScrollingFrame")
     LeftScroll.Size = UDim2.new(1, -22, 1, -20)
@@ -467,23 +466,26 @@ function UI:CreateTab(tabName)
     end)
 
     ---------------------------------------------------------
+    -- DIVIDER: pemisah tipis antar card kiri-kanan
+    ---------------------------------------------------------
+    local CardDivider = Instance.new("Frame")
+    CardDivider.Name = "CardDivider"
+    CardDivider.AnchorPoint = Vector2.new(0.5, 0)
+    CardDivider.Size = UDim2.new(0, 1, 1, 0)
+    CardDivider.Position = UDim2.new(0.5, 0, 0, 0)
+    CardDivider.BackgroundColor3 = Theme.Border
+    CardDivider.BorderSizePixel = 0
+    CardDivider.Parent = TabPage
+
+    ---------------------------------------------------------
     -- CARD 2: RIGHT
     ---------------------------------------------------------
     local RightCard = Instance.new("Frame")
     RightCard.Name = "RightCard"
-    RightCard.Size = UDim2.new(0.5, -4, 1, 0)
-    RightCard.Position = UDim2.new(0.5, 4, 0, 0)
-    RightCard.BackgroundColor3 = Theme.CardBG
+    RightCard.Size = UDim2.new(0.5, 0, 1, 0)
+    RightCard.Position = UDim2.new(0.5, 0, 0, 0)
+    RightCard.BackgroundTransparency = 1
     RightCard.Parent = TabPage
-
-    local RightCardCorner = Instance.new("UICorner")
-    RightCardCorner.CornerRadius = UDim.new(0, 12)
-    RightCardCorner.Parent = RightCard
-
-    local RightCardStroke = Instance.new("UIStroke")
-    RightCardStroke.Color = Theme.Border
-    RightCardStroke.Thickness = 1
-    RightCardStroke.Parent = RightCard
 
     local RightScroll = Instance.new("ScrollingFrame")
     RightScroll.Size = UDim2.new(1, -22, 1, -20)
