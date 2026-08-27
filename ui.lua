@@ -37,8 +37,8 @@ end
 ---------------------------------------------------------
 local ToastHolder = Instance.new("Frame")
 ToastHolder.Name = "ToastHolder"
-ToastHolder.AnchorPoint = Vector2.new(0.5, 0)
-ToastHolder.Position = UDim2.new(0.5, 0, 0, 14)
+ToastHolder.AnchorPoint = Vector2.new(1, 0)
+ToastHolder.Position = UDim2.new(1, -14, 0, 14)
 ToastHolder.Size = UDim2.new(0, 260, 0, 0)
 ToastHolder.BackgroundTransparency = 1
 ToastHolder.ZIndex = 50
@@ -46,7 +46,7 @@ ToastHolder.Parent = ScreenGui
 
 local ToastList = Instance.new("UIListLayout")
 ToastList.Parent = ToastHolder
-ToastList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+ToastList.HorizontalAlignment = Enum.HorizontalAlignment.Right
 ToastList.Padding = UDim.new(0, 6)
 
 local function ShowToast(text, isOn)
@@ -142,7 +142,7 @@ local QuickPanel = Instance.new("Frame")
 QuickPanel.Name = "QuickPanel"
 QuickPanel.Size = UDim2.new(0, 170, 0, 0)
 QuickPanel.AutomaticSize = Enum.AutomaticSize.Y
-QuickPanel.Position = UDim2.new(0, 14, 0, 14)
+QuickPanel.Position = UDim2.new(0, 14, 0, 110)
 QuickPanel.BackgroundColor3 = Theme.CardBG
 QuickPanel.BackgroundTransparency = 0.05
 QuickPanel.Active = true
