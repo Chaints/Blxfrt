@@ -410,7 +410,7 @@ TabUnderlineCorner.CornerRadius = UDim.new(1, 0)
 TabUnderlineCorner.Parent = TabUnderline
 
 ---------------------------------------------------------
--- CONTENT VIEWPORT (clips, holds sliding track of tab pages)
+-- CONTENT VIEWPORT (holds all tab pages; only the active one is Visible)
 ---------------------------------------------------------
 local Viewport = Instance.new("Frame")
 Viewport.Name = "Viewport"
@@ -419,14 +419,6 @@ Viewport.Position = UDim2.new(0, 8, 0, 116)
 Viewport.BackgroundTransparency = 1
 Viewport.ClipsDescendants = true
 Viewport.Parent = MainWindow
-
--- Track holds all tab pages side by side; slides horizontally on tab switch
-local Track = Instance.new("Frame")
-Track.Name = "Track"
-Track.Size = UDim2.new(1, 0, 1, 0) -- resized to scale once TabCount is known
-Track.Position = UDim2.new(0, 0, 0, 0)
-Track.BackgroundTransparency = 1
-Track.Parent = Viewport
 
 ---------------------------------------------------------
 -- BUILDER LOGIC
@@ -471,8 +463,11 @@ function UI:CreateTab(tabName)
 
     local TabPage = Instance.new("Frame")
     TabPage.Name = tabName .. "Page"
+    TabPage.Size = UDim2.new(1, 0, 1, 0)
+    TabPage.Position = UDim2.new(0, 0, 0, 0)
     TabPage.BackgroundTransparency = 1
-    TabPage.Parent = Track
+    TabPage.Visible = FirstTab
+    TabPage.Parent = Viewport
 
     ---------------------------------------------------------
     -- CARD 1: LEFT
@@ -552,6 +547,7 @@ function UI:CreateTab(tabName)
         for _, t in pairs(Tabs) do
             tween(t.Button, {BackgroundColor3 = Theme.InactivePill}, 0.18)
             tween(t.Label, {TextColor3 = Theme.TextMuted}, 0.18)
+            t.Page.Visible = false
         end
         tween(TabButton, {BackgroundColor3 = Theme.Accent}, 0.18)
         tween(TabLabel, {TextColor3 = Theme.Background}, 0.18)
@@ -561,8 +557,7 @@ function UI:CreateTab(tabName)
         }, 0.28, Enum.EasingStyle.Quint)
 
         currentIndex = pageIndex
-        local targetXScale = -(pageIndex / math.max(TabCount, 1))
-        tween(Track, {Position = UDim2.new(targetXScale, 0, 0, 0)}, 0.32, Enum.EasingStyle.Quint)
+        TabPage.Visible = true
     end
 
     TabButton.MouseButton1Click:Connect(goToTab)
@@ -877,20 +872,6 @@ function UI:CreateTab(tabName)
 
     return Elements
 end
-
----------------------------------------------------------
--- FINAL SIZING PASS (scale-based: no need to wait for AbsoluteSize,
--- works immediately regardless of render timing / executor)
----------------------------------------------------------
-task.defer(function()
-    local n = math.max(TabCount, 1)
-    Track.Size = UDim2.new(n, 0, 1, 0)
-    for _, t in pairs(Tabs) do
-        t.Page.Size = UDim2.new(1 / n, 0, 1, 0)
-        t.Page.Position = UDim2.new(t.Index / n, 0, 0, 0)
-    end
-    Track.Position = UDim2.new(0, 0, 0, 0)
-end)
 
 MobileBtn.MouseButton1Click:Connect(function()
     local isVis = not MainWindow.Visible
