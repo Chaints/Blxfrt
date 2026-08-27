@@ -205,7 +205,8 @@ function ScriptLoad.BringMob(enemy, groundCFrame)
         hrp.Velocity = Vector3.zero
     end
 end
--- 5. TAKE QUEST (FIXED DENGAN FORMAT COMMF_ ASLI)
+
+-- 5. TAKE QUEST DENGAN PAKSAAN KABUR DARI NPC
 function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
     if CommF then
         local character = LocalPlayer.Character
@@ -221,13 +222,13 @@ function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
             end
         end
         
-        -- Kalau sudah dekat NPC, stop tween, lock posisi nempel pas ke NPC
         if currentTween then currentTween:Cancel() end
         if questCFrame then
+            -- Nempel ke NPC buat ambil quest
             hrp.CFrame = questCFrame
         end
         
-        -- Panggil remote quest pakai format asli CommF_
+        -- Eksekusi ambil quest
         pcall(function()
             local args = {
                 "StartQuest",
@@ -236,6 +237,14 @@ function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
             }
             CommF:InvokeServer(unpack(args))
         end)
+        
+        -- TAMBAHAN: Begitu quest kepanggil, langsung lempar/dorong dikit karakternya 
+        -- biar posisinya gak nempel mulu di NPC dan gak dikira "lagi di NPC" terus!
+        task.wait(0.5)
+        if questCFrame then
+            hrp.CFrame = questCFrame * CFrame.new(0, 0, -10) -- Dorong maju 10 stud ke depan NPC
+        end
+        task.wait(0.5)
     end
 end
 
