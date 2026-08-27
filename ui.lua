@@ -247,7 +247,7 @@ end
 local MainWindow = Instance.new("Frame")
 MainWindow.Name = "MainWindow"
 MainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
-MainWindow.Size = UDim2.new(0, 430, 0, 320)
+MainWindow.Size = UDim2.new(0, 470, 0, 320)
 MainWindow.Position = UDim2.new(0.5, 0, 0.45, 0)
 MainWindow.BackgroundTransparency = 1
 MainWindow.BorderSizePixel = 0
@@ -374,8 +374,8 @@ TabUnderlineCorner.Parent = TabUnderline
 ---------------------------------------------------------
 local Viewport = Instance.new("Frame")
 Viewport.Name = "Viewport"
-Viewport.Size = UDim2.new(1, -16, 1, -110)
-Viewport.Position = UDim2.new(0, 8, 0, 104)
+Viewport.Size = UDim2.new(1, -16, 1, -94)
+Viewport.Position = UDim2.new(0, 8, 0, 88)
 Viewport.BackgroundTransparency = 1
 Viewport.ClipsDescendants = true
 Viewport.Parent = MainWindow
@@ -434,7 +434,7 @@ function UI:CreateTab(tabName)
     ---------------------------------------------------------
     local LeftCard = Instance.new("Frame")
     LeftCard.Name = "LeftCard"
-    LeftCard.Size = UDim2.new(0.5, -8, 1, 0)
+    LeftCard.Size = UDim2.new(0.5, -4, 1, 0)
     LeftCard.Position = UDim2.new(0, 0, 0, 0)
     LeftCard.BackgroundColor3 = Theme.CardBG
     LeftCard.Parent = TabPage
@@ -470,8 +470,8 @@ function UI:CreateTab(tabName)
     ---------------------------------------------------------
     local RightCard = Instance.new("Frame")
     RightCard.Name = "RightCard"
-    RightCard.Size = UDim2.new(0.5, -8, 1, 0)
-    RightCard.Position = UDim2.new(0.5, 8, 0, 0)
+    RightCard.Size = UDim2.new(0.5, -4, 1, 0)
+    RightCard.Position = UDim2.new(0.5, 4, 0, 0)
     RightCard.BackgroundColor3 = Theme.CardBG
     RightCard.Parent = TabPage
 
@@ -589,9 +589,14 @@ function UI:CreateTab(tabName)
         Label.Font = Enum.Font.GothamMedium
         Label.TextSize = 12
         Label.TextXAlignment = Enum.TextXAlignment.Left
-        Label.TextTruncate = Enum.TextTruncate.AtEnd
+        Label.TextScaled = true
         Label.ZIndex = 2
         Label.Parent = Item
+
+        local LabelConstraint = Instance.new("UITextSizeConstraint")
+        LabelConstraint.MaxTextSize = 12
+        LabelConstraint.MinTextSize = 8
+        LabelConstraint.Parent = Label
 
         local Selector = Instance.new("TextButton")
         Selector.Size = UDim2.new(0.54, -14, 0, 30)
@@ -620,9 +625,14 @@ function UI:CreateTab(tabName)
         SelLabel.Font = Enum.Font.GothamBold
         SelLabel.TextSize = 11
         SelLabel.TextXAlignment = Enum.TextXAlignment.Left
-        SelLabel.TextTruncate = Enum.TextTruncate.AtEnd
+        SelLabel.TextScaled = true
         SelLabel.ZIndex = 2
         SelLabel.Parent = Selector
+
+        local SelLabelConstraint = Instance.new("UITextSizeConstraint")
+        SelLabelConstraint.MaxTextSize = 11
+        SelLabelConstraint.MinTextSize = 8
+        SelLabelConstraint.Parent = SelLabel
 
         local Arrow = Instance.new("TextLabel")
         Arrow.Size = UDim2.new(0, 18, 1, 0)
@@ -741,8 +751,13 @@ function UI:CreateTab(tabName)
         TitleLbl.Font = Enum.Font.GothamMedium
         TitleLbl.TextSize = 12
         TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
-        TitleLbl.TextTruncate = Enum.TextTruncate.AtEnd
+        TitleLbl.TextScaled = true
         TitleLbl.Parent = Item
+
+        local TitleLblConstraint = Instance.new("UITextSizeConstraint")
+        TitleLblConstraint.MaxTextSize = 12
+        TitleLblConstraint.MinTextSize = 8
+        TitleLblConstraint.Parent = TitleLbl
 
         local ValueBox = Instance.new("TextBox")
         ValueBox.Size = UDim2.new(0, 46, 0, 20)
@@ -852,6 +867,7 @@ function UI:CreateTab(tabName)
 
         local Item = Instance.new("TextButton")
         Item.Size = UDim2.new(1, 0, 0, 46)
+        Item.AutomaticSize = Enum.AutomaticSize.Y
         Item.BackgroundColor3 = Theme.InactivePill
         Item.Text = ""
         Item.AutoButtonColor = false
@@ -862,7 +878,8 @@ function UI:CreateTab(tabName)
         ItemCorner.Parent = Item
 
         local Label = Instance.new("TextLabel")
-        Label.Size = UDim2.new(1, -62, 1, 0)
+        Label.Size = UDim2.new(1, -62, 0, 0)
+        Label.AutomaticSize = Enum.AutomaticSize.Y
         Label.Position = UDim2.new(0, 14, 0, 0)
         Label.BackgroundTransparency = 1
         Label.Text = text
@@ -870,8 +887,14 @@ function UI:CreateTab(tabName)
         Label.Font = Enum.Font.GothamMedium
         Label.TextSize = 12
         Label.TextXAlignment = Enum.TextXAlignment.Left
-        Label.TextTruncate = Enum.TextTruncate.AtEnd
+        Label.TextYAlignment = Enum.TextYAlignment.Center
+        Label.TextWrapped = true
         Label.Parent = Item
+
+        local LabelPad = Instance.new("UIPadding")
+        LabelPad.PaddingTop = UDim.new(0, 14)
+        LabelPad.PaddingBottom = UDim.new(0, 14)
+        LabelPad.Parent = Label
 
         local Indicator = Instance.new("Frame")
         Indicator.Size = UDim2.new(0, 40, 0, 22)
@@ -988,15 +1011,20 @@ function UI:CreateTab(tabName)
         Padding.Parent = Item
 
         local TitleLbl = Instance.new("TextLabel")
-        TitleLbl.Size = UDim2.new(1, 0, 0, 18)
+        TitleLbl.Size = UDim2.new(1, -56, 0, 18)
         TitleLbl.BackgroundTransparency = 1
         TitleLbl.Text = text
         TitleLbl.TextColor3 = Theme.TextPrimary
         TitleLbl.Font = Enum.Font.GothamMedium
         TitleLbl.TextSize = 12
         TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
-        TitleLbl.TextTruncate = Enum.TextTruncate.AtEnd
+        TitleLbl.TextScaled = true
         TitleLbl.Parent = Item
+
+        local TitleLbl2Constraint = Instance.new("UITextSizeConstraint")
+        TitleLbl2Constraint.MaxTextSize = 12
+        TitleLbl2Constraint.MinTextSize = 8
+        TitleLbl2Constraint.Parent = TitleLbl
 
         local ValueLbl = Instance.new("TextLabel")
         ValueLbl.Size = UDim2.new(0, 50, 0, 18)
