@@ -153,14 +153,6 @@ TabNav.CanvasSize = UDim2.new(0, 0, 0, 0)
 TabNav.ScrollingDirection = Enum.ScrollingDirection.X
 TabNav.Parent = Header
 
-local TabDivider = Instance.new("Frame")
-TabDivider.Name = "TabDivider"
-TabDivider.Size = UDim2.new(1, -24, 0, 1)
-TabDivider.Position = UDim2.new(0, 12, 0, 46)
-TabDivider.BackgroundColor3 = Theme.Border
-TabDivider.BorderSizePixel = 0
-TabDivider.Parent = Header
-
 local TabLayout = Instance.new("UIListLayout")
 TabLayout.Parent = TabNav
 TabLayout.FillDirection = Enum.FillDirection.Horizontal
@@ -176,8 +168,8 @@ end)
 ---------------------------------------------------------
 local Viewport = Instance.new("Frame")
 Viewport.Name = "Viewport"
-Viewport.Size = UDim2.new(1, -16, 1, -108)
-Viewport.Position = UDim2.new(0, 8, 0, 104)
+Viewport.Size = UDim2.new(1, -16, 1, -120)
+Viewport.Position = UDim2.new(0, 8, 0, 116)
 Viewport.BackgroundTransparency = 1
 Viewport.ClipsDescendants = true
 Viewport.Parent = MainWindow
@@ -219,12 +211,6 @@ function UI:CreateTab(tabName)
     local TabCorner = Instance.new("UICorner")
     TabCorner.CornerRadius = UDim.new(1, 0)
     TabCorner.Parent = TabButton
-
-    local TabStroke = Instance.new("UIStroke")
-    TabStroke.Color = Theme.Border
-    TabStroke.Thickness = 1
-    TabStroke.Transparency = FirstTab and 1 or 0.3
-    TabStroke.Parent = TabButton
 
     local TabLabel = Instance.new("TextLabel")
     TabLabel.Size = UDim2.new(1, 0, 1, 0)
