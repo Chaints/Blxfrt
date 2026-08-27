@@ -25,7 +25,7 @@ local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 local currentTween = nil
 local activeHash = "12796888"
 
--- NOCLIP & ANTI JATUH YANG AMAN (TIDAK BIKIN MAJU MUNDUR)
+-- NOCLIP MURNI & ANTI-JATUH PHYSICS (BODYVELOCITY)
 RunService.Stepped:Connect(function()
     if _G.AutoFarm then
         local character = LocalPlayer.Character
@@ -33,17 +33,30 @@ RunService.Stepped:Connect(function()
             local hrp = character:FindFirstChild("HumanoidRootPart")
             
             if hrp then
-                -- Hanya matikan gravitasi/velocity saat tidak tweening (anteng di atas musuh)
-                if currentTween == nil or currentTween.PlaybackState ~= Enum.PlaybackState.Playing then
-                    hrp.Velocity = Vector3.zero
-                    hrp.RotVelocity = Vector3.zero
+                -- Buat BodyVelocity kalau belum ada biar karakter ga jatuh ditarik gravitasi
+                if not hrp:FindFirstChild("AntiFall") then
+                    local bv = Instance.new("BodyVelocity")
+                    bv.Name = "AntiFall"
+                    bv.MaxForce = Vector3.new(100000, 100000, 100000)
+                    bv.Velocity = Vector3.zero
+                    bv.Parent = hrp
                 end
             end
 
+            -- Noclip murni biar tembus tembok
             for _, part in ipairs(character:GetChildren()) do
                 if part:IsA("BasePart") and part.CanCollide then
                     part.CanCollide = false
                 end
+            end
+        end
+    else
+        -- Hapus BodyVelocity kalau AutoFarm dimatiin biar bisa turun/jatuh normal
+        local character = LocalPlayer.Character
+        if character then
+            local hrp = character:FindFirstChild("HumanoidRootPart")
+            if hrp and hrp:FindFirstChild("AntiFall") then
+                hrp.AntiFall:Destroy()
             end
         end
     end
