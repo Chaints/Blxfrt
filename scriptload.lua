@@ -25,24 +25,19 @@ local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 local currentTween = nil
 local activeHash = "12796888"
 
--- ANTI GRAVITASI & LOCK POSISI (ANTI JATUH)
-local lockedCFrame = nil
-
+-- NOCLIP & ANTI JATUH YANG AMAN (TIDAK BIKIN MAJU MUNDUR)
 RunService.Stepped:Connect(function()
     if _G.AutoFarm then
         local character = LocalPlayer.Character
         if character then
             local hrp = character:FindFirstChild("HumanoidRootPart")
+            
             if hrp then
-                -- Kalau lagi ga tweening dan posisi lock ada, paksa tahan posisinya biar ga jatuh
-                if lockedCFrame and (currentTween == nil or currentTween.PlaybackState ~= Enum.PlaybackState.Playing) then
-                    hrp.CFrame = lockedCFrame
-                elseif hrp then
-                    lockedCFrame = hrp.CFrame
+                -- Hanya matikan gravitasi/velocity saat tidak tweening (anteng di atas musuh)
+                if currentTween == nil or currentTween.PlaybackState ~= Enum.PlaybackState.Playing then
+                    hrp.Velocity = Vector3.zero
+                    hrp.RotVelocity = Vector3.zero
                 end
-                
-                hrp.Velocity = Vector3.zero
-                hrp.RotVelocity = Vector3.zero
             end
 
             for _, part in ipairs(character:GetChildren()) do
@@ -51,8 +46,6 @@ RunService.Stepped:Connect(function()
                 end
             end
         end
-    else
-        lockedCFrame = nil
     end
 end)
 
@@ -90,12 +83,6 @@ function ScriptLoad.TweenTo(targetCFrame, speed)
     local hrp = character.HumanoidRootPart
     local distance = (hrp.Position - targetCFrame.Position).Magnitude
 
-    -- TAMBAHAN: Paksa kamera fokus ke karakter biar ga lepas/ketinggalan
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if humanoid and workspace.CurrentCamera.CameraSubject ~= humanoid then
-        workspace.CurrentCamera.CameraSubject = humanoid
-    end
-
     if distance < 3 then
         if currentTween then currentTween:Cancel() end
         lastTweenTarget = nil
@@ -111,11 +98,9 @@ function ScriptLoad.TweenTo(targetCFrame, speed)
         end
     end
 
-    -- FIX: Jarak dibagi kecepatan murni, tanpa batasan math.clamp
     local baseSpeed = speed or _G.TweenSpeed or 300
     local duration = distance / baseSpeed
 
-    -- FIX: Pakai Linear supaya kecepatan konstan dari awal sampai akhir terbang
     local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
 
     if currentTween then currentTween:Cancel() end
@@ -218,14 +203,12 @@ function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
         
         if questCFrame then
             local distance = (hrp.Position - questCFrame.Position).Magnitude
-            -- Kalau masih jauh, jalankan tween dan jangan ambil quest dulu
             if distance > 10 then
                 ScriptLoad.TweenTo(questCFrame, _G.TweenSpeed)
                 return 
             end
         end
         
-        -- Kalau sudah dekat (distance <= 10), berhentikan tween lalu ambil quest
         if currentTween then currentTween:Cancel() end
         CommF:InvokeServer("StartQuest", questName, levelReq)
     end
@@ -341,7 +324,6 @@ task.spawn(function()
                 local method = _G.FarmMethod or "Quest"
 
                 if method == "Nearest" then
-                    -- MODE NEAREST: serang mob terdekat dari posisi player, tanpa peduli quest
                     local mainTarget = GetNearestEnemy(myHrp)
 
                     if mainTarget then
@@ -370,7 +352,6 @@ task.spawn(function()
                     end
 
                 else
-                    -- MODE QUEST / NO QUEST: pakai target berbasis level quest data
                     local targetName, questName, questIndex, questCFrame = GetQuestData()
                     local skipRest = false
 
@@ -386,7 +367,6 @@ task.spawn(function()
                             skipRest = true
                         end
                     end
-                    -- method == "No Quest" langsung skip pengambilan quest, langsung cari target
 
                     if not skipRest then
                         local enemiesFolder = GetEnemiesFolder()
