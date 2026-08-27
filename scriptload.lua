@@ -12,9 +12,9 @@ _G.AutoFarm = _G.AutoFarm or false
 _G.AutoEquipMelee = true
 _G.FastAttack = true
 _G.AttackPlayers = false 
-_G.AttackRadius = 60
+_G.AttackRadius = 60     -- Jangkauan area Fast Attack (studs)
 _G.BringMob = true
-_G.AttackRange = 350
+_G.AttackRange = 350     -- Radius tarik NPC
 
 -- DEKLARASI REMOTE
 local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
@@ -23,17 +23,41 @@ local RegisterHit = Net:FindFirstChild("RE/RegisterHit") or Net:FindFirstChild("
 local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 
 local currentTween = nil
+local activeHash = nil
 
--- 1. EXPAND HITBOX & FIX PHYSICS NPC
-function ScriptLoad.ExpandHitbox(enemy)
-    for _, part in ipairs(enemy:GetDescendants()) do
-        if part:IsA("BasePart") then
-            part.CanCollide = false
+-- AUTO EXTRACT HASH SERVERSIDE
+local function GetServerHash()
+    if activeHash then return activeHash end
+    pcall(function()
+        for _, v in ipairs(getgc(true)) do
+            if type(v) == "function" and (getinfo(v).name == "RegisterHit" or getinfo(v).name == "attack") then
+                for _, upval in ipairs(getupvalues(v)) do
+                    if type(upval) == "string" and #upval == 8 then
+                        activeHash = upval
+                        return activeHash
+                    end
+                end
+            end
         end
-    end
+    end)
+    return activeHash or "12796888"
 end
 
--- 2. TWEEN MOVEMENT
+if hookmetamethod then
+    local oldNamecall
+    oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        local args = {...}
+        if method == "FireServer" and self.Name == "RegisterHit" then
+            if args[4] and type(args[4]) == "string" then
+                activeHash = args[4]
+            end
+        end
+        return oldNamecall(self, ...)
+    end)
+end
+
+-- 1. SMOOTH TWEEN MOVEMENT (ANTI NJOT-NJOTAN)
 function ScriptLoad.TweenTo(targetCFrame, speed)
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -59,12 +83,11 @@ function ScriptLoad.TweenTo(targetCFrame, speed)
     return currentTween
 end
 
--- 3. AUTO EQUIP MELEE
+-- 2. AUTO EQUIP MELEE
 function ScriptLoad.EquipMelee()
     local character = LocalPlayer.Character
     local backpack = LocalPlayer:FindFirstChild("Backpack")
     if not character or not backpack then return end
-
     if character:FindFirstChildOfClass("Tool") then return end
 
     local meleeKeywords = {"Combat", "Dark Step", "Electro", "Water Kung Fu", "Dragon Claw", "Superhuman", "Death Step", "Sharkman Karate", "Electric Claw", "Dragon Talon", "Godhuman", "Sanguine Art"}
@@ -91,7 +114,7 @@ function ScriptLoad.EquipMelee()
     end
 end
 
--- 4. FAST ATTACK MULTI-TARGET (PAKE HASH REMOTESPY RECENT "12796888")
+-- 3. MULTI-TARGET FAST ATTACK (MUKUL BANYAK NPC SEKALIGUS)
 function ScriptLoad.FastAttack()
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -99,7 +122,6 @@ function ScriptLoad.FastAttack()
     local myHrp = character.HumanoidRootPart
     local hitTargets = {}
 
-    -- Scan NPC
     local enemiesFolder = workspace:FindFirstChild("Enemies")
     if enemiesFolder then
         for _, enemy in ipairs(enemiesFolder:GetChildren()) do
@@ -117,57 +139,42 @@ function ScriptLoad.FastAttack()
         end
     end
 
-    -- Scan Player
-    if _G.AttackPlayers then
-        for _, otherPlayer in ipairs(Players:GetPlayers()) do
-            if otherPlayer ~= LocalPlayer and otherPlayer.Character then
-                local hum = otherPlayer.Character:FindFirstChild("Humanoid")
-                local targetPart = otherPlayer.Character:FindFirstChild("LeftFoot") 
-                    or otherPlayer.Character:FindFirstChild("UpperTorso") 
-                    or otherPlayer.Character:FindFirstChild("HumanoidRootPart")
-                
-                if hum and hum.Health > 0 and targetPart then
-                    local distance = (targetPart.Position - myHrp.Position).Magnitude
-                    if distance <= _G.AttackRadius then
-                        table.insert(hitTargets, targetPart)
-                    end
-                end
-            end
-        end
-    end
-
-    -- Eksekusi Hit Multi-Target
     if #hitTargets > 0 then
+        local hash = GetServerHash()
         if RegisterAttack then
-            RegisterAttack:FireServer(0.5, 1) -- Payload RegisterAttack terbaru
+            RegisterAttack:FireServer(0.5, 1)
         end
         
         if RegisterHit then
-            -- Pisahkan Target Utama (Arg 1) dan Daftar Target Tambahan (Arg 2)
             local mainTarget = hitTargets[1]
             local subTargets = {}
 
+            -- Masukkan seluruh NPC yang masuk radius ke daftar subTargets untuk serangan AoE
             for i = 2, #hitTargets do
                 table.insert(subTargets, hitTargets[i])
             end
 
             local hitArgs = {
                 [1] = mainTarget,
-                [2] = subTargets,     -- Array musuh tambahan biar kena banyak sekaligus
-                [4] = "12796888"       -- HASH REMOTESPY TERBARU
+                [2] = subTargets, -- Array Multi-Hit
+                [4] = hash
             }
             RegisterHit:FireServer(unpack(hitArgs))
         end
     end
 end
 
--- 5. BRING MOB FIX
+-- 4. BRING MOB FIX (PAKAI BODYVELOCITY AGAR NPC DI TANAH & ANTI-TERBANG)
 function ScriptLoad.BringMob(enemy, groundCFrame)
     local hrp = enemy:FindFirstChild("HumanoidRootPart")
     local hum = enemy:FindFirstChild("Humanoid")
     
     if hrp and hum and hum.Health > 0 then
-        ScriptLoad.ExpandHitbox(enemy)
+        for _, part in ipairs(enemy:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
 
         hrp.CFrame = groundCFrame
         
@@ -184,7 +191,7 @@ function ScriptLoad.BringMob(enemy, groundCFrame)
     end
 end
 
--- 6. TAKE QUEST
+-- 5. TAKE QUEST
 function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
     if CommF then
         if questCFrame then
@@ -195,7 +202,7 @@ function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
     end
 end
 
--- 7. DATABASE QUEST & NPC TARGET (LEVEL 1 - 700)
+-- 6. DATABASE QUEST (LEVEL 1 - 700)
 local function GetQuestData()
     local level = LocalPlayer.Data.Level.Value
 
@@ -258,7 +265,7 @@ local function GetQuestData()
     end
 end
 
--- 8. NOCLIP KARAKTER
+-- 7. NOCLIP & VELOCITY ZEROING (PENYEBAB UTAMA TWEEN HALUS / ANTI PATAR-PATAH)
 RunService.Stepped:Connect(function()
     if _G.AutoFarm then
         local character = LocalPlayer.Character
@@ -275,7 +282,7 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- 9. LOOP FAST ATTACK
+-- 8. LOOP FAST ATTACK
 task.spawn(function()
     while true do
         task.wait(0.01)
@@ -287,7 +294,7 @@ task.spawn(function()
     end
 end)
 
--- 10. LOOP UTAMA
+-- 9. LOOP UTAMA
 task.spawn(function()
     while task.wait(0.1) do
         if _G.AutoFarm then
@@ -336,7 +343,7 @@ task.spawn(function()
                                 myHrp.CFrame = farmPosPlayer
                             end
 
-                            -- Bring semua NPC sejenis
+                            -- Bring SEMUA NPC sejenis
                             for _, enemy in ipairs(enemiesFolder:GetChildren()) do
                                 if string.find(enemy.Name, targetName) then
                                     local eHrp = enemy:FindFirstChild("HumanoidRootPart")
