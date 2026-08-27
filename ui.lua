@@ -136,6 +136,57 @@ MobStroke.Thickness = 1
 MobStroke.Parent = MobileBtn
 
 ---------------------------------------------------------
+-- WATERMARK (floating, separate from main window, draggable)
+---------------------------------------------------------
+local Watermark = Instance.new("Frame")
+Watermark.Name = "Watermark"
+Watermark.Size = UDim2.new(0, 150, 0, 26)
+Watermark.Position = UDim2.new(0, 14, 0, 14)
+Watermark.BackgroundColor3 = Theme.CardBG
+Watermark.BackgroundTransparency = 0.05
+Watermark.Active = true
+Watermark.Draggable = true
+Watermark.ZIndex = 8
+Watermark.Parent = ScreenGui
+
+local WatermarkCorner = Instance.new("UICorner")
+WatermarkCorner.CornerRadius = UDim.new(0, 8)
+WatermarkCorner.Parent = Watermark
+
+local WatermarkStroke = Instance.new("UIStroke")
+WatermarkStroke.Color = Theme.Border
+WatermarkStroke.Thickness = 1
+WatermarkStroke.Parent = Watermark
+
+local WatermarkDot = Instance.new("Frame")
+WatermarkDot.Size = UDim2.new(0, 6, 0, 6)
+WatermarkDot.Position = UDim2.new(0, 10, 0.5, -3)
+WatermarkDot.BackgroundColor3 = Theme.Accent
+WatermarkDot.Parent = Watermark
+
+local WatermarkDotCorner = Instance.new("UICorner")
+WatermarkDotCorner.CornerRadius = UDim.new(1, 0)
+WatermarkDotCorner.Parent = WatermarkDot
+
+local WatermarkLabel = Instance.new("TextLabel")
+WatermarkLabel.Size = UDim2.new(1, -24, 1, 0)
+WatermarkLabel.Position = UDim2.new(0, 22, 0, 0)
+WatermarkLabel.BackgroundTransparency = 1
+WatermarkLabel.Text = "ZxD Hub | 00:00:00"
+WatermarkLabel.TextColor3 = Theme.TextPrimary
+WatermarkLabel.Font = Enum.Font.GothamMedium
+WatermarkLabel.TextSize = 11
+WatermarkLabel.TextXAlignment = Enum.TextXAlignment.Left
+WatermarkLabel.Parent = Watermark
+
+task.spawn(function()
+    while Watermark.Parent do
+        WatermarkLabel.Text = "ZxD Hub | " .. os.date("%H:%M:%S")
+        task.wait(1)
+    end
+end)
+
+---------------------------------------------------------
 -- MAIN WINDOW (single floating container, responsive)
 ---------------------------------------------------------
 local MainWindow = Instance.new("Frame")
@@ -239,6 +290,20 @@ TabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 TabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     TabNav.CanvasSize = UDim2.new(0, TabLayout.AbsoluteContentSize.X + 8, 0, 0)
 end)
+
+local TabUnderline = Instance.new("Frame")
+TabUnderline.Name = "TabUnderline"
+TabUnderline.AnchorPoint = Vector2.new(0, 0)
+TabUnderline.Size = UDim2.new(0, 0, 0, 2)
+TabUnderline.Position = UDim2.new(0, 0, 1, 2)
+TabUnderline.BackgroundColor3 = Theme.Accent
+TabUnderline.BorderSizePixel = 0
+TabUnderline.ZIndex = 5
+TabUnderline.Parent = TabNav
+
+local TabUnderlineCorner = Instance.new("UICorner")
+TabUnderlineCorner.CornerRadius = UDim.new(1, 0)
+TabUnderlineCorner.Parent = TabUnderline
 
 ---------------------------------------------------------
 -- CONTENT VIEWPORT (clips, holds sliding track of tab pages)
@@ -386,6 +451,10 @@ function UI:CreateTab(tabName)
         end
         tween(TabButton, {BackgroundColor3 = Theme.Accent}, 0.18)
         tween(TabLabel, {TextColor3 = Theme.Background}, 0.18)
+        tween(TabUnderline, {
+            Position = UDim2.new(0, TabButton.AbsolutePosition.X - TabNav.AbsolutePosition.X + TabNav.CanvasPosition.X, 1, 2),
+            Size = UDim2.new(0, TabButton.AbsoluteSize.X, 0, 2)
+        }, 0.28, Enum.EasingStyle.Quint)
 
         currentIndex = pageIndex
         local targetX = -(Viewport.AbsoluteSize.X * pageIndex)
@@ -401,6 +470,9 @@ function UI:CreateTab(tabName)
         task.defer(function()
             TabPage.Size = UDim2.new(0, Viewport.AbsoluteSize.X, 1, 0)
             Track.Size = UDim2.new(0, Viewport.AbsoluteSize.X * TabCount, 1, 0)
+            task.wait(0.05)
+            TabUnderline.Position = UDim2.new(0, TabButton.AbsolutePosition.X - TabNav.AbsolutePosition.X, 1, 2)
+            TabUnderline.Size = UDim2.new(0, TabButton.AbsoluteSize.X, 0, 2)
         end)
     end
     FirstTab = false
@@ -489,6 +561,39 @@ function UI:CreateTab(tabName)
         DotCorner.CornerRadius = UDim.new(1, 0)
         DotCorner.Parent = Dot
 
+        local PulseDot = Instance.new("Frame")
+        PulseDot.Size = UDim2.new(0, 6, 0, 6)
+        PulseDot.Position = UDim2.new(1, -12, 0, 6)
+        PulseDot.BackgroundColor3 = Theme.Accent
+        PulseDot.BackgroundTransparency = defaultState and 0 or 1
+        PulseDot.ZIndex = 3
+        PulseDot.Parent = Item
+
+        local PulseDotCorner = Instance.new("UICorner")
+        PulseDotCorner.CornerRadius = UDim.new(1, 0)
+        PulseDotCorner.Parent = PulseDot
+
+        local pulseLoop = nil
+        local function startPulse()
+            if pulseLoop then return end
+            pulseLoop = task.spawn(function()
+                while true do
+                    tween(PulseDot, {Size = UDim2.new(0, 9, 0, 9), BackgroundTransparency = 0.5}, 0.6, Enum.EasingStyle.Sine)
+                    task.wait(0.6)
+                    tween(PulseDot, {Size = UDim2.new(0, 6, 0, 6), BackgroundTransparency = 0}, 0.6, Enum.EasingStyle.Sine)
+                    task.wait(0.6)
+                end
+            end)
+        end
+        local function stopPulse()
+            if pulseLoop then
+                task.cancel(pulseLoop)
+                pulseLoop = nil
+            end
+            tween(PulseDot, {Size = UDim2.new(0, 6, 0, 6), BackgroundTransparency = 1}, 0.2)
+        end
+        if defaultState then startPulse() end
+
         local enabled = defaultState or false
 
         Item.MouseEnter:Connect(function()
@@ -505,6 +610,7 @@ function UI:CreateTab(tabName)
                 Position = enabled and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7),
                 BackgroundColor3 = enabled and Theme.Background or Theme.TextMuted
             }, 0.18)
+            if enabled then startPulse() else stopPulse() end
             ShowToast(text .. (enabled and ": ON" or ": OFF"), enabled)
             pcall(callback, enabled)
         end)
