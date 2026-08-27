@@ -81,7 +81,6 @@ function ScriptLoad.TweenTo(targetCFrame, speed)
     end
 
     -- Kalau target belum bergeser jauh dari tween sebelumnya, biarkan tween yang jalan
-    -- terus jalan sampai selesai (jangan di-cancel & restart tiap loop -> ini yang bikin patah-patah)
     if lastTweenTarget and currentTween and currentTween.PlaybackState == Enum.PlaybackState.Playing then
         local targetShift = (lastTweenTarget.Position - targetCFrame.Position).Magnitude
         if targetShift < 7 then
@@ -89,12 +88,12 @@ function ScriptLoad.TweenTo(targetCFrame, speed)
         end
     end
 
-    -- Duration dihitung dari jarak/speed: makin tinggi TweenSpeed (100-350), makin cepat durasinya.
-    -- Range clamp disesuaikan biar slider beneran kerasa efeknya di seluruh rentang.
+    -- FIX: Jarak dibagi kecepatan murni, tanpa batasan math.clamp
     local baseSpeed = speed or _G.TweenSpeed or 300
-    local duration = math.clamp(distance / baseSpeed, 0.1, 0.9)
+    local duration = distance / baseSpeed
 
-    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+    -- FIX: Pakai Linear supaya kecepatan konstan dari awal sampai akhir terbang
+    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
 
     if currentTween then currentTween:Cancel() end
 
