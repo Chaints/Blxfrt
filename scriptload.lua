@@ -17,8 +17,19 @@ _G.FarmMethod = _G.FarmMethod or "Quest"
 
 -- DEKLARASI REMOTE
 local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
-local RegisterAttack = Net:FindFirstChild("RE/RegisterAttack")
-local RegisterHit = Net:FindFirstChild("RE/RegisterHit") or Net:FindFirstChild("RegisterHit")
+-- FindFirstChild("RE/RegisterAttack") mencari instance bernama PERSIS itu
+-- (termasuk garis miringnya) - itu BUKAN path folder. Kalau struktur
+-- aslinya Net.RE.RegisterAttack (folder RE berisi remote RegisterAttack),
+-- baris lama selalu return nil sehingga FireServer di FastAttack() silently
+-- di-skip (karena ada "if RegisterAttack then") - musuh gak keserang tanpa error.
+-- Fix: coba folder "RE" dulu, baru fallback ke pencarian nama langsung.
+local REFolder = Net:FindFirstChild("RE")
+local RegisterAttack = (REFolder and REFolder:FindFirstChild("RegisterAttack"))
+    or Net:FindFirstChild("RegisterAttack")
+    or Net:FindFirstChild("RE/RegisterAttack")
+local RegisterHit = (REFolder and REFolder:FindFirstChild("RegisterHit"))
+    or Net:FindFirstChild("RegisterHit")
+    or Net:FindFirstChild("RE/RegisterHit")
 local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 
 local activeHash = "12796888"

@@ -602,12 +602,15 @@ function UI:CreateTab(tabName)
         Arrow.Parent = Selector
 
         local OptionsFrame = Instance.new("Frame")
-        OptionsFrame.Size = UDim2.new(0.54, -14, 0, #options * 28)
-        OptionsFrame.Position = UDim2.new(0.46, 0, 1, 2)
+        OptionsFrame.Size = UDim2.new(0, 0, 0, #options * 28) -- width diisi ulang tiap kali dibuka (lihat updateOptionsPosition)
         OptionsFrame.BackgroundColor3 = Theme.CardBG
         OptionsFrame.Visible = false
-        OptionsFrame.ZIndex = 20
-        OptionsFrame.Parent = Item
+        OptionsFrame.ZIndex = 200
+        -- Di-parent ke ScreenGui (bukan Item di dalam ScrollingFrame) karena
+        -- ScrollingFrame SELALU ClipsDescendants=true secara default di Roblox,
+        -- jadi list opsi ini akan terpotong/hilang meski Item.ClipsDescendants
+        -- di-set false. Posisinya dihitung manual mengikuti Selector.
+        OptionsFrame.Parent = ScreenGui
 
         local OptCorner = Instance.new("UICorner")
         OptCorner.CornerRadius = UDim.new(0, 6)
@@ -616,6 +619,7 @@ function UI:CreateTab(tabName)
         local OptStroke = Instance.new("UIStroke")
         OptStroke.Color = Theme.Border
         OptStroke.Thickness = 1
+        OptStroke.ZIndex = 200
         OptStroke.Parent = OptionsFrame
 
         local OptList = Instance.new("UIListLayout")
@@ -623,6 +627,16 @@ function UI:CreateTab(tabName)
 
         local selected = default or options[1]
         local isOpen = false
+
+        local function updateOptionsPosition()
+            -- Hitung posisi & lebar manual berdasarkan posisi absolut Selector
+            -- di layar, karena OptionsFrame sekarang di luar ScrollingFrame
+            -- (parent-nya ScreenGui) jadi tidak lagi otomatis ikut Item.
+            local absPos = Selector.AbsolutePosition
+            local absSize = Selector.AbsoluteSize
+            OptionsFrame.Position = UDim2.fromOffset(absPos.X, absPos.Y + absSize.Y + 2)
+            OptionsFrame.Size = UDim2.fromOffset(absSize.X, #options * 28)
+        end
 
         local function closeDropdown()
             isOpen = false
@@ -632,6 +646,9 @@ function UI:CreateTab(tabName)
 
         Selector.MouseButton1Click:Connect(function()
             isOpen = not isOpen
+            if isOpen then
+                updateOptionsPosition()
+            end
             OptionsFrame.Visible = isOpen
             Item.ZIndex = isOpen and 21 or 2
         end)
@@ -642,7 +659,7 @@ function UI:CreateTab(tabName)
             OptBtn.BackgroundColor3 = Theme.CardBG
             OptBtn.Text = ""
             OptBtn.AutoButtonColor = false
-            OptBtn.ZIndex = 21
+            OptBtn.ZIndex = 201
             OptBtn.Parent = OptionsFrame
 
             local OptLabel = Instance.new("TextLabel")
@@ -654,7 +671,7 @@ function UI:CreateTab(tabName)
             OptLabel.Font = Enum.Font.GothamMedium
             OptLabel.TextSize = 11
             OptLabel.TextXAlignment = Enum.TextXAlignment.Left
-            OptLabel.ZIndex = 21
+            OptLabel.ZIndex = 201
             OptLabel.Parent = OptBtn
 
             OptBtn.MouseEnter:Connect(function()
