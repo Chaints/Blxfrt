@@ -79,6 +79,28 @@ FarmTab:CreateSliderInput("Bring Range (Stud)", 5, 150, 55, "left", function(val
     _G.BringRange = value
 end)
 
+-- AUTO ATTACK (independen dari Auto Farm - jalan sendiri tanpa perlu
+-- nyalain toggle Auto Farm dulu. Default ON.)
+FarmTab:AddSection("Auto Attack", "left")
+
+_G.AutoAttack = true
+FarmTab:CreateToggle("Auto Attack (55 Stud)", _G.AutoAttack, "left", function(state)
+    _G.AutoAttack = state
+    print("Auto Attack Status:", state)
+end)
+
+_G.AttackTargetMob = true
+FarmTab:CreateToggle("Target: Mob", _G.AttackTargetMob, "left", function(state)
+    _G.AttackTargetMob = state
+    print("Attack Target Mob:", state)
+end)
+
+_G.AttackTargetPlayer = false
+FarmTab:CreateToggle("Target: Player", _G.AttackTargetPlayer, "left", function(state)
+    _G.AttackTargetPlayer = state
+    print("Attack Target Player:", state)
+end)
+
 -- CARD KANAN (config + boss farming Sea 1)
 FarmTab:AddSection("Farm Config", "right")
 

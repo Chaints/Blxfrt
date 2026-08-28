@@ -15,14 +15,17 @@ _G.BringRange = _G.BringRange or 55
 _G.TweenSpeed = _G.TweenSpeed or 300
 _G.FarmMethod = _G.FarmMethod or "Quest"
 
+-- AUTO ATTACK (fitur terpisah dari Auto Farm, default ON, bisa nyerang
+-- Mob dan/atau Player dalam radius _G.AttackRadius)
+_G.AutoAttack = (_G.AutoAttack == nil) and true or _G.AutoAttack
+_G.AttackTargetMob = (_G.AttackTargetMob == nil) and true or _G.AttackTargetMob
+_G.AttackTargetPlayer = (_G.AttackTargetPlayer == nil) and false or _G.AttackTargetPlayer
+
 -- DEKLARASI REMOTE
 local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
 -- FindFirstChild("RE/RegisterAttack") mencari instance bernama PERSIS itu
--- (termasuk garis miringnya) - itu BUKAN path folder. Kalau struktur
--- aslinya Net.RE.RegisterAttack (folder RE berisi remote RegisterAttack),
--- baris lama selalu return nil sehingga FireServer di FastAttack() silently
--- di-skip (karena ada "if RegisterAttack then") - musuh gak keserang tanpa error.
--- Fix: coba folder "RE" dulu, baru fallback ke pencarian nama langsung.
+-- (termasuk garis miringnya) - bukan path folder. Coba folder "RE" dulu,
+-- fallback ke pencarian nama langsung.
 local REFolder = Net:FindFirstChild("RE")
 local RegisterAttack = (REFolder and REFolder:FindFirstChild("RegisterAttack"))
     or Net:FindFirstChild("RegisterAttack")
@@ -182,22 +185,44 @@ function ScriptLoad.EquipMelee()
 end
 
 -- 3. FAST ATTACK MULTI-TARGET (Proximity Kill Aura)
+-- Bisa menyerang Mob (folder workspace.Enemies) dan/atau Player lain,
+-- tergantung _G.AttackTargetMob / _G.AttackTargetPlayer.
 function ScriptLoad.FastAttack()
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
     
     local myHrp = character.HumanoidRootPart
     local hitTargets = {}
-    local enemiesFolder = GetEnemiesFolder()
+    local radius = _G.AttackRadius or 55
 
-    if enemiesFolder then
-        for _, enemy in ipairs(enemiesFolder:GetChildren()) do
-            local hum = enemy:FindFirstChild("Humanoid")
-            local targetPart = enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("UpperTorso")
-            
-            if hum and hum.Health > 0 and targetPart then
-                if (targetPart.Position - myHrp.Position).Magnitude <= (_G.AttackRadius or 55) then
-                    table.insert(hitTargets, targetPart)
+    -- Scan Mob
+    if _G.AttackTargetMob then
+        local enemiesFolder = GetEnemiesFolder()
+        if enemiesFolder then
+            for _, enemy in ipairs(enemiesFolder:GetChildren()) do
+                local hum = enemy:FindFirstChild("Humanoid")
+                local targetPart = enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("UpperTorso")
+
+                if hum and hum.Health > 0 and targetPart then
+                    if (targetPart.Position - myHrp.Position).Magnitude <= radius then
+                        table.insert(hitTargets, targetPart)
+                    end
+                end
+            end
+        end
+    end
+
+    -- Scan Player (skip diri sendiri)
+    if _G.AttackTargetPlayer then
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character then
+                local hum = plr.Character:FindFirstChild("Humanoid")
+                local targetPart = plr.Character:FindFirstChild("HumanoidRootPart") or plr.Character:FindFirstChild("UpperTorso")
+
+                if hum and hum.Health > 0 and targetPart then
+                    if (targetPart.Position - myHrp.Position).Magnitude <= radius then
+                        table.insert(hitTargets, targetPart)
+                    end
                 end
             end
         end
@@ -372,9 +397,11 @@ local function GetNearestEnemy(myHrp)
 end
 
 -- 7. LOOP ATTACK (Ultra Fast Proximity Scan)
+-- Sekarang independen dari Auto Farm - jalan asal _G.AutoAttack ON,
+-- gak perlu nyalain Auto Farm dulu.
 task.spawn(function()
     while task.wait(0.03) do -- Dipercepat dari 0.15 ke 0.03 detik
-        if _G.FastAttack and _G.AutoFarm then
+        if _G.AutoAttack then
             pcall(ScriptLoad.FastAttack)
         end
     end
