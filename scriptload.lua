@@ -187,12 +187,15 @@ end
 -- 3. FAST ATTACK MULTI-TARGET (Proximity Kill Aura)
 -- Bisa menyerang Mob (folder workspace.Enemies) dan/atau Player lain,
 -- tergantung _G.AttackTargetMob / _G.AttackTargetPlayer.
+-- Target diurutkan dari yang PALING DEKAT dulu, supaya kalau ada
+-- musuh yang lagi nyamperin/deket banget, dialah yang jadi mainTarget
+-- (bukan asal urutan index folder).
 function ScriptLoad.FastAttack()
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
     
     local myHrp = character.HumanoidRootPart
-    local hitTargets = {}
+    local hitTargets = {} -- setiap entry: {part = targetPart, dist = jarak}
     local radius = _G.AttackRadius or 55
 
     -- Scan Mob
@@ -204,8 +207,9 @@ function ScriptLoad.FastAttack()
                 local targetPart = enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("UpperTorso")
 
                 if hum and hum.Health > 0 and targetPart then
-                    if (targetPart.Position - myHrp.Position).Magnitude <= radius then
-                        table.insert(hitTargets, targetPart)
+                    local dist = (targetPart.Position - myHrp.Position).Magnitude
+                    if dist <= radius then
+                        table.insert(hitTargets, {part = targetPart, dist = dist})
                     end
                 end
             end
@@ -220,13 +224,17 @@ function ScriptLoad.FastAttack()
                 local targetPart = plr.Character:FindFirstChild("HumanoidRootPart") or plr.Character:FindFirstChild("UpperTorso")
 
                 if hum and hum.Health > 0 and targetPart then
-                    if (targetPart.Position - myHrp.Position).Magnitude <= radius then
-                        table.insert(hitTargets, targetPart)
+                    local dist = (targetPart.Position - myHrp.Position).Magnitude
+                    if dist <= radius then
+                        table.insert(hitTargets, {part = targetPart, dist = dist})
                     end
                 end
             end
         end
     end
+
+    -- Urutkan dari yang paling dekat, biar mainTarget = musuh terdekat
+    table.sort(hitTargets, function(a, b) return a.dist < b.dist end)
 
     if #hitTargets > 0 then
         pcall(function()
@@ -234,13 +242,22 @@ function ScriptLoad.FastAttack()
             if RegisterAttack then RegisterAttack:FireServer(0.01) end
             
             if RegisterHit then
-                local mainTarget = hitTargets[1]
+                local mainTarget = hitTargets[1].part
                 local subTargets = {}
                 for i = 2, #hitTargets do
-                    table.insert(subTargets, hitTargets[i])
+                    table.insert(subTargets, hitTargets[i].part)
                 end
 
+                -- Kirim sekali dengan array lengkap (cara normal)
                 RegisterHit:FireServer(mainTarget, subTargets, nil, activeHash or "12796888")
+
+                -- FALLBACK: beberapa game hanya memproses mainTarget dan
+                -- mengabaikan array subTargets di server-side. Kalau itu
+                -- masalahnya, kirim juga satu-satu per target supaya
+                -- semuanya kena, bukan cuma yang pertama.
+                for i = 2, #hitTargets do
+                    RegisterHit:FireServer(hitTargets[i].part, {}, nil, activeHash or "12796888")
+                end
             end
         end)
     end
