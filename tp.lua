@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
 local TPModule = {}
@@ -51,7 +52,29 @@ TPModule.Islands = {
 local isTeleporting = false
 local targetTeleportCFrame = nil
 
--- FUNGSI EKS EKUSI TELEPORT TO CFRAME (LOKAL VEKTOR LERP)
+-- FUNGSI MEMBUAT PLATFORM WATER SAFEGUARD
+local function getOrCreatePlatform()
+    local platform = Workspace:FindFirstChild("TPWaterSafePlatform")
+    if not platform then
+        platform = Instance.new("Part")
+        platform.Name = "TPWaterSafePlatform"
+        platform.Size = Vector3.new(15, 1, 15)
+        platform.Transparency = 1
+        platform.Anchored = true
+        platform.CanCollide = true
+        platform.Parent = Workspace
+    end
+    return platform
+end
+
+local function removePlatform()
+    local platform = Workspace:FindFirstChild("TPWaterSafePlatform")
+    if platform then
+        platform:Destroy()
+    end
+end
+
+-- FUNGSI ESEKUSI TELEPORT TO CFRAME
 function TPModule.TeleportTo(targetCFrame)
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -63,6 +86,7 @@ function TPModule.TeleportTo(targetCFrame)
         isTeleporting = false
         targetTeleportCFrame = nil
         hrp.CFrame = targetCFrame
+        removePlatform()
         return
     end
 
@@ -73,6 +97,7 @@ end
 function TPModule.StopTeleport()
     isTeleporting = false
     targetTeleportCFrame = nil
+    removePlatform()
 end
 
 -- ENGINE FLY TELEPORT (Per Frame di Stepped)
@@ -95,7 +120,21 @@ RunService.Stepped:Connect(function(deltaTime)
 
         local currentPos = hrp.Position
         local targetPos = targetTeleportCFrame.Position
-        local direction = (targetPos - currentPos)
+
+        -- SAFE HEIGHT LOCK: Menjaga Ketinggian Terbang minimal 80 studs di atas permukaan laut
+        local safeMinY = math.max(targetPos.Y, 80)
+        local adjustedCurrentPos = Vector3.new(currentPos.X, math.max(currentPos.Y, safeMinY), currentPos.Z)
+
+        -- Kebutuhan penyesuaian target posisi penerbangan horizontal dulu sebelum turun ke lokasi akhir
+        local distanceHorizontal = (Vector3.new(targetPos.X, 0, targetPos.Z) - Vector3.new(currentPos.X, 0, currentPos.Z)).Magnitude
+        local destinationVector = targetPos
+
+        if distanceHorizontal > 100 then
+            -- Terbang tinggi lurus di udara sampai jarak 100 studs dari pulau
+            destinationVector = Vector3.new(targetPos.X, safeMinY, targetPos.Z)
+        end
+
+        local direction = (destinationVector - currentPos)
         local distance = direction.Magnitude
 
         if distance > 3 then
@@ -106,9 +145,13 @@ RunService.Stepped:Connect(function(deltaTime)
 
             local nextPos = currentPos + (direction.Unit * maxStep)
 
-            -- Tetap tegak lurus (tidak miring)
-            local lookAtPos = Vector3.new(targetPos.X, currentPos.Y, targetPos.Z)
+            -- Tetap tegak lurus (tidak miring ke tanah/air)
+            local lookAtPos = Vector3.new(destinationVector.X, currentPos.Y, destinationVector.Z)
             hrp.CFrame = CFrame.new(nextPos) * CFrame.lookAt(nextPos, lookAtPos).Rotation
+
+            -- Tempelkan platform tak terlihat tepat di bawah kaki sebagai pelindung ekstra dari air
+            local platform = getOrCreatePlatform()
+            platform.CFrame = CFrame.new(nextPos - Vector3.new(0, 3.5, 0))
 
             -- Reset gaya gesek / velocity fisika
             hrp.Velocity = Vector3.zero
@@ -117,9 +160,11 @@ RunService.Stepped:Connect(function(deltaTime)
             hrp.CFrame = targetTeleportCFrame
             isTeleporting = false
             targetTeleportCFrame = nil
+            
             if hrp:FindFirstChild("AntiFall") then
                 hrp.AntiFall:Destroy()
             end
+            removePlatform()
         end
 
         -- Noclip Otomatis Selama Terbang

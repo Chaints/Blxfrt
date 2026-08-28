@@ -520,7 +520,7 @@ task.spawn(function()
     end
 end)
 
--- 8. LOOP UTAMA FARMING
+-- 8. LOOP UTAMA FARMING (Anti-Stuck StreamingEnabled Fix)
 task.spawn(function()
     while task.wait(0.2) do
         if _G.AutoFarm then
@@ -574,9 +574,9 @@ task.spawn(function()
                         ScriptLoad.TakeQuest(questName, questIndex, questCFrame)
                     else
                         local enemiesFolder = GetEnemiesFolder()
-                        if enemiesFolder then
-                            local mainTarget = nil
+                        local mainTarget = nil
 
+                        if enemiesFolder then
                             for _, enemy in ipairs(enemiesFolder:GetChildren()) do
                                 if string.find(enemy.Name, targetName) then
                                     local hrp = enemy:FindFirstChild("HumanoidRootPart")
@@ -587,33 +587,37 @@ task.spawn(function()
                                     end
                                 end
                             end
+                        end
 
-                            if mainTarget then
-                                local mainHrp = mainTarget:FindFirstChild("HumanoidRootPart")
-                                local groundCFrame = mainHrp.CFrame
-                                local farmPosPlayer = groundCFrame * CFrame.new(0, 9, 0)
+                        -- JIKA MOB DITEMUKAN: Terbang ke Mob & Serang
+                        if mainTarget then
+                            local mainHrp = mainTarget:FindFirstChild("HumanoidRootPart")
+                            local groundCFrame = mainHrp.CFrame
+                            local farmPosPlayer = groundCFrame * CFrame.new(0, 9, 0)
 
-                                if (myHrp.Position - farmPosPlayer.Position).Magnitude > 3 then
-                                    ScriptLoad.TweenTo(farmPosPlayer, _G.TweenSpeed)
-                                else
-                                    ScriptLoad.StopMove()
-                                    myHrp.CFrame = farmPosPlayer
-                                end
+                            if (myHrp.Position - farmPosPlayer.Position).Magnitude > 3 then
+                                ScriptLoad.TweenTo(farmPosPlayer, _G.TweenSpeed)
+                            else
+                                ScriptLoad.StopMove()
+                                myHrp.CFrame = farmPosPlayer
+                            end
 
-                                if _G.BringMob then
-                                    for _, enemy in ipairs(enemiesFolder:GetChildren()) do
-                                        if string.find(enemy.Name, targetName) then
-                                            local eHrp = enemy:FindFirstChild("HumanoidRootPart")
-                                            if eHrp and (eHrp.Position - groundCFrame.Position).Magnitude <= _G.BringRange then
-                                                ScriptLoad.BringMob(enemy, groundCFrame)
-                                            end
+                            if _G.BringMob then
+                                for _, enemy in ipairs(enemiesFolder:GetChildren()) do
+                                    if string.find(enemy.Name, targetName) then
+                                        local eHrp = enemy:FindFirstChild("HumanoidRootPart")
+                                        if eHrp and (eHrp.Position - groundCFrame.Position).Magnitude <= _G.BringRange then
+                                            ScriptLoad.BringMob(enemy, groundCFrame)
                                         end
                                     end
                                 end
-                            else
-                                if questCFrame then
-                                    ScriptLoad.TweenTo(questCFrame, _G.TweenSpeed)
-                                end
+                            end
+                        else
+                            -- PERBAIKAN: Jika Quest sudah terambil tapi Mob belum di-load game (karena jauh),
+                            -- paksa terbang ke area spawn mob berdasarkan koordinat questCFrame + offset area mob
+                            if questCFrame then
+                                local mobAreaPos = questCFrame * CFrame.new(0, 30, -150) -- Geser 150 studs dari NPC ke area mob
+                                ScriptLoad.TweenTo(mobAreaPos, _G.TweenSpeed)
                             end
                         end
                     end
