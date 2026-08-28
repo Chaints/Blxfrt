@@ -344,15 +344,38 @@ function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
         
         task.wait(0.15)
 
-        -- 5. Anti-Stuck Bypass - DINONAKTIFKAN.
-        -- Sebelumnya di sini karakter dipaksa CFrame ke
-        -- questCFrame * CFrame.new(0, 5, -5) supaya lepas dari hitbox NPC.
-        -- Di beberapa titik quest (contoh: level 120 - Chief Petty Officer,
-        -- CFrame -5036,28,4324) posisi hasil geseran itu ternyata tidak
-        -- punya ground di bawahnya, sehingga karakter melayang dan tidak
-        -- pernah kembali untuk retry quest -> stuck permanen.
-        -- Karakter dibiarkan tetap di questCFrame asli (baris hrp.CFrame di atas),
-        -- yang sudah dipastikan valid karena itu titik NPC-nya sendiri.
+        -- 5. Anti-Stuck Bypass: geser sedikit dari titik NPC supaya
+        -- karakter tidak overlap langsung dengan hitbox NPC (yang bisa
+        -- bikin quest gagal ke-trigger / karakter nyangkut di dialog).
+        -- DIPERBAIKI dari versi sebelumnya: sekarang di-raycast dulu ke
+        -- bawah untuk pastikan ada ground di posisi hasil geseran.
+        -- Kalau tidak ada ground (misal titip quest ada di pinggir jurang
+        -- seperti level 120), fallback ke geseran horizontal kecil saja
+        -- tanpa naik ke atas - jauh lebih kecil resiko melayang di udara.
+        if hrp and questCFrame then
+            local candidate = questCFrame * CFrame.new(0, 5, -5)
+            local rayParams = RaycastParams.new()
+            rayParams.FilterType = Enum.RaycastFilterType.Exclude
+            rayParams.FilterDescendantsInstances = {character}
+
+            local rayResult = workspace:Raycast(candidate.Position, Vector3.new(0, -20, 0), rayParams)
+
+            if rayResult then
+                -- Ada ground di bawah candidate, aman untuk dipakai
+                hrp.CFrame = candidate
+            else
+                -- Tidak ada ground, coba geseran kecil horizontal saja
+                -- (tanpa naik ke atas) dari posisi NPC asli
+                local smallShift = questCFrame * CFrame.new(0, 0, -3)
+                local rayResult2 = workspace:Raycast(smallShift.Position, Vector3.new(0, -20, 0), rayParams)
+                if rayResult2 then
+                    hrp.CFrame = smallShift
+                end
+                -- Kalau masih tidak ada ground juga, biarkan karakter
+                -- tetap di questCFrame asli (baris hrp.CFrame di atas)
+                -- daripada resiko melayang.
+            end
+        end
 
         isTakingQuest = false
     end)
