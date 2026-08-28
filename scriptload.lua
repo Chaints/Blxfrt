@@ -170,7 +170,7 @@ function ScriptLoad.EquipMelee()
     end
 end
 
--- 3. FAST ATTACK MULTI-TARGET
+-- 3. FAST ATTACK MULTI-TARGET (Proximity Kill Aura)
 function ScriptLoad.FastAttack()
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -194,7 +194,9 @@ function ScriptLoad.FastAttack()
 
     if #hitTargets > 0 then
         pcall(function()
-            if RegisterAttack then RegisterAttack:FireServer(0.5) end
+            -- PERBAIKAN: Ubah dari 0.5 ke 0.01 agar bypass animasi memukul
+            if RegisterAttack then RegisterAttack:FireServer(0.01) end
+            
             if RegisterHit then
                 local mainTarget = hitTargets[1]
                 local subTargets = {}
@@ -207,6 +209,7 @@ function ScriptLoad.FastAttack()
         end)
     end
 end
+
 
 -- 4. BRING MOB ULTRA LIGHT
 function ScriptLoad.BringMob(enemy, groundCFrame)
@@ -357,9 +360,9 @@ local function GetNearestEnemy(myHrp)
     return nearest
 end
 
--- 7. LOOP ATTACK
+-- 7. LOOP ATTACK (Ultra Fast Proximity Scan)
 task.spawn(function()
-    while task.wait(0.15) do
+    while task.wait(0.03) do -- Dipercepat dari 0.15 ke 0.03 detik
         if _G.FastAttack and _G.AutoFarm then
             pcall(ScriptLoad.FastAttack)
         end
