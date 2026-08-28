@@ -27,7 +27,7 @@ local activeHash = "12796888"
 local targetMoveCFrame = nil
 local isLerpMoving = false
 
--- NOCLIP MURNI, ANTI-FALL, & ENGINE LERP MOVEMENT
+-- ENGINE FLY MOVEMENT (Murni Vektor, Super Smooth & Anti-Lag)
 RunService.Stepped:Connect(function(deltaTime)
     local character = LocalPlayer.Character
     if not character then return end
@@ -45,21 +45,26 @@ RunService.Stepped:Connect(function(deltaTime)
                 bv.Parent = hrp
             end
 
-            -- Engine Lerp (Pengganti Tween)
+            -- Engine Terbang Halus
             if isLerpMoving and targetMoveCFrame then
-                local distance = (hrp.Position - targetMoveCFrame.Position).Magnitude
+                local currentPos = hrp.Position
+                local targetPos = targetMoveCFrame.Position
+                local direction = (targetPos - currentPos)
+                local distance = direction.Magnitude
                 
-                if distance > 2 then
+                if distance > 3 then
                     local speed = _G.TweenSpeed or 300
-                    -- Menghitung langkah berdasarkan Frame Rate (deltaTime) agar tetap konsisten & tidak lag
-                    local maxStep = math.min(speed * deltaTime, distance)
-                    local alpha = maxStep / distance
+                    -- Mengunci delta time agar pergerakan tidak 'melompat' saat FPS drop
+                    local safeDelta = math.clamp(deltaTime, 0.01, 0.033)
+                    local maxStep = math.min(speed * safeDelta, distance)
                     
-                    -- Perhitungan Rotasi & Posisi Baru
-                    local newCFrame = hrp.CFrame:Lerp(targetMoveCFrame, alpha)
-                    hrp.CFrame = newCFrame
+                    -- Geser posisi sejauh maxStep ke arah tujuan
+                    local nextPos = currentPos + (direction.Unit * maxStep)
                     
-                    -- Reset Velocity agar karakter tidak kena gravitasi/terlempar
+                    -- Update CFrame + Rotasi Menghadap ke Tujuan
+                    hrp.CFrame = CFrame.new(nextPos, targetPos)
+                    
+                    -- Amankan Velocity biar tidak kena Anti-Cheat / Jatuh
                     hrp.Velocity = Vector3.zero
                 else
                     hrp.CFrame = targetMoveCFrame
@@ -68,7 +73,7 @@ RunService.Stepped:Connect(function(deltaTime)
             end
         end
 
-        -- Noclip
+        -- Noclip Karakter
         for _, part in ipairs(character:GetChildren()) do
             if part:IsA("BasePart") and part.CanCollide then
                 part.CanCollide = false
