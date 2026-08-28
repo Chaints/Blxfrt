@@ -53,8 +53,8 @@ FarmTab:CreateDropdown("Farm Method", {"Quest", "Nearest", "No Quest"}, "Nearest
     print("Farm Method:", choice)
 end)
 
-_G.TweenSpeed = 300
-FarmTab:CreateSliderInput("Tween Speed", 100, 350, 300, "left", function(value)
+_G.TweenSpeed = 200
+FarmTab:CreateSliderInput("Tween Speed", 100, 200, 200, "left", function(value)
     _G.TweenSpeed = value
 end)
 
@@ -68,7 +68,7 @@ FarmTab:CreateSliderInput("Health Mob %", 1, 100, 15, "left", function(value)
     _G.HealthMobPercent = value
 end)
 
-_G.BringMob = trur
+_G.BringMob = true
 FarmTab:CreateToggle("Bring Mob", _G.BringMob, "left", function(state)
     _G.BringMob = state
     print("Bring Mob Status:", state)

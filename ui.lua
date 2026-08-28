@@ -52,62 +52,10 @@ ToastList.HorizontalAlignment = Enum.HorizontalAlignment.Right
 ToastList.Padding = UDim.new(0, 6)
 
 local function ShowToast(text, isOn)
-    local Toast = Instance.new("Frame")
-    Toast.Size = UDim2.new(0, 240, 0, 36)
-    Toast.BackgroundColor3 = Theme.CardBG
-    Toast.BackgroundTransparency = 1
-    Toast.ZIndex = 51
-    Toast.Parent = ToastHolder
-
-    local ToastCorner = Instance.new("UICorner")
-    ToastCorner.CornerRadius = UDim.new(0, 10)
-    ToastCorner.Parent = Toast
-
-    local ToastStroke = Instance.new("UIStroke")
-    ToastStroke.Color = Theme.Border
-    ToastStroke.Thickness = 1
-    ToastStroke.Transparency = 1
-    ToastStroke.Parent = Toast
-
-    local Dot = Instance.new("Frame")
-    Dot.Size = UDim2.new(0, 8, 0, 8)
-    Dot.Position = UDim2.new(0, 12, 0.5, -4)
-    Dot.BackgroundColor3 = (isOn == nil or isOn) and Theme.Accent or Theme.TextMuted
-    Dot.BackgroundTransparency = 1
-    Dot.ZIndex = 52
-    Dot.Parent = Toast
-
-    local DotCorner = Instance.new("UICorner")
-    DotCorner.CornerRadius = UDim.new(1, 0)
-    DotCorner.Parent = Dot
-
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, -34, 1, 0)
-    Label.Position = UDim2.new(0, 28, 0, 0)
-    Label.BackgroundTransparency = 1
-    Label.Text = text
-    Label.TextColor3 = Theme.TextPrimary
-    Label.TextTransparency = 1
-    Label.Font = Enum.Font.GothamMedium
-    Label.TextSize = 12
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.TextTruncate = Enum.TextTruncate.AtEnd
-    Label.ZIndex = 52
-    Label.Parent = Toast
-
-    tween(Toast, {BackgroundTransparency = 0.05}, 0.18)
-    tween(ToastStroke, {Transparency = 0}, 0.18)
-    tween(Dot, {BackgroundTransparency = 0}, 0.18)
-    tween(Label, {TextTransparency = 0}, 0.18)
-
-    task.delay(1.4, function()
-        tween(Toast, {BackgroundTransparency = 1}, 0.25)
-        tween(ToastStroke, {Transparency = 1}, 0.25)
-        tween(Dot, {BackgroundTransparency = 1}, 0.25)
-        tween(Label, {TextTransparency = 1}, 0.25)
-        task.wait(0.28)
-        Toast:Destroy()
-    end)
+    -- Disabled: user tidak mau card notifikasi kecil muncul tiap
+    -- toggle/dropdown/button diklik. Semua pemanggilan ShowToast(...)
+    -- di bawah tetap ada tapi jadi no-op karena function-nya dikosongin.
+    return
 end
 
 ---------------------------------------------------------
