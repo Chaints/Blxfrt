@@ -68,7 +68,7 @@ FarmTab:CreateSliderInput("Health Mob %", 1, 100, 15, "left", function(value)
     _G.HealthMobPercent = value
 end)
 
-_G.BringMob = false
+_G.BringMob = trur
 FarmTab:CreateToggle("Bring Mob", _G.BringMob, "left", function(state)
     _G.BringMob = state
     print("Bring Mob Status:", state)
