@@ -53,19 +53,22 @@ RunService.Stepped:Connect(function(deltaTime)
                 local distance = direction.Magnitude
                 
                 if distance > 3 then
-                    local speed = _G.TweenSpeed or 300
-                    -- Mengunci delta time agar pergerakan tidak 'melompat' saat FPS drop
+                    -- KUNCI MAX SPEED: Maksimal 200
+                    local currentSpeed = _G.TweenSpeed or 200
+                    local speed = math.min(currentSpeed, 200)
+                    
                     local safeDelta = math.clamp(deltaTime, 0.01, 0.033)
                     local maxStep = math.min(speed * safeDelta, distance)
                     
-                    -- Geser posisi sejauh maxStep ke arah tujuan
                     local nextPos = currentPos + (direction.Unit * maxStep)
                     
-                    -- Update CFrame + Rotasi Menghadap ke Tujuan
-                    hrp.CFrame = CFrame.new(nextPos, targetPos)
+                    -- PERBAIKAN ROTASI: Karakter tetap berdiri tegak menghadap target (tidak miring ke bawah)
+                    local lookAtPos = Vector3.new(targetPos.X, currentPos.Y, targetPos.Z)
+                    hrp.CFrame = CFrame.new(nextPos) * CFrame.lookAt(nextPos, lookAtPos).Rotation
                     
-                    -- Amankan Velocity biar tidak kena Anti-Cheat / Jatuh
+                    -- PERBAIKAN VELOCITY: Reset total gaya dorong fisika
                     hrp.Velocity = Vector3.zero
+                    hrp.AssemblyLinearVelocity = Vector3.zero
                 else
                     hrp.CFrame = targetMoveCFrame
                     isLerpMoving = false
@@ -219,43 +222,52 @@ end
 
 -- 5. TAKE QUEST (WITH ANTI-STUCK COOLDOWN)
 local lastQuestCheck = 0
+local isTakingQuest = false
+
 function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
-    if not CommF then return end
+    if not CommF or isTakingQuest then return end
+    
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
-    
     local hrp = character.HumanoidRootPart
-    
+
+    -- 1. Jika posisi masih jauh dari NPC, terbang dulu ke NPC
     if questCFrame then
         local distance = (hrp.Position - questCFrame.Position).Magnitude
-        if distance > 12 then
+        if distance > 10 then
             ScriptLoad.TweenTo(questCFrame, _G.TweenSpeed)
             return 
         end
     end
-    
-    if tick() - lastQuestCheck < 1.5 then return end
-    lastQuestCheck = tick()
 
+    -- 2. Cooldown proteksi agar tidak spam Remote ke Server
+    if tick() - lastQuestCheck < 1.2 then return end
+    lastQuestCheck = tick()
+    isTakingQuest = true
+
+    -- 3. Hentikan pergerakan agar posisi karakter stabil
     ScriptLoad.StopMove()
     if questCFrame then
         hrp.CFrame = questCFrame
+        hrp.Velocity = Vector3.zero
     end
-    
+
+    -- 4. Ambil Quest via Task Spawn (Thread Terpisah)
     task.spawn(function()
         pcall(function()
-            local args = {
-                "StartQuest",
-                questName,
-                levelReq
-            }
-            CommF:InvokeServer(unpack(args))
+            -- Kirim remote terima quest
+            CommF:InvokeServer("StartQuest", questName, levelReq)
         end)
         
-        task.wait(0.3)
-        if questCFrame and hrp then
-            hrp.CFrame = questCFrame * CFrame.new(0, 0, -10)
+        task.wait(0.15)
+
+        -- 5. Anti-Stuck Bypass: Geser posisi sedikit ke atas/belakang NPC 
+        -- supaya lepas dari hit-box NPC & tidak nyangkut dialog
+        if hrp and questCFrame then
+            hrp.CFrame = questCFrame * CFrame.new(0, 5, -5)
         end
+
+        isTakingQuest = false
     end)
 end
 
