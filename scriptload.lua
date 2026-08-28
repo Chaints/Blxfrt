@@ -242,11 +242,31 @@ function ScriptLoad.FastAttack()
             if RegisterAttack then RegisterAttack:FireServer(0.01) end
             
             if RegisterHit then
+                -- Re-check posisi tepat sebelum fire (bukan snapshot lama),
+                -- jaga-jaga target sempat bergerak antara scan dan fire.
+                -- Re-sort supaya benar-benar yang PALING DEKAT saat ini.
+                for _, entry in ipairs(hitTargets) do
+                    if entry.part and entry.part.Parent then
+                        entry.dist = (entry.part.Position - myHrp.Position).Magnitude
+                    else
+                        entry.dist = math.huge -- part sudah invalid, taruh paling belakang
+                    end
+                end
+                table.sort(hitTargets, function(a, b) return a.dist < b.dist end)
+
                 local mainTarget = hitTargets[1].part
                 local subTargets = {}
                 for i = 2, #hitTargets do
                     table.insert(subTargets, hitTargets[i].part)
                 end
+
+                -- DEBUG: cek target mana yang kepilih jadi mainTarget dan jaraknya.
+                -- Hapus/comment baris print ini kalau sudah tidak dibutuhkan.
+                print(("[AutoAttack] mainTarget=%s dist=%.1f | total target=%d"):format(
+                    mainTarget.Parent and mainTarget.Parent.Name or "?",
+                    hitTargets[1].dist,
+                    #hitTargets
+                ))
 
                 -- Kirim sekali dengan array lengkap (cara normal)
                 RegisterHit:FireServer(mainTarget, subTargets, nil, activeHash or "12796888")
