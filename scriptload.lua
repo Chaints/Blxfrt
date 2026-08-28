@@ -330,6 +330,13 @@ function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
 
     -- 4. Ambil Quest via Task Spawn (Thread Terpisah)
     task.spawn(function()
+        -- Safety net: kalau InvokeServer hang/gak pernah balik, jangan
+        -- biarkan isTakingQuest macet true selamanya (yang akan bikin
+        -- TakeQuest berikutnya selalu di-skip di baris paling atas).
+        task.delay(3, function()
+            isTakingQuest = false
+        end)
+
         pcall(function()
             -- Kirim remote terima quest
             CommF:InvokeServer("StartQuest", questName, levelReq)
@@ -337,11 +344,15 @@ function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
         
         task.wait(0.15)
 
-        -- 5. Anti-Stuck Bypass: Geser posisi sedikit ke atas/belakang NPC 
-        -- supaya lepas dari hit-box NPC & tidak nyangkut dialog
-        if hrp and questCFrame then
-            hrp.CFrame = questCFrame * CFrame.new(0, 5, -5)
-        end
+        -- 5. Anti-Stuck Bypass - DINONAKTIFKAN.
+        -- Sebelumnya di sini karakter dipaksa CFrame ke
+        -- questCFrame * CFrame.new(0, 5, -5) supaya lepas dari hitbox NPC.
+        -- Di beberapa titik quest (contoh: level 120 - Chief Petty Officer,
+        -- CFrame -5036,28,4324) posisi hasil geseran itu ternyata tidak
+        -- punya ground di bawahnya, sehingga karakter melayang dan tidak
+        -- pernah kembali untuk retry quest -> stuck permanen.
+        -- Karakter dibiarkan tetap di questCFrame asli (baris hrp.CFrame di atas),
+        -- yang sudah dipastikan valid karena itu titik NPC-nya sendiri.
 
         isTakingQuest = false
     end)
