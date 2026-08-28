@@ -404,9 +404,9 @@ local function GetQuestData()
     elseif level >= 100 and level < 120 then
         return "Snowman", "SnowQuest", 2, CFrame.new(1386, 87, -1298)
     elseif level >= 120 and level < 130 then
-        return "Chief Petty Officer", "MarineFordQuest2", 1, CFrame.new(-5036, 28, 4324)
+        return "Chief Petty Officer", "MarineQuest2", 1, CFrame.new(-5036, 28, 4324)
     elseif level >= 130 and level < 150 then
-        return "Vice Admiral", "MarineFordQuest2", 2, CFrame.new(-5036, 28, 4324)
+        return "Vice Admiral", "MarineQuest2", 2, CFrame.new(-5036, 28, 4324)
     elseif level >= 150 and level < 175 then
         return "Sky Bandit", "SkyQuest", 1, CFrame.new(-4841, 717, -2623)
     elseif level >= 175 and level < 190 then
