@@ -5,6 +5,7 @@ local rawBase = "https://raw.githubusercontent.com/Chaints/Blxfrt/main/"
 local UI = loadstring(game:HttpGet(rawBase .. "ui.lua?" .. tick()))()
 local ScriptLoad = loadstring(game:HttpGet(rawBase .. "scriptload.lua?" .. tick()))()
 local TP = loadstring(game:HttpGet(rawBase .. "tp.lua?" .. tick()))()
+local Gacha = loadstring(game:HttpGet(rawBase .. "gacha.lua?" .. tick()))()
 
 -- Pengecekan Sea berdasarkan PlaceId
 local placeId = game.PlaceId
@@ -203,6 +204,9 @@ local FruitTab = UI:CreateTab("Fruit")
 
 -- CARD KIRI
 FruitTab:AddSection("Fruit Settings", "left")
+FruitTab:CreateButton("Roll Random Fruit", "left", function()
+    Gacha.BuyRandomFruit()
+end)
 FruitTab:CreateToggle("Auto Eat Fruit", false, "left", function(state) end)
 FruitTab:CreateToggle("Notify Fruit Spawn", false, "left", function(state) end)
 FruitTab:CreateToggle("Auto Buy Fruit", false, "left", function(state) end)
