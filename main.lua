@@ -1,9 +1,10 @@
 -- main.lua
 local rawBase = "https://raw.githubusercontent.com/Chaints/Blxfrt/main/"
 
--- Load UI (Dengan Anti-Cache tick())
+-- Load UI & Modul Pendukung (Dengan Anti-Cache tick())
 local UI = loadstring(game:HttpGet(rawBase .. "ui.lua?" .. tick()))()
 local ScriptLoad = loadstring(game:HttpGet(rawBase .. "scriptload.lua?" .. tick()))()
+local TP = loadstring(game:HttpGet(rawBase .. "tp.lua?" .. tick()))()
 
 -- Pengecekan Sea berdasarkan PlaceId
 local placeId = game.PlaceId
@@ -79,8 +80,7 @@ FarmTab:CreateSliderInput("Bring Range (Stud)", 5, 150, 55, "left", function(val
     _G.BringRange = value
 end)
 
--- AUTO ATTACK (independen dari Auto Farm - jalan sendiri tanpa perlu
--- nyalain toggle Auto Farm dulu. Default ON.)
+-- AUTO ATTACK (independen dari Auto Farm - jalan sendiri tanpa perlu nyalain toggle Auto Farm dulu)
 FarmTab:AddSection("Auto Attack", "left")
 
 _G.AutoAttack = true
@@ -138,19 +138,63 @@ end)
 
 ---------------------------------------------------------
 
--- TAB 2: TELEPORT
+-- TAB 2: TELEPORT (TERHUBUNG KE TP.LUA)
 local TeleTab = UI:CreateTab("Teleport")
 
--- CARD KIRI
+-- CARD KIRI: SEA TRAVEL
 TeleTab:AddSection("Sea Teleport", "left")
-TeleTab:CreateButton("Teleport Sea 1", "left", function() end)
-TeleTab:CreateButton("Teleport Sea 2", "left", function() end)
-TeleTab:CreateButton("Teleport Sea 3", "left", function() end)
 
--- CARD KANAN
-TeleTab:AddSection("Quick Islands", "right")
-TeleTab:CreateButton("TP to Mansion", "right", function() end)
-TeleTab:CreateButton("TP to Cafe", "right", function() end)
+TeleTab:CreateButton("Teleport Sea 1", "left", function()
+    TP.TeleportToSea("Sea 1")
+end)
+TeleTab:CreateButton("Teleport Sea 2", "left", function()
+    TP.TeleportToSea("Sea 2")
+end)
+TeleTab:CreateButton("Teleport Sea 3", "left", function()
+    TP.TeleportToSea("Sea 3")
+end)
+
+-- CARD KANAN: QUICK ISLANDS (DINAMIS Sesuai Sea Saat Ini)
+TeleTab:AddSection("Quick Islands (" .. currentSea .. ")", "right")
+
+if currentSea == "Sea 1" then
+    TeleTab:CreateButton("Starter Island", "right", function() TP.TeleportToIsland("Sea 1", "Starter Island") end)
+    TeleTab:CreateButton("Jungle", "right", function() TP.TeleportToIsland("Sea 1", "Jungle") end)
+    TeleTab:CreateButton("Pirate Village", "right", function() TP.TeleportToIsland("Sea 1", "Pirate Village") end)
+    TeleTab:CreateButton("Desert", "right", function() TP.TeleportToIsland("Sea 1", "Desert") end)
+    TeleTab:CreateButton("Frozen Village", "right", function() TP.TeleportToIsland("Sea 1", "Frozen Village") end)
+    TeleTab:CreateButton("MarineFord", "right", function() TP.TeleportToIsland("Sea 1", "MarineFord") end)
+    TeleTab:CreateButton("Skypiea", "right", function() TP.TeleportToIsland("Sea 1", "Skypiea") end)
+    TeleTab:CreateButton("Prison", "right", function() TP.TeleportToIsland("Sea 1", "Prison") end)
+    TeleTab:CreateButton("Colosseum", "right", function() TP.TeleportToIsland("Sea 1", "Colosseum") end)
+    TeleTab:CreateButton("Magma Village", "right", function() TP.TeleportToIsland("Sea 1", "Magma Village") end)
+    TeleTab:CreateButton("Underwater Island", "right", function() TP.TeleportToIsland("Sea 1", "Underwater Island") end)
+    TeleTab:CreateButton("Upper Skylands", "right", function() TP.TeleportToIsland("Sea 1", "Upper Skylands") end)
+    TeleTab:CreateButton("Fountain City", "right", function() TP.TeleportToIsland("Sea 1", "Fountain City") end)
+
+elseif currentSea == "Sea 2" then
+    TeleTab:CreateButton("Cafe", "right", function() TP.TeleportToIsland("Sea 2", "Cafe") end)
+    TeleTab:CreateButton("Kingdom of Rose", "right", function() TP.TeleportToIsland("Sea 2", "Kingdom of Rose") end)
+    TeleTab:CreateButton("Uship / Graveyard", "right", function() TP.TeleportToIsland("Sea 2", "Uship / Graveyard") end)
+    TeleTab:CreateButton("Green Zone", "right", function() TP.TeleportToIsland("Sea 2", "Green Zone") end)
+    TeleTab:CreateButton("Dark Arena", "right", function() TP.TeleportToIsland("Sea 2", "Dark Arena") end)
+    TeleTab:CreateButton("Snow Mountain", "right", function() TP.TeleportToIsland("Sea 2", "Snow Mountain") end)
+    TeleTab:CreateButton("Hot and Cold", "right", function() TP.TeleportToIsland("Sea 2", "Hot and Cold") end)
+    TeleTab:CreateButton("Cursed Ship", "right", function() TP.TeleportToIsland("Sea 2", "Cursed Ship") end)
+    TeleTab:CreateButton("Ice Castle", "right", function() TP.TeleportToIsland("Sea 2", "Ice Castle") end)
+    TeleTab:CreateButton("Forgotten Island", "right", function() TP.TeleportToIsland("Sea 2", "Forgotten Island") end)
+
+elseif currentSea == "Sea 3" then
+    TeleTab:CreateButton("Mansion", "right", function() TP.TeleportToIsland("Sea 3", "Mansion") end)
+    TeleTab:CreateButton("Port Town", "right", function() TP.TeleportToIsland("Sea 3", "Port Town") end)
+    TeleTab:CreateButton("Great Tree", "right", function() TP.TeleportToIsland("Sea 3", "Great Tree") end)
+    TeleTab:CreateButton("Castle On The Sea", "right", function() TP.TeleportToIsland("Sea 3", "Castle On The Sea") end)
+    TeleTab:CreateButton("Hydra Island", "right", function() TP.TeleportToIsland("Sea 3", "Hydra Island") end)
+    TeleTab:CreateButton("Floating Turtle", "right", function() TP.TeleportToIsland("Sea 3", "Floating Turtle") end)
+    TeleTab:CreateButton("Haunted Castle", "right", function() TP.TeleportToIsland("Sea 3", "Haunted Castle") end)
+    TeleTab:CreateButton("Sea of Treats", "right", function() TP.TeleportToIsland("Sea 3", "Sea of Treats") end)
+    TeleTab:CreateButton("Tiki Outpost", "right", function() TP.TeleportToIsland("Sea 3", "Tiki Outpost") end)
+end
 
 ---------------------------------------------------------
 
