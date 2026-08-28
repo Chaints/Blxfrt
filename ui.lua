@@ -52,10 +52,62 @@ ToastList.HorizontalAlignment = Enum.HorizontalAlignment.Right
 ToastList.Padding = UDim.new(0, 6)
 
 local function ShowToast(text, isOn)
-    -- Disabled: user tidak mau card notifikasi kecil muncul tiap
-    -- toggle/dropdown/button diklik. Semua pemanggilan ShowToast(...)
-    -- di bawah tetap ada tapi jadi no-op karena function-nya dikosongin.
-    return
+    local Toast = Instance.new("Frame")
+    Toast.Size = UDim2.new(0, 240, 0, 36)
+    Toast.BackgroundColor3 = Theme.CardBG
+    Toast.BackgroundTransparency = 1
+    Toast.ZIndex = 51
+    Toast.Parent = ToastHolder
+
+    local ToastCorner = Instance.new("UICorner")
+    ToastCorner.CornerRadius = UDim.new(0, 10)
+    ToastCorner.Parent = Toast
+
+    local ToastStroke = Instance.new("UIStroke")
+    ToastStroke.Color = Theme.Border
+    ToastStroke.Thickness = 1
+    ToastStroke.Transparency = 1
+    ToastStroke.Parent = Toast
+
+    local Dot = Instance.new("Frame")
+    Dot.Size = UDim2.new(0, 8, 0, 8)
+    Dot.Position = UDim2.new(0, 12, 0.5, -4)
+    Dot.BackgroundColor3 = (isOn == nil or isOn) and Theme.Accent or Theme.TextMuted
+    Dot.BackgroundTransparency = 1
+    Dot.ZIndex = 52
+    Dot.Parent = Toast
+
+    local DotCorner = Instance.new("UICorner")
+    DotCorner.CornerRadius = UDim.new(1, 0)
+    DotCorner.Parent = Dot
+
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(1, -34, 1, 0)
+    Label.Position = UDim2.new(0, 28, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = text
+    Label.TextColor3 = Theme.TextPrimary
+    Label.TextTransparency = 1
+    Label.Font = Enum.Font.GothamMedium
+    Label.TextSize = 12
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.TextTruncate = Enum.TextTruncate.AtEnd
+    Label.ZIndex = 52
+    Label.Parent = Toast
+
+    tween(Toast, {BackgroundTransparency = 0.05}, 0.18)
+    tween(ToastStroke, {Transparency = 0}, 0.18)
+    tween(Dot, {BackgroundTransparency = 0}, 0.18)
+    tween(Label, {TextTransparency = 0}, 0.18)
+
+    task.delay(1.4, function()
+        tween(Toast, {BackgroundTransparency = 1}, 0.25)
+        tween(ToastStroke, {Transparency = 1}, 0.25)
+        tween(Dot, {BackgroundTransparency = 1}, 0.25)
+        tween(Label, {TextTransparency = 1}, 0.25)
+        task.wait(0.28)
+        Toast:Destroy()
+    end)
 end
 
 ---------------------------------------------------------
@@ -122,61 +174,9 @@ QuickPad.Parent = QuickPanel
 local ActiveQuickRows = {}
 
 local function RegisterQuick(text, offCallback)
-    if ActiveQuickRows[text] then return end
-    local Row = Instance.new("Frame")
-    Row.Size = UDim2.new(1, 0, 0, 26)
-    Row.BackgroundTransparency = 1
-    Row.ZIndex = 9
-    Row.Parent = QuickPanel
-
-    local Dot = Instance.new("Frame")
-    Dot.Size = UDim2.new(0, 6, 0, 6)
-    Dot.Position = UDim2.new(0, 10, 0.5, -3)
-    Dot.BackgroundColor3 = Theme.Accent
-    Dot.ZIndex = 9
-    Dot.Parent = Row
-
-    local DotCorner = Instance.new("UICorner")
-    DotCorner.CornerRadius = UDim.new(1, 0)
-    DotCorner.Parent = Dot
-
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, -46, 1, 0)
-    Label.Position = UDim2.new(0, 22, 0, 0)
-    Label.BackgroundTransparency = 1
-    Label.Text = text
-    Label.TextColor3 = Theme.TextPrimary
-    Label.Font = Enum.Font.GothamMedium
-    Label.TextSize = 11
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.TextTruncate = Enum.TextTruncate.AtEnd
-    Label.ZIndex = 9
-    Label.Parent = Row
-
-    local CloseX = Instance.new("TextButton")
-    CloseX.Size = UDim2.new(0, 20, 0, 20)
-    CloseX.Position = UDim2.new(1, -26, 0.5, -10)
-    CloseX.BackgroundTransparency = 1
-    CloseX.Text = "×"
-    CloseX.TextColor3 = Theme.TextMuted
-    CloseX.Font = Enum.Font.GothamBold
-    CloseX.TextSize = 15
-    CloseX.AutoButtonColor = false
-    CloseX.ZIndex = 9
-    CloseX.Parent = Row
-
-    CloseX.MouseEnter:Connect(function()
-        tween(CloseX, {TextColor3 = Theme.TextPrimary}, 0.15)
-    end)
-    CloseX.MouseLeave:Connect(function()
-        tween(CloseX, {TextColor3 = Theme.TextMuted}, 0.15)
-    end)
-    CloseX.MouseButton1Click:Connect(function()
-        pcall(offCallback)
-    end)
-
-    ActiveQuickRows[text] = Row
-    QuickPanel.Visible = true
+    -- Disabled: user tidak mau ada mini panel kiri atas yang bisa
+    -- ngeoff toggle (Auto Farm, dll) tanpa buka panel utama.
+    return
 end
 
 local function UnregisterQuick(text)
