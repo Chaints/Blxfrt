@@ -1,4 +1,3 @@
-local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -22,39 +21,64 @@ local RegisterAttack = Net:FindFirstChild("RE/RegisterAttack")
 local RegisterHit = Net:FindFirstChild("RE/RegisterHit") or Net:FindFirstChild("RegisterHit")
 local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 
-local currentTween = nil
 local activeHash = "12796888"
 
--- NOCLIP MURNI & ANTI-JATUH PHYSICS (BODYVELOCITY)
-RunService.Stepped:Connect(function()
+-- STATE MOVEMENT LERP
+local targetMoveCFrame = nil
+local isLerpMoving = false
+
+-- NOCLIP MURNI, ANTI-FALL, & ENGINE LERP MOVEMENT
+RunService.Stepped:Connect(function(deltaTime)
+    local character = LocalPlayer.Character
+    if not character then return end
+    
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    
     if _G.AutoFarm then
-        local character = LocalPlayer.Character
-        if character then
-            local hrp = character:FindFirstChild("HumanoidRootPart")
-            
-            if hrp then
-                if not hrp:FindFirstChild("AntiFall") then
-                    local bv = Instance.new("BodyVelocity")
-                    bv.Name = "AntiFall"
-                    bv.MaxForce = Vector3.new(100000, 100000, 100000)
-                    bv.Velocity = Vector3.zero
-                    bv.Parent = hrp
-                end
+        if hrp then
+            -- Anti-Fall BodyVelocity
+            if not hrp:FindFirstChild("AntiFall") then
+                local bv = Instance.new("BodyVelocity")
+                bv.Name = "AntiFall"
+                bv.MaxForce = Vector3.new(100000, 100000, 100000)
+                bv.Velocity = Vector3.zero
+                bv.Parent = hrp
             end
 
-            for _, part in ipairs(character:GetChildren()) do
-                if part:IsA("BasePart") and part.CanCollide then
-                    part.CanCollide = false
+            -- Engine Lerp (Pengganti Tween)
+            if isLerpMoving and targetMoveCFrame then
+                local distance = (hrp.Position - targetMoveCFrame.Position).Magnitude
+                
+                if distance > 2 then
+                    local speed = _G.TweenSpeed or 300
+                    -- Menghitung langkah berdasarkan Frame Rate (deltaTime) agar tetap konsisten & tidak lag
+                    local maxStep = math.min(speed * deltaTime, distance)
+                    local alpha = maxStep / distance
+                    
+                    -- Perhitungan Rotasi & Posisi Baru
+                    local newCFrame = hrp.CFrame:Lerp(targetMoveCFrame, alpha)
+                    hrp.CFrame = newCFrame
+                    
+                    -- Reset Velocity agar karakter tidak kena gravitasi/terlempar
+                    hrp.Velocity = Vector3.zero
+                else
+                    hrp.CFrame = targetMoveCFrame
+                    isLerpMoving = false
                 end
             end
         end
-    else
-        local character = LocalPlayer.Character
-        if character then
-            local hrp = character:FindFirstChild("HumanoidRootPart")
-            if hrp and hrp:FindFirstChild("AntiFall") then
-                hrp.AntiFall:Destroy()
+
+        -- Noclip
+        for _, part in ipairs(character:GetChildren()) do
+            if part:IsA("BasePart") and part.CanCollide then
+                part.CanCollide = false
             end
+        end
+    else
+        isLerpMoving = false
+        targetMoveCFrame = nil
+        if hrp and hrp:FindFirstChild("AntiFall") then
+            hrp.AntiFall:Destroy()
         end
     end
 end)
@@ -83,9 +107,7 @@ if hookmetamethod then
     end)
 end
 
--- 1. TWEEN MOVEMENT
-local lastTweenTarget = nil
-
+-- 1. LERP MOVEMENT (PENGGANTI TWEEN)
 function ScriptLoad.TweenTo(targetCFrame, speed)
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -93,31 +115,21 @@ function ScriptLoad.TweenTo(targetCFrame, speed)
     local hrp = character.HumanoidRootPart
     local distance = (hrp.Position - targetCFrame.Position).Magnitude
 
-    if distance < 3 then
-        if currentTween then currentTween:Cancel() end
-        lastTweenTarget = nil
+    if distance <= 3 then
+        isLerpMoving = false
+        targetMoveCFrame = nil
         hrp.CFrame = targetCFrame
         return
     end
 
-    if lastTweenTarget and currentTween and currentTween.PlaybackState == Enum.PlaybackState.Playing then
-        local targetShift = (lastTweenTarget.Position - targetCFrame.Position).Magnitude
-        if targetShift < 7 then
-            return currentTween
-        end
-    end
+    -- Update target lokasi bergerak
+    targetMoveCFrame = targetCFrame
+    isLerpMoving = true
+end
 
-    local baseSpeed = speed or _G.TweenSpeed or 300
-    local duration = distance / baseSpeed
-
-    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
-
-    if currentTween then currentTween:Cancel() end
-
-    lastTweenTarget = targetCFrame
-    currentTween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
-    currentTween:Play()
-    return currentTween
+function ScriptLoad.StopMove()
+    isLerpMoving = false
+    targetMoveCFrame = nil
 end
 
 -- 2. AUTO EQUIP MELEE
@@ -220,7 +232,7 @@ function ScriptLoad.TakeQuest(questName, levelReq, questCFrame)
     if tick() - lastQuestCheck < 1.5 then return end
     lastQuestCheck = tick()
 
-    if currentTween then currentTween:Cancel() end
+    ScriptLoad.StopMove()
     if questCFrame then
         hrp.CFrame = questCFrame
     end
@@ -362,6 +374,7 @@ task.spawn(function()
                         if (myHrp.Position - farmPosPlayer.Position).Magnitude > 3 then
                             ScriptLoad.TweenTo(farmPosPlayer, _G.TweenSpeed)
                         else
+                            ScriptLoad.StopMove()
                             myHrp.CFrame = farmPosPlayer
                         end
 
@@ -412,6 +425,7 @@ task.spawn(function()
                                 if (myHrp.Position - farmPosPlayer.Position).Magnitude > 3 then
                                     ScriptLoad.TweenTo(farmPosPlayer, _G.TweenSpeed)
                                 else
+                                    ScriptLoad.StopMove()
                                     myHrp.CFrame = farmPosPlayer
                                 end
 
@@ -435,6 +449,8 @@ task.spawn(function()
                 end
 
             end
+        else
+            ScriptLoad.StopMove()
         end
     end
 end)
